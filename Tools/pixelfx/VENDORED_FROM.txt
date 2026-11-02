@@ -1,0 +1,1 @@
+a84159688af3ca37a4be05a0d422b94451b2e24e  https://github.com/patch-gg/pixelfx (MIT)  vendored 2026-11-03, docs/readme 제외

@@ -1,0 +1,13 @@
+RafaelMatos - Epic RPG World Pack - [FREE Demo] Ancient Ruins
+https://rafaelmatos.itch.io/epic-rpg-world-pack-free-demo-ancient-ruins-asset-tileset
+
+Official free archive acquired 2026-09-22; license verified 2026-09-30.
+The author permits personal/commercial project use and modification, excluding NFTs.
+Standalone repackaging, redistribution/resale and use as an AI training database are prohibited.
+Attribution is optional. Ruin Runner credits RafaelMatos.
+
+Used: ten native 32px stone/moss floor cells in the flooded halls.
+Source RGBA pixels are unchanged; individual PNG extraction and 32PPU import.
+A single renderer tint adapts the stones to the flooded stage palette.
+Original archive, source page and crop manifest remain in private ArtDirection.
+Distributed only as part of the compiled game, not as a standalone asset pack.

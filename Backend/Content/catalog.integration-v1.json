@@ -1,0 +1,13 @@
+{
+  "version": "integration-v1",
+  "status": "integration-only; full gameplay catalog publication pending",
+  "generatorVersions": ["legacy-fixed-layout-v1", "modules-v1.0.0"],
+  "startingLegacy": 3,
+  "maxActiveTalents": 4,
+  "starterWeapons": [
+    { "id": "rust_sword", "unlockCost": 0 },
+    { "id": "worn_dagger", "unlockCost": 5 }
+  ],
+  "talents": [],
+  "settlement": { "minimumReward": 1, "killsPerShard": 4, "rewardPerRoom": 1, "victoryBonus": 6, "campaignStages": 3, "maxKills": 10000, "maxRooms": 1000 }
+}

@@ -1,0 +1,76 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8749040e19eb4645b867bc8d56f5eb2, type: 3}
+  m_Name: twin_towers
+  m_EditorClassIdentifier: RuinRunner.Runtime::RuinRunner.RoomTemplate
+  roomId: twin_towers
+  displayName: "\uC30D\uB465\uC774 \uD0D1"
+  selectionWeight: 1
+  bossRoom: 0
+  preferredExitDirection: 3
+  automaticWaveSize: 2
+  accentColor: {r: 0.85, g: 0.45, b: 0.25, a: 0.4}
+  playerSpawn: {x: -11.2, y: 0}
+  roomSize: {x: 26, y: 22}
+  platforms:
+  - position: {x: -4.6018, y: 2.7966}
+    size: {x: 2.3009, y: 4.661}
+    tileIndex: 6
+    solid: 1
+  - position: {x: 4.6018, y: 2.7966}
+    size: {x: 2.3009, y: 4.661}
+    tileIndex: 6
+    solid: 1
+  enemies:
+  - type: 1
+    position: {x: -6.9027, y: -3.7288}
+    wave: 0
+  - type: 1
+    position: {x: 6.9027, y: -3.7288}
+    wave: 0
+  - type: 3
+    position: {x: 0, y: 6.5254}
+    wave: 0
+  - type: 1
+    position: {x: -9.36, y: -7.04}
+    wave: 0
+  - type: 3
+    position: {x: 9.1, y: 7.48}
+    wave: 0
+  - type: 0
+    position: {x: 0, y: -7.48}
+    wave: 0
+  decorations:
+  - kind: 1
+    position: {x: -8.0531, y: 7.0847}
+    scale: 1.1
+  - kind: 1
+    position: {x: 8.0531, y: 7.0847}
+    scale: 1.2
+  - kind: 1
+    position: {x: -8.0531, y: -7.0847}
+    scale: 1.2
+  - kind: 1
+    position: {x: 8.0531, y: -7.0847}
+    scale: 1.1
+  - kind: 3
+    position: {x: -8.0531, y: -1.8644}
+    scale: 1.1
+  - kind: 3
+    position: {x: 8.0531, y: -1.8644}
+    scale: 1.1
+  - kind: 4
+    position: {x: -2.3009, y: 8.7627}
+    scale: 1.2
+  - kind: 5
+    position: {x: 2.3009, y: 8.7627}
+    scale: 1.2

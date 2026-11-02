@@ -1,0 +1,31 @@
+Sscary — The adventurer - Male (official Free Demo)
+https://sscary.itch.io/the-adventurer-male
+Official license checked 2026-10-01: free/commercial game use and modification allowed.
+Standalone redistribution or resale of the asset pack is prohibited. Credit appreciated.
+No Premium edition was purchased or incorporated.
+
+The selected backpack character's original idle/walk/dash/death cells and shadow are retained.
+2026-10-01 additions: native 48x64 thrust joint/closed-hand poses and original trouser/boot
+step/gait combinations. Official face, hair, backpack, outfit palette and contact anchors
+are preserved. Individual PNGs share identical images instead of counting duplicates as
+new poses. A generated arm key was considered as a pose reference; its changed pixels,
+face and antialiased edges were rejected and are not present in this game.
+Detailed development sources, native modification records and hashes are in
+ArtDirection/Generated/SscaryMotion-20261001 and ArtDirection/Review-20261001/hero-thrust.
+
+Native melee modifications (2026-10-01): sweep/reverse/two-handed cleave joints and closed hands, original idle/gait combinations, 2910 distinct RGBA PNGs. Original face/hair/backpack shapes, palette, fixed canvas and foot pivot retained. 4608 sample combinations are not 4608 newly authored attack poses. No generated raster or Premium files adopted. Source/edit records: Docs/HeroMelee-20261001.md and ArtDirection/Review-20261001/hero-melee.
+
+Compact dagger cuts: 1169 additional native PNGs, 3072 original idle/gait sample combinations; 8-14 distinct standing poses per view for short real attack duration. Same original licensed character palette and identity.
+
+Native guard/parry/charge/charged-release joints and stance (2026-10-01): 2857 distinct additional native PNGs, 6144 combinations with original idle/gait frames. Original rigid face/hair/backpack, palette, boots and foot pivot preserved. Guard 7-13, fast parry 6-10, charge 9-14, release 9-11 distinct standing poses per view. Shared frames and breathing/gait combinations are not counted as newly authored poses. Partial charge continues from the visible joint key; full charge and release share their exact endpoint pixels. Records: Docs/HeroDefense-20261001.md and ArtDirection/Review-20261001/hero-defense.
+
+Native ranged modifications (2026-10-01): separate bow, crossbow, pistol, rifle, shotgun and cannon arm/support/release/recoil joints, 4964 distinct RGBA PNGs and 9216 combinations with the original idle/gait frames. The short releases have 7-15 distinct standing poses per view; held frames and idle/gait combinations are not additional authored poses. Original rigid face/hair/backpack, palette, boots, 48x64 canvas, 32 PPU and foot pivot (24,22) retained. No generated raster, resized character or Premium files adopted. Records: Docs/HeroRanged-20261001.md and ArtDirection/Review-20261001/hero-ranged. Dedicated hurt and reload body clips remain unfinished.
+
+Raised native armed joints and separate weapon standing profiles (2026-10-02):
+ArmedGripV3 includes12,266 distinct PNGs/24,096 combinations of original gait/breathing
+and native action joints. WeaponStandingV4 includes2,083 distinct PNGs/6,912 combinations
+of six family stances and short returns with the original gait/breathing. These are not
+12,266 or2,083 independently authored action poses. The approved original head/face,
+backpack, palette, footfall, 48x64 canvas and pivot remain intact. No Premium or generated
+character adopted; source/edit/import/identity/current screen records are in
+Docs/WeaponStances-20261002.md and ArtDirection/Review-20261001/weapon-carry.

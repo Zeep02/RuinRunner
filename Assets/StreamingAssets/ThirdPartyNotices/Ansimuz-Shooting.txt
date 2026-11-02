@@ -1,0 +1,8 @@
+Warped Shooting Fx — Luis Zuno (Ansimuz)
+Official source: https://ansimuz.itch.io/warped-shooting-fx
+License: Creative Commons Zero v1.0 Universal (CC0).
+Both the official asset page and packaged public-license.pdf state CC0 use, including commercial projects and modifications.
+Original free archive: Warped shooting fx files.zip; SHA256 41cd3c8c1be7707c53d04ea6aa3c91130e13a44aa9da707682eb9761c788e918.
+Used: spark, waveform, charged, Hits-2, Hits-3 and Hits-6 authored source frames.
+Adoption: original PNG cells split without resampling/repainting; common pivots, Point/uncompressed import. Runtime rotation, size, playback and layering are presentation adjustments.
+No music from this pack is used.

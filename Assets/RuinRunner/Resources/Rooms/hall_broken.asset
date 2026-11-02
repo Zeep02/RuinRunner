@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8749040e19eb4645b867bc8d56f5eb2, type: 3}
+  m_Name: hall_broken
+  m_EditorClassIdentifier: RuinRunner.Runtime::RuinRunner.RoomTemplate
+  roomId: hall_broken
+  displayName: "\uBB34\uB108\uC9C4 \uD68C\uB791"
+  selectionWeight: 1
+  bossRoom: 0
+  preferredExitDirection: 0
+  automaticWaveSize: 2
+  accentColor: {r: 0.2, g: 0.55, b: 0.9, a: 0.4}
+  playerSpawn: {x: -8.2, y: 0}
+  roomSize: {x: 20, y: 12}
+  platforms:
+  - position: {x: -3.5398, y: 2.0339}
+    size: {x: 2.1239, y: 1.6271}
+    tileIndex: 6
+    solid: 1
+  - position: {x: 3.5398, y: -1.5254}
+    size: {x: 1.7699, y: 2.0339}
+    tileIndex: 6
+    solid: 1
+  enemies:
+  - type: 0
+    position: {x: -4.4248, y: -2.0339}
+    wave: 0
+  - type: 0
+    position: {x: 5.3097, y: 2.5424}
+    wave: 0
+  - type: 3
+    position: {x: 1.3274, y: 3.0508}
+    wave: 0
+  decorations:
+  - kind: 1
+    position: {x: -6.1947, y: 3.8644}
+    scale: 1.1
+  - kind: 1
+    position: {x: 6.1947, y: 3.8644}
+    scale: 1.2
+  - kind: 1
+    position: {x: -6.1947, y: -3.8644}
+    scale: 1.2
+  - kind: 1
+    position: {x: 6.1947, y: -3.8644}
+    scale: 1.1
+  - kind: 3
+    position: {x: -6.1947, y: -1.0169}
+    scale: 1.1
+  - kind: 3
+    position: {x: 6.1947, y: -1.0169}
+    scale: 1.1
+  - kind: 4
+    position: {x: -1.7699, y: 4.7797}
+    scale: 1.2
+  - kind: 5
+    position: {x: 1.7699, y: 4.7797}
+    scale: 1.2

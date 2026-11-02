@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <!-- Compile the actual Unity-independent authoring/generation sources, not a server copy. -->
+  <ItemGroup>
+    <Compile Include="../../Assets/RuinRunner/Runtime/World/Generation/GeneratedStage.cs" Link="GeneratedStage.cs" />
+    <Compile Include="../../Assets/RuinRunner/Runtime/World/Generation/SpatialModuleCatalog.cs" Link="SpatialModuleCatalog.cs" />
+    <Compile Include="../../Assets/RuinRunner/Runtime/World/Generation/GeneratedStageGeometry.cs" Link="GeneratedStageGeometry.cs" />
+    <Compile Include="../../Assets/RuinRunner/Runtime/World/Generation/ProceduralStageGenerator.cs" Link="ProceduralStageGenerator.cs" />
+  </ItemGroup>
+</Project>

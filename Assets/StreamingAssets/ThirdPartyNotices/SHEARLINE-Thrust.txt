@@ -1,0 +1,25 @@
+Source: https://godboyhappy.itch.io/shearline-pixel-melee-slash-vfx
+Used: sheets_32/thrust-stab.png, eight exact native cells (six visible poses). No downloaded engine code is executed.
+
+SHEARLINE - Pixel Slash, Parry & Impact VFX (32x32)
+Copyright (c) 2026 godboyhappy
+
+WHAT YOU MAY DO
+- Use these effects in unlimited personal and commercial projects, forever.
+- Modify, recolour, rescale, retime, re-atlas and combine them freely.
+- Ship them in games, apps, videos, streams and printed work.
+- No credit required. Credit is welcome but never expected.
+
+WHAT YOU MAY NOT DO
+- Resell or redistribute the image files themselves, as-is or recoloured, as an
+  asset pack, a texture pack, an NFT, a template, or any other product whose
+  value is the art. Ship them inside your work, not as the work.
+- Claim authorship of the pack itself.
+
+THE ENGINE SCRIPTS ARE SEPARATE
+godot/SHEARLINEFX.gd and unity/SHEARLINEFX.cs are MIT licensed. Paste them into a
+closed commercial codebase, with or without attribution. They are code, not art,
+so the redistribution limit above does not apply to them.
+
+NO WARRANTY
+Provided "as is", without warranty of any kind.

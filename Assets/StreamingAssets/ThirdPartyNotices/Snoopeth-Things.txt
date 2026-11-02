@@ -1,0 +1,5 @@
+Things by SnoopethDuckDuck
+Source: https://snoopethduckduck.itch.io/things
+License: CC0-1.0 / https://creativecommons.org/publicdomain/zero/1.0/
+Native individual sprites from the author-provided 2px-outline folder.
+No source resizing, recoloring or painting. Used for Ruin Runner accessory insignias, optics and energy containers.

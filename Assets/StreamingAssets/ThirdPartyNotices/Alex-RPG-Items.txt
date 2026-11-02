@@ -1,0 +1,7 @@
+16x16 RPG Item Packs 1 and 2 by Alex's Assets
+Sources:
+https://alexs-assets.itch.io/16x16-rpg-item-pack
+https://alexs-assets.itch.io/16x16-rpg-item-pack-2
+License: CC0-1.0 / https://creativecommons.org/publicdomain/zero/1.0/
+Original individual 16x16 PNGs, with no pixel changes or resampling.
+Used for Ruin Runner feather, ring, necklaces, flask and armor accessory icons.

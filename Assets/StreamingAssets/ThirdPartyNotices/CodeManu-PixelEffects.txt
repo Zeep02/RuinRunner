@@ -1,0 +1,11 @@
+Free Pixel Effects by CodeManu / Davit Masia.
+Source: https://codemanu.itch.io/pixelart-effect-pack
+Archive SHA256: 831566871401a9c27246a26f7a760bb9db72a140e88ff134748fb023d30ca1fe
+The author's description and bundled README dedicate the effects to public domain
+and permit commercial use without required credit. The page metadata also lists
+CC BY 4.0, so attribution is supplied here for both interpretations.
+CC BY 4.0: https://creativecommons.org/licenses/by/4.0/
+Changes: native 100x100 grid cells exported to individual PNGs. Empty cells and
+identical repeated holds removed from runtime sequences. Source RGBA pixels and
+common canvases preserved. Unity display sizes and colors may vary at runtime.
+This attribution does not imply author endorsement.

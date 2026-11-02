@@ -1,0 +1,35 @@
+using System;
+using System.IO;
+using System.Text;
+using System.Linq;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using RuinRunner.Backend;
+
+var root=Path.GetFullPath("F:/codex/LoglikeCap");
+var directory=Path.Combine(root,"Backend/.local/private/client-store-tests/"+Guid.NewGuid().ToString("N"));
+var store=new BackendPrivateStore(directory);var checks=new List<string>();
+void Check(string name,bool value){if(!value)throw new Exception(name);checks.Add(name);}
+var first=store.GetIdentity();var second=new BackendPrivateStore(directory).GetIdentity();
+Check("DPAPI identity survives store reconstruction",first.installationId==second.installationId && first.guestSecret==second.guestSecret);
+var raw=File.ReadAllBytes(Directory.GetFiles(Path.Combine(directory,"identity")).Single());
+Check("credential is not plaintext on disk",!Encoding.UTF8.GetString(raw).Contains(first.guestSecret) && !Encoding.UTF8.GetString(raw).Contains(first.installationId));
+var command=new PendingOperation{operationId=Guid.NewGuid().ToString(),playerId=Guid.NewGuid().ToString(),apiOrigin="http://127.0.0.1:5186/",method="POST",path="v1/profiles",payload="{\"name\":\"검증\"}",createdUtc=DateTime.UtcNow.ToString("O")};
+store.Write("operations",command.operationId,command);
+Check("pending journal survives reconstruction with exact operation and payload",new BackendPrivateStore(directory).Pending(command.playerId,command.apiOrigin).Single().payload==command.payload);
+Check("pending journal is scoped to owner and server",store.Pending(Guid.NewGuid().ToString(),command.apiOrigin).Length==0 && store.Pending(command.playerId,"https://different.invalid/").Length==0);
+command.status="confirmed";command.responseJson="{\"revision\":1}";store.Write("operations",command.operationId,command);
+Check("confirmed journal is no longer pending",store.Pending(command.playerId,command.apiOrigin).Length==0 && store.Read<PendingOperation>("operations",command.operationId).responseJson==command.responseJson);
+var profile=new ProfileView{profileId=Guid.NewGuid().ToString(),revision=3,legacyShards=33};store.SaveProfile(profile,command.apiOrigin);
+store.SaveProfile(new ProfileView{profileId=profile.profileId,revision=1,legacyShards=7},command.apiOrigin);
+Check("old receipts cannot overwrite newer confirmed profile cache",store.Read<ProfileView>("profiles",command.apiOrigin+":"+profile.profileId).legacyShards==33);
+var sourcePath=Path.Combine(directory,"isolated-old-save.json");var source="{\"version\":1,\"slotNumber\":1,\"legacyShards\":12,\"note\":\"한국어\"}";
+var original=new UTF8Encoding(true).GetPreamble().Concat(Encoding.UTF8.GetBytes(source)).ToArray();File.WriteAllBytes(sourcePath,original);File.WriteAllText(sourcePath+".bak","{\"version\":1}",new UTF8Encoding(false));
+var backup=store.BackupLegacy(sourcePath);var restored=Path.Combine(directory,"restored-new.json");store.RestoreLegacyToNewFile(backup,restored);
+Check("legacy backup restores exact original including BOM",File.ReadAllBytes(restored).SequenceEqual(original) && File.ReadAllBytes(sourcePath).SequenceEqual(original));
+Check("legacy import hashes exact BOM-free UTF8 without rewriting source",backup.sourceJson==source && backup.importSha256==BackendPrivateStore.Hash(Encoding.UTF8.GetBytes(source)));
+Check("legacy recovery backup retained",File.Exists(backup.encryptedRecoveryPath));
+bool refused=false;try{store.RestoreLegacyToNewFile(backup,sourcePath);}catch(IOException){refused=true;}Check("restore refuses to overwrite original save",refused);
+var output=Path.Combine(root,"Backend/Validation/client-store-"+DateTime.Now.ToString("yyyyMMdd-HHmmss")+".json");Directory.CreateDirectory(Path.GetDirectoryName(output));
+File.WriteAllText(output,JsonConvert.SerializeObject(new{status="PASS",checks,method="Windows CurrentUser DPAPI and real disk IO; no Unity or user save touched"},Formatting.Indented),new UTF8Encoding(false));
+Console.WriteLine("PASS "+checks.Count+" checks: "+output);

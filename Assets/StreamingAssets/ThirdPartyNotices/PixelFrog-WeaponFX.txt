@@ -1,0 +1,6 @@
+Tiny Swords (Free Pack) — Pixel Frog
+Official source: https://pixelfrog-assets.itch.io/tiny-swords
+The author permits use and modification in personal/commercial projects. Attribution is optional. Redistribution, resale or repackaging as standalone assets is prohibited.
+Only Explosion_02 and Dust_02 from the already acquired Free Pack are used inside the compiled game. No paid Enemy Pack is used and no standalone asset pack is distributed.
+Ten original 192x192 explosion poses and ten 64x64 dust poses are split into individual PNGs without resampling or repainting. Runtime size, tint, layering and timing are adjusted to fit Ruin Runner.
+Exact source cells and SHA256 values: ArtDirection/Review-20261001/weapon-fx/native-import.json.

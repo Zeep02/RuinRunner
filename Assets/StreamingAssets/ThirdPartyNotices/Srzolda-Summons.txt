@@ -1,0 +1,7 @@
+Free Magic Summons Pack by SrZolda
+https://srzolda.itch.io/magic-summons
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Used: blue_summon_Sheet.png, 36 animation frames.
+Changes: lossless removal of an exact 8x pixel enlargement; individual frame extraction;
+ground-plane projection and timing in game. Author does not endorse this game.

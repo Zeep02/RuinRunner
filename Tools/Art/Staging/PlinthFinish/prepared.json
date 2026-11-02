@@ -1,0 +1,570 @@
+{
+  "status": "PREPARED OUTSIDE ASSETS; not applied or Unity verified",
+  "source": "Assets/RuinRunner/Runtime/World/CainosRuinsArt.cs",
+  "sourceSha256": "a95d4bad154266f5056b073acf6353add169a59358be5656436bfdf531980f3d",
+  "candidate": "Tools/Art/Staging/PlinthFinish/CainosRuinsArt.cs",
+  "candidateSha256": "079a42c48c4bde56df57f336f75881f370f5555875de1b141d9516335cc8071e",
+  "scope": "BuildPlinth drawing only. Original ClosedBounds, colliders, geometry, seed/generator/version unchanged.",
+  "visual": "80% worn native stone base, sparse staggered native paving, continuous native cap strips around the top. Existing front face/lip retained.",
+  "newAssets": 32,
+  "review": "ArtDirection/Review-20261009/plinth-finish/v2-stone-only/native-comparison.png",
+  "reviewIsActualGameplay": false,
+  "nativeSourceSha256": {
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Stone/quiet.png": "8da0514ff848140cb1211dac20a12d818c8651d86c1647772a34732b4f0555cd",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/face-0.png": "cfad52581c86b4f322c2b1be7abce8f970370317148292bcf2b77734fa5e776d",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/cap-0.png": "4011741cafc84f42bdc5645033d8442ec7aa7793740ffd97f076661392039268",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/face-1.png": "e1a332687efa1454a2f81e023e400d97932def491026bf8ed80006f16badbcc1",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/cap-1.png": "1f81967c59338536351d4e8c940b33fa5a1642e08c92a776fa53e3d888de6844",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/face-2.png": "135c2c0a9d8d40dd24972fd67ebad93c72ed7ae45af1b98cebd45bed1467cf03",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/cap-2.png": "7862d033ccae510784f4f3f5c3a26d135be080235b8a48b8ac65f329f9447921",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/face-3.png": "3502b16fb99932c0d4f97bbfa0a389f708a632e103cfc9a50d7758e9c131e431",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Ribbon/cap-3.png": "76402a92a63ab6ffa2fad1d51b43cab39caea5452006e54dbfddca8eadcb8cf8",
+    "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Stone/worn.png": "5b97802ade9b44993fd91e504e0c642b701b7a4d386b1d7e9c469fb582edd81a",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/04.png": "6ff624026ca0fbfb856e3b7658ec1c57a6a43a2ff6e02d49c9e95c09ef4d2bf9",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/17.png": "a3f3c0d472f3701bcd565ae66f67354985f3620628d3d879a0ef0f66f8f90250",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/25.png": "92912b0bac299fde010fa1880597819685d03283219d1a9ca1d70d9537d05de2",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/05.png": "d4bd6449bceefe83476380cb0290d6f544685fa8db18f626978ef9f632027bd6",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/22.png": "f3eb2ce9d5e0b1a1bb9b645f4c78ebf0a7e386f2645da4023557ece310d7c8e9",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/03.png": "f6a53b6fab763048d2dc4c5e7486ec9ebe5f91a2a93a7f710530e59b0a68a3ea",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/08.png": "901d755b078be861599d0a79973f059a289552d2e9bb5f64b571b345b8e79153",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/13.png": "1d299a00a3b5c94f2bc0ebaa0782cbcc23ea98951a08088276841e73bdf11b74",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/16.png": "c8ab87d4893e7cbc49086926597f7530b20b11632925309a19e7f66e27d1e367",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/14.png": "894002feed835940bfc87648d134d7bf49eceebc8aef79af8abd232f4bd3f5ff",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/02.png": "435b9e943a646a1b9407da4a66646c60c51707c1bfc03ab6e912f875714c3982",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/27.png": "41a729d90866a1dc37afa36d62a31ae2f83fe0f6e573665358d1dd08d7f57a28",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/10.png": "35a3bd0b9d5ed13775e952ec78c793ebe2e59c9f7aa2bf287166da5fbcac3cf3",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/09.png": "026b678d1c4bcb8050ec7c0e3bdc35351ddd9accd29b9de6a44f0634a028ab8a",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/15.png": "2228f75d6ca435c25a3162fcfbbfa8b3746734aa2aee941048abd3d88096b407",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/18.png": "39c9519deb81ad6269b2382cec98d2ff899cce526ef03031dd75ca048af78be3",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/31.png": "e70f66616c51159975189bdb83c9d2c7902dcc29b62c961e65ba1e91d4143dda",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/29.png": "232c2eac760eae604f9dd43352c0b272396b7cfaf220081b54583b6d0cbc2320",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/30.png": "232c2eac760eae604f9dd43352c0b272396b7cfaf220081b54583b6d0cbc2320",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/01.png": "439345dec13d40e486218c36dd522635ba9d9277a1a6eeac20c6c1386b2d4ab5",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/06.png": "58b5939423fb3bea65ed8810d311631ffede9b6e6f73113032bf66543192a1d0",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/12.png": "00621a52b2ee6c7d49fc78249c11337541ccd15ad643db1ca36859ec32d61ef9",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/11.png": "219a36a96b9b115bab85165e65271e6e547e85e2e78010a8a59155e52ed18e06",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/26.png": "1fc359d4270e2729c621f9d22550e603b0c68fd9f592afdacbcf404314ca19ef",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/19.png": "bbefcd482781956b6dde72ef06f1d35fa88623fecfe996710663b49a51f2e35e",
+    "Tools/Art/Staging/PlinthFinish/StonePaving/24.png": "dd113d7b53b0a7880ce4a1b6918a0839e041edecc114156c6fe788ca2216b593"
+  },
+  "extraction": [
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/00.png",
+      "sourceSha256": "3d27a68d7844384bf66555ced097037ef4403cb614701f65724224934d221310",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/00.png",
+      "sha256": "088f124235b35e29db0931fe5abf39754dd928197e0267eec6d0050911495fdc",
+      "removedExactGrassPixels": 50,
+      "retainedOriginalStonePixels": 206,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/01.png",
+      "sourceSha256": "57b44383681a627f4fd063da0e669559ece70dfd6b898772a05199c1614a5069",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/01.png",
+      "sha256": "439345dec13d40e486218c36dd522635ba9d9277a1a6eeac20c6c1386b2d4ab5",
+      "removedExactGrassPixels": 50,
+      "retainedOriginalStonePixels": 206,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/02.png",
+      "sourceSha256": "730312765acad3e050f2d2d0c880ef4b1cf04e182e88dd63b827ca33f629d343",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/02.png",
+      "sha256": "435b9e943a646a1b9407da4a66646c60c51707c1bfc03ab6e912f875714c3982",
+      "removedExactGrassPixels": 56,
+      "retainedOriginalStonePixels": 200,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/03.png",
+      "sourceSha256": "42f8926a9aa57d431f757c73ce9214d7d248d41a675e874ccfed1a59b5a16e8d",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/03.png",
+      "sha256": "f6a53b6fab763048d2dc4c5e7486ec9ebe5f91a2a93a7f710530e59b0a68a3ea",
+      "removedExactGrassPixels": 59,
+      "retainedOriginalStonePixels": 197,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/04.png",
+      "sourceSha256": "31dbcad8e76625cdcac97f6fcdb98cc1a9920537e0dbdae3d9e487c869c618ea",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/04.png",
+      "sha256": "6ff624026ca0fbfb856e3b7658ec1c57a6a43a2ff6e02d49c9e95c09ef4d2bf9",
+      "removedExactGrassPixels": 50,
+      "retainedOriginalStonePixels": 206,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/05.png",
+      "sourceSha256": "bf73de554674b1fdb93864c268dffba138ba63ee05634d718a98e72765ef19d7",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/05.png",
+      "sha256": "d4bd6449bceefe83476380cb0290d6f544685fa8db18f626978ef9f632027bd6",
+      "removedExactGrassPixels": 50,
+      "retainedOriginalStonePixels": 206,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/06.png",
+      "sourceSha256": "54b469c63c17cfc6df41033291e138188fef7e32cae9699480c873e9a6529571",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/06.png",
+      "sha256": "58b5939423fb3bea65ed8810d311631ffede9b6e6f73113032bf66543192a1d0",
+      "removedExactGrassPixels": 50,
+      "retainedOriginalStonePixels": 206,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/07.png",
+      "sourceSha256": "8f626e7a84403b19299ff8b4d79b1ffcaec1829928588c14e3824de5abdfdaaa",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/07.png",
+      "sha256": "7203b7190220a09dd23cf1cb3ac2d60f2a1b57e760f970598ba9adbc8ccb7021",
+      "removedExactGrassPixels": 58,
+      "retainedOriginalStonePixels": 198,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/08.png",
+      "sourceSha256": "db7cf272b70e25b2e701e2c02819b9bd6748d9c2e7c7c23bf8f50c671a2dc3ea",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/08.png",
+      "sha256": "901d755b078be861599d0a79973f059a289552d2e9bb5f64b571b345b8e79153",
+      "removedExactGrassPixels": 64,
+      "retainedOriginalStonePixels": 192,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/09.png",
+      "sourceSha256": "b2b204f59db376584ecf0586a00f7d1dbc7fbb3092054f99e7391855ddf5d19a",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/09.png",
+      "sha256": "026b678d1c4bcb8050ec7c0e3bdc35351ddd9accd29b9de6a44f0634a028ab8a",
+      "removedExactGrassPixels": 51,
+      "retainedOriginalStonePixels": 205,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/10.png",
+      "sourceSha256": "89bfa2fe9a754874ab247d315066c258cd1fe3b3885ca976cbd1a0a4f89a0b1a",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/10.png",
+      "sha256": "35a3bd0b9d5ed13775e952ec78c793ebe2e59c9f7aa2bf287166da5fbcac3cf3",
+      "removedExactGrassPixels": 60,
+      "retainedOriginalStonePixels": 196,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/11.png",
+      "sourceSha256": "5b5636a3913aed66077a8c7b568d494aac25f2b1642e02dd35f18604b5ccfc04",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/11.png",
+      "sha256": "219a36a96b9b115bab85165e65271e6e547e85e2e78010a8a59155e52ed18e06",
+      "removedExactGrassPixels": 59,
+      "retainedOriginalStonePixels": 197,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/12.png",
+      "sourceSha256": "64e9984e2b7ec81c5ea6567ec2fd36d41084cd8b9eb0d1b0f53e6a2166106aeb",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/12.png",
+      "sha256": "00621a52b2ee6c7d49fc78249c11337541ccd15ad643db1ca36859ec32d61ef9",
+      "removedExactGrassPixels": 64,
+      "retainedOriginalStonePixels": 192,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/13.png",
+      "sourceSha256": "f540cf1cd65b5fd5e44f913bd28db4b3662fbe8fc6ae37e8be04247ed7544303",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/13.png",
+      "sha256": "1d299a00a3b5c94f2bc0ebaa0782cbcc23ea98951a08088276841e73bdf11b74",
+      "removedExactGrassPixels": 65,
+      "retainedOriginalStonePixels": 191,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/14.png",
+      "sourceSha256": "68c3abd905eae0879e007bf7e3b4750016ca0bbcd41ddc496bd5059bfbcec0a3",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/14.png",
+      "sha256": "894002feed835940bfc87648d134d7bf49eceebc8aef79af8abd232f4bd3f5ff",
+      "removedExactGrassPixels": 62,
+      "retainedOriginalStonePixels": 194,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/15.png",
+      "sourceSha256": "bff76cc62ed9a41f2b697d26a4e8ca87658b7c0b3e49185eff5b24e553a5ba58",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/15.png",
+      "sha256": "2228f75d6ca435c25a3162fcfbbfa8b3746734aa2aee941048abd3d88096b407",
+      "removedExactGrassPixels": 77,
+      "retainedOriginalStonePixels": 179,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/16.png",
+      "sourceSha256": "16112a6f2f9e2fdb625897db4be2c9fb2a0340fa5532c16401e5e71f8a3f6fd1",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/16.png",
+      "sha256": "c8ab87d4893e7cbc49086926597f7530b20b11632925309a19e7f66e27d1e367",
+      "removedExactGrassPixels": 58,
+      "retainedOriginalStonePixels": 198,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/17.png",
+      "sourceSha256": "8f5081395df1044daa82a1bdf62cad593d413f274c05ac0e68d6d77c0166c151",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/17.png",
+      "sha256": "a3f3c0d472f3701bcd565ae66f67354985f3620628d3d879a0ef0f66f8f90250",
+      "removedExactGrassPixels": 58,
+      "retainedOriginalStonePixels": 198,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/18.png",
+      "sourceSha256": "eb8699446bbca722ea3eb859e1b873acdc13bce1f7255ab7b6aaa6f064795354",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/18.png",
+      "sha256": "39c9519deb81ad6269b2382cec98d2ff899cce526ef03031dd75ca048af78be3",
+      "removedExactGrassPixels": 96,
+      "retainedOriginalStonePixels": 160,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/19.png",
+      "sourceSha256": "e01cfadde1eec1897da12fdab3a3c09c2d21d8d3251930432dde6ca62b087689",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/19.png",
+      "sha256": "bbefcd482781956b6dde72ef06f1d35fa88623fecfe996710663b49a51f2e35e",
+      "removedExactGrassPixels": 75,
+      "retainedOriginalStonePixels": 181,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/20.png",
+      "sourceSha256": "4ae71e088a0cc6828605545770d50ce3fade40b09926ff19955e2dc33c0ab1bd",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/20.png",
+      "sha256": "8149ea44edeb858e0b72a3ec51345382efe94c17ea48555dcc02890c0dda9b55",
+      "removedExactGrassPixels": 71,
+      "retainedOriginalStonePixels": 185,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/21.png",
+      "sourceSha256": "57e3d9f6a047e926b52bb94b3dc57ca2f158759cd2acfa53fd0c31a489ecac24",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/21.png",
+      "sha256": "f97c34434f83ae0b296211817c42de5a0ccf6b708e12f686a23de48e95c8b7fe",
+      "removedExactGrassPixels": 59,
+      "retainedOriginalStonePixels": 197,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/22.png",
+      "sourceSha256": "bcc2d09abe31e503e8713fd672601c65a2f206804cb79985103e72604552bb67",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/22.png",
+      "sha256": "f3eb2ce9d5e0b1a1bb9b645f4c78ebf0a7e386f2645da4023557ece310d7c8e9",
+      "removedExactGrassPixels": 62,
+      "retainedOriginalStonePixels": 194,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/23.png",
+      "sourceSha256": "735329cf524fc6fad70467fd94a8a7c9b83b02a55a42ae2672bf4b329b94cd0c",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/23.png",
+      "sha256": "f3dbfdc567d00169b4282d62590afe472de371e77f2cbed84d9dd756ae808ebc",
+      "removedExactGrassPixels": 83,
+      "retainedOriginalStonePixels": 173,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/24.png",
+      "sourceSha256": "617bf6093369578f4d47b2bef781bedb24dde0f3afca60f876a4f884991e0d15",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/24.png",
+      "sha256": "dd113d7b53b0a7880ce4a1b6918a0839e041edecc114156c6fe788ca2216b593",
+      "removedExactGrassPixels": 71,
+      "retainedOriginalStonePixels": 185,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/25.png",
+      "sourceSha256": "e3bbf9d049ace3632baf006148b8155ce2b3c2f636117c514347e60e8fd7190e",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/25.png",
+      "sha256": "92912b0bac299fde010fa1880597819685d03283219d1a9ca1d70d9537d05de2",
+      "removedExactGrassPixels": 99,
+      "retainedOriginalStonePixels": 157,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/26.png",
+      "sourceSha256": "fdae406c525864b1fffdae5aa79475d033a5987e44d4b6b9d55cd06eed0b4e29",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/26.png",
+      "sha256": "1fc359d4270e2729c621f9d22550e603b0c68fd9f592afdacbcf404314ca19ef",
+      "removedExactGrassPixels": 71,
+      "retainedOriginalStonePixels": 185,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/27.png",
+      "sourceSha256": "ca15536166e01a92d54b3b0acda94ce226dfe6ca37e6a1b4f1020647131ea9f6",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/27.png",
+      "sha256": "41a729d90866a1dc37afa36d62a31ae2f83fe0f6e573665358d1dd08d7f57a28",
+      "removedExactGrassPixels": 72,
+      "retainedOriginalStonePixels": 184,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/28.png",
+      "sourceSha256": "b7516d923703ebe42a5cc176ba8280a51fb7bff9184b8ebd02856a3825956d29",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/28.png",
+      "sha256": "f3a395465eadeb96bb6ca1275cb1b3d332616f4a49e9fb64f0136f83d789c41d",
+      "removedExactGrassPixels": 156,
+      "retainedOriginalStonePixels": 100,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/29.png",
+      "sourceSha256": "5b12c86f693d821de5f88362fe1d29ec4c3e93cea9a2a7300cf6840810115bc9",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/29.png",
+      "sha256": "232c2eac760eae604f9dd43352c0b272396b7cfaf220081b54583b6d0cbc2320",
+      "removedExactGrassPixels": 256,
+      "retainedOriginalStonePixels": 0,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/30.png",
+      "sourceSha256": "9fb2154c26054832c73fe22976a72ef643291378863c4ec085c9e8c9f0a4651f",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/30.png",
+      "sha256": "232c2eac760eae604f9dd43352c0b272396b7cfaf220081b54583b6d0cbc2320",
+      "removedExactGrassPixels": 256,
+      "retainedOriginalStonePixels": 0,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    {
+      "source": "Assets/RuinRunner/Resources/Art/Pixel/Separated/External/Cainos/Paving/31.png",
+      "sourceSha256": "cdbb9a535fa92c57b7d6b21ff028936f46af0934ec2c43ebddbe0304183bb2eb",
+      "staged": "Tools/Art/Staging/PlinthFinish/StonePaving/31.png",
+      "sha256": "e70f66616c51159975189bdb83c9d2c7902dcc29b62c961e65ba1e91d4143dda",
+      "removedExactGrassPixels": 122,
+      "retainedOriginalStonePixels": 134,
+      "width": 16,
+      "height": 16,
+      "ppu": 32,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  ],
+  "transparentSourceColors": [
+    [
+      101,
+      108,
+      23,
+      255
+    ],
+    [
+      104,
+      111,
+      22,
+      255
+    ],
+    [
+      114,
+      117,
+      27,
+      255
+    ],
+    [
+      120,
+      123,
+      33,
+      255
+    ],
+    [
+      127,
+      129,
+      36,
+      255
+    ],
+    [
+      127,
+      130,
+      38,
+      255
+    ]
+  ]
+}

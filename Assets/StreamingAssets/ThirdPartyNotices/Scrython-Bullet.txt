@@ -1,0 +1,5 @@
+Pixelart Guns — Scrython
+Official source: https://scrython.itch.io/pixelart-guns
+The author's license permits personal/commercial use and modification. Credit is appreciated, not required. Asset pack resale/redistribution is prohibited.
+Only the tiny bullet cell from the already acquired original pack is used inside the compiled game. No standalone asset pack is distributed.
+Original art is not resampled or repainted. Import pivot, world size and cosmetic trail are runtime presentation adjustments.

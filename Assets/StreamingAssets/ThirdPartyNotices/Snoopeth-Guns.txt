@@ -1,0 +1,6 @@
+Guns, by SnoopethDuckDuck
+Source: https://snoopethduckduck.itch.io/guns
+License: CC0. https://creativecommons.org/publicdomain/zero/1.0/
+Selected original two-pixel outline variants from Pack 1 and Pack 2.
+Changes: transparent padding, Unity grip pivots and muzzle landmarks. Original pixel colors and dimensions retained.
+Source archive and license retained under ArtDirection/ExternalCandidates/20260922/snoopeth-guns.

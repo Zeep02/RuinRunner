@@ -1,0 +1,5 @@
+Free 16x16 Assorted RPG Icons by Shade
+Official source: https://merchant-shade.itch.io/16x16-mixed-rpg-icons
+License: CC0-1.0 / https://creativecommons.org/publicdomain/zero/1.0/
+Used cells: pixelquest16-july-2025-cave.png x16 y16 w16 h16 (prism), potions.png x0 y80 w16 h16 (sealed powder bottle).
+Individual cells were extracted losslessly. Source pixels, palette and native 16x16 size are unchanged.

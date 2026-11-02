@@ -1,0 +1,18 @@
+Additional original Snoopeth assets used by the 2026-10-04 combat expansion.
+License: CC0-1.0. No source pixel/canvas/palette alterations.
+
+Weapons: https://snoopethduckduck.itch.io/swords and https://snoopethduckduck.itch.io/guns
+returning_edge: Swords Pack 1/2px/30.png
+gravity_maul: Swords Pack 4/2px/15.png
+tether_carbine: Guns Pack 2/2px/23.png
+bastion_shotgun: Guns Pack 2/2px/41.png
+
+Accessories: https://snoopethduckduck.itch.io/things
+recall_spool: Things 2px/1.png
+cadence_clasp: Things 2px/17.png
+prism_cage: Things 2px/20.png
+trail_spindle: Things 2px/57.png
+focus_prism: Things 2px/4.png
+mana_aegis: Things 2px/55.png
+
+Existing Snoopeth-Melee.txt, Snoopeth-Guns.txt and Snoopeth-Things.txt retain original license evidence.

@@ -1,0 +1,10 @@
+Dungeon Crawl Stone Soup individual CC0 accessories
+
+Seven-league boots: CanOfWorms
+https://github.com/crawl/crawl/commit/e33e9958401823c0a6fa3d7dc913435df9db3d03
+
+Artist permission record: https://github.com/crawl/tiles/blob/master/ARTISTS.md
+License: CC0-1.0 for this individual artist-contributed image.
+The game's GPL code is not used or included.
+Original 32x32 PNG bytes retained without painting, recoloring, or resizing.
+Evidence and commit-pinned source hashes: ArtDirection/item-gaps.

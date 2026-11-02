@@ -1,0 +1,109 @@
+<title>Ruin Runner 초안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Gowun+Dodum&display=swap">
+<style>
+/* 레이아웃: 위에 정수 배율 게임 화면, 아래에 조작법과 이미지 테스트 패널이 줄바꿈되는 두 칸. 게임 화면에 맞춘 단일 어두운 테마. */
+:root {
+  --ink: #22161f;        /* 픽셀 윤곽과 같은 남보라 먹색 */
+  --ground: #171a16;     /* 페이지 바닥: 이끼빛이 도는 어둠 */
+  --panel: #20251f;
+  --line: #34402f;
+  --text: #e6eadf;
+  --muted: #9aa58f;
+  --moss: #6fbf5f;       /* 강조: 풀잎 */
+  --frost: #8fd3f4;      /* 스킬 색 */
+  --pixel: "Silkscreen", "Courier New", monospace;
+  --body: "Gowun Dodum", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { background: var(--ground); color: var(--text); }
+body { font-family: var(--body); font-size: 14px; line-height: 1.55; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1160px; margin: 0 auto; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+h1 { font-family: var(--pixel); font-weight: 400; font-size: 22px; letter-spacing: .04em; margin: 0; text-wrap: balance; }
+h1 span { color: var(--moss); }
+.stats { font-family: var(--pixel); font-size: 12px; color: var(--muted); display: flex; gap: 16px; font-variant-numeric: tabular-nums; }
+.stats b { color: var(--text); font-weight: 400; }
+#stage { width: 100%; display: flex; justify-content: center; background: var(--ink); border: 1px solid var(--line); padding-block: 8px; }
+#screen { display: block; image-rendering: pixelated; image-rendering: crisp-edges; cursor: none; touch-action: none; outline: none; max-width: 100%; }
+#screen:focus-visible { outline: 2px solid var(--moss); }
+.touch { display: none; gap: 8px; justify-content: center; }
+@media (pointer: coarse) { .touch { display: flex; } }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; }
+@media (max-width: 760px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+section { background: var(--panel); border: 1px solid var(--line); padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+h2 { font-family: var(--pixel); font-weight: 400; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.keys { display: grid; grid-template-columns: auto 1fr; gap: 8px 14px; align-items: center; margin: 0; }
+.keys dt { display: flex; gap: 4px; flex-wrap: wrap; }
+.keys dd { margin: 0; }
+kbd { font-family: var(--pixel); font-size: 11px; background: var(--ink); border: 1px solid var(--line); border-bottom-width: 3px; padding: 1px 6px; color: var(--text); }
+.note { color: var(--muted); font-size: 13px; margin: 0; max-width: 62ch; }
+.rows { display: grid; gap: 10px; }
+.row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+@media (max-width: 460px) { .row { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.row label { color: var(--text); }
+.info { font-family: var(--pixel); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+input[type=file] { color: var(--muted); font: inherit; font-size: 12px; min-width: 0; max-width: 100%; }
+input[type=file]::file-selector-button { font: inherit; background: var(--ink); color: var(--text); border: 1px solid var(--line); padding: 4px 10px; margin-right: 8px; cursor: pointer; }
+input[type=number] { width: 4.5em; background: var(--ink); color: var(--text); border: 1px solid var(--line); padding: 3px 6px; font: inherit; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg label { border: 1px solid var(--line); padding: 4px 10px; cursor: pointer; background: var(--ink); }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { border-color: var(--moss); color: var(--moss); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--moss); }
+.checks { display: flex; gap: 16px; flex-wrap: wrap; }
+input[type=range] { width: 100%; accent-color: var(--moss); }
+button { font: inherit; background: var(--ink); color: var(--text); border: 1px solid var(--line); padding: 8px 14px; cursor: pointer; }
+button:hover { border-color: var(--moss); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--moss); outline-offset: 1px; }
+.touch button { font-family: var(--pixel); font-size: 13px; padding: 12px 22px; }
+.touch #btn-skill { color: var(--frost); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>RUIN RUNNER <span>DRAFT</span></h1>
+    <div class="stats"><span>WAVE <b id="wave">0</b></span><span>KILLS <b id="kills">0</b></span><span id="zoom">1×</span></div>
+  </header>
+
+  <div id="stage"><canvas id="screen" tabindex="0" aria-label="게임 화면. WASD로 이동, 클릭으로 공격, 우클릭으로 스킬"></canvas></div>
+  <div class="touch"><button id="btn-attack" type="button">ATTACK</button><button id="btn-skill" type="button">FROST</button></div>
+
+  <div class="grid">
+    <section>
+      <h2>Controls</h2>
+      <dl class="keys">
+        <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>이동</dd>
+        <dt><kbd>마우스</kbd></dt><dd>조준</dd>
+        <dt><kbd>좌클릭</kbd><kbd>J</kbd></dt><dd>칼 휘두르기 (번갈아 베기, 풀도 벤다)</dd>
+        <dt><kbd>우클릭</kbd><kbd>K</kbd><kbd>Space</kbd></dt><dd>서리 폭발: 주변 적을 얼리고 2 피해, 재사용 3.5초</dd>
+      </dl>
+      <p class="note">휴대폰에서는 화면을 누른 채 끌면 그쪽으로 걷고, 아래 버튼으로 공격합니다. 참격·타격 불꽃·처치 연기·서리 폭발은 pixelfx 코드가 매 프레임 직접 그립니다.</p>
+    </section>
+
+    <section>
+      <h2>Image test</h2>
+      <div class="rows">
+        <div class="row"><label for="in-hero">플레이어</label><input id="in-hero" type="file" accept="image/png,image/gif,image/webp"><span class="info" id="hero-info">기본 이미지</span></div>
+        <div class="row"><label for="in-frames">걷기 프레임 수</label><input id="in-frames" type="number" min="1" max="32" value="1"><span class="info">가로 시트일 때</span></div>
+        <div class="row"><label for="in-enemy">적</label><input id="in-enemy" type="file" accept="image/png,image/gif,image/webp"><span class="info" id="enemy-info">기본 이미지</span></div>
+        <div class="row"><label for="in-tile">바닥 타일</label><input id="in-tile" type="file" accept="image/png,image/gif,image/webp"><span class="info" id="tile-info">기본 이미지</span></div>
+      </div>
+      <p class="note">넣은 이미지는 확대·축소 없이 원본 픽셀 크기 그대로, 발밑 가운데를 기준으로 놓입니다. 화면은 384×216 논리 픽셀이며 정수 배율로 키워 보여 줍니다.</p>
+      <div class="rows">
+        <div class="row"><span>이펙트 색</span>
+          <div class="seg" role="radiogroup" aria-label="이펙트 색">
+            <label><input type="radio" name="style" id="style-white" value="white" checked>흰색 단색</label>
+            <label><input type="radio" name="style" id="style-default" value="default">pixelfx 기본</label>
+          </div><span></span></div>
+        <div class="row"><label for="in-light">빛 번짐</label><input id="in-light" type="range" min="0" max="1" step="0.05" value="0.15"><span class="info" id="light-val">0.15</span></div>
+        <div class="row"><span>타격감</span>
+          <div class="checks"><label><input id="in-hitstop" type="checkbox" checked> 히트스톱</label><label><input id="in-shake" type="checkbox" checked> 화면 흔들림</label></div><span></span></div>
+      </div>
+      <div><button id="btn-reset" type="button">기본 이미지로 되돌리기</button></div>
+    </section>
+  </div>
+</div>
+<script>/*BUNDLE*/</script>

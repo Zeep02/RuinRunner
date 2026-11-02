@@ -1,0 +1,15 @@
+Lucifer Dungeon Tileset (1.0), distributed by Foozle
+https://foozlecc.itch.io/lucifer-dungeon-tileset
+License: Creative Commons Zero 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Official free archive acquired and verified 2026-09-30.
+The packaged Readme credits Baldur (https://twitter.com/the__baldur).
+The current official page credits David (https://x.com/chroma_dave).
+Both attribution records are retained here; the CC0 license agrees in both sources.
+
+Used: nine native 32px floor cells (three stone sizes; intact/cracked/broken)
+in the seal core. Individual crops retain original RGBA pixels and 32PPU.
+A uniform renderer tint adapts them to the seal core palette.
+No source resampling, repainting, or generated image derivatives.
+Original archive, license and source page are retained in private ArtDirection.

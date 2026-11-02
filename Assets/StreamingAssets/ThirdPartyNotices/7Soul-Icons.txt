@@ -1,0 +1,14 @@
+Selected fantasy equipment icons by Henrique Lazarini (7Soul1).
+Source: https://opengameart.org/content/496-pixel-art-icons-for-medievalfantasy-rpg
+License: CC0 1.0 Universal Public Domain Dedication.
+https://creativecommons.org/publicdomain/zero/1.0/
+Original archive: 496_RPG_icons.zip (curated archive excludes derivative-game icons).
+Changes: transparent padding only, Unity grip pivots, world display size and orientation.
+Original pixel colors and geometry are preserved. This does not imply artist endorsement.
+
+Additional red ring and ruby pendant from CC0 Jewelry Icons by 7Soul1:
+https://opengameart.org/content/cc0-jewelry-icons
+Archive jewelry-7soul1_20201212.zip SHA256:
+7cd8d154048464d60f6f9bf82db6289950939dd4e36849b3fb028a498800155d
+Native 32x32 ring_03_red.png and necklace_01.png, transparent padding only;
+no repaint or resampling.

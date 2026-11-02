@@ -1,0 +1,12 @@
+Animated chest artwork by Somi.
+Source: https://pyrrhhic.itch.io/the-essential-animated-chest-pack-6-unique-themes
+Official free download: Chests.zip (PNG pack only; paid Aseprite download not used).
+Commercial and noncommercial game use and modification allowed. Do not resell,
+redistribute or sublicense as standalone assets, or claim authorship.
+Attribution optional; credited here as Somi. No endorsement implied.
+The packaged LICENSE has placeholder author fields; the official author page
+identifies Somi and supplies the same use terms. Both originals retained locally.
+Changes: exact native 32x32 source cells, six distinct opening poses per chest;
+duplicate holds and reverse closing sequence omitted; foot pivots and display size.
+No repainting, resampling, recoloring, duplicated poses or invented intermediate frames.
+SHA256 Chests.zip: 7c1e24bc2552bf544f89b89f0da0e4a730143231d4276ddc37c2c301cfe35f41

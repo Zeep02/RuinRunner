@@ -1,0 +1,13 @@
+Free Fantasy 64 Swords Pack
+Artist: Filippo D'Alfosno (TETRABYTE)
+Source: https://tetrabyte.itch.io/fantasy-64-sword-pack
+Retrieved: 2026-10-04, official free / name-your-own-price download.
+
+The author permits use of the sprites for any purpose and requests optional attribution.
+The original pack and the source-page license evidence are retained under
+ArtDirection/ExternalCandidates/20261004/tetrabyte-swords.
+
+Used: three 32x32 sword cells for training_katana, moon_blade and blood_moon_katana.
+Modification: each original cell was extracted into a separate PNG. Original pixels,
+native dimensions and palette are unchanged; no resizing or image generation was used.
+This is the author's custom permission, not a claim that the pack is CC0.

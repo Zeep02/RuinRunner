@@ -1,0 +1,7 @@
+Free Bow and Crossbow Icons, by CraftPix / Free Game Assets
+Source: https://free-game-assets.itch.io/free-bow-and-crossbow-pixel-art-icons
+License: CraftPix Freebie Products license, https://craftpix.net/file-licenses/
+Free personal/commercial game use and modification permitted. Standalone art redistribution/resale not permitted.
+Used: transparent Icon31, Icon29_no_effect and Icon33.
+Changes: transparent padding, Unity grip pivots and muzzle landmarks. Source pixels retained.
+Original archive and packaged License.txt retained under ArtDirection/ExternalCandidates/20260922/craftpix-crossbows.

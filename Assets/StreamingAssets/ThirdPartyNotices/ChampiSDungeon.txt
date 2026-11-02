@@ -1,0 +1,12 @@
+Dungeon Pixel Art x32 — Champi_S
+Official source: https://champi-s.itch.io/dungeon-pixel-art-x32
+License: Creative Commons Zero v1.0 Universal (CC0)
+https://creativecommons.org/publicdomain/zero/1.0/
+Official page checked 2026-10-03: permits free/commercial use and modification.
+
+RuinRunner uses native paving cells and a quiet stone ground from Asset-Tileset.png.
+Source SHA-256: 6fecffe24861b8984e3169177c6f86e7df32c8b35ad8f62bc8833d444ab6e295
+Separate PNGs retain exact original RGBA pixels and dimensions (no resampling).
+Display adaptation: shared CoreStone material applies a subdued slate palette
+to ground and paving; spatial wear uses sprite opacity. Original images preserved.
+One extracted seal image is retained as an unused comparison candidate.

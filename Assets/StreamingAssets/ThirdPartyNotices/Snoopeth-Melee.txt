@@ -1,0 +1,12 @@
+Swords and Staffs, by SnoopethDuckDuck
+Source: https://snoopethduckduck.itch.io/swords
+Mirror: https://opengameart.org/content/swords-cc0
+License: CC0 1.0 https://creativecommons.org/publicdomain/zero/1.0/
+
+Selected native two-pixel-outline originals from Packs 1–6.
+The PNG source bytes, original dimensions and pixel colors are unchanged.
+Unity grip pivots and aiming landmarks are authored for this game's hero.
+Source archives and original CC0 notices are retained in the development project:
+ArtDirection/ExternalCandidates/20261004/snoopeth-melee.
+Exact source-to-item mapping and SHA256 values:
+ArtDirection/Review-20261004/weapon-redesign/accepted-selection.json.

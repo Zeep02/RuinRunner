@@ -1,0 +1,12 @@
+{
+  "floorAreas": [
+    { "name": "ENTRANCE", "x": 2, "y": 3, "width": 9, "height": 7 },
+    { "name": "PASSAGE", "x": 11, "y": 5, "width": 6, "height": 4 },
+    { "name": "CISTERN HALL", "x": 17, "y": 3, "width": 13, "height": 13 },
+    { "name": "SIDE ALCOVE", "x": 13, "y": 12, "width": 4, "height": 4 },
+    { "name": "OLD SANCTUM", "x": 20, "y": 16, "width": 7, "height": 4 }
+  ],
+  "pool": { "x": 24, "y": 5, "width": 4, "height": 3 },
+  "spawn": { "x": 6, "y": 6 },
+  "urns": [ { "x": 3, "y": 8 }, { "x": 9, "y": 8 }, { "x": 18, "y": 14 }, { "x": 28, "y": 14 }, { "x": 14, "y": 14 } ]
+}

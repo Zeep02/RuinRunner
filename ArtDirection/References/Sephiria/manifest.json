@@ -1,0 +1,70 @@
+{
+  "purpose": "User-supplied visual and motion references; not training weights or shipping game assets",
+  "files": [
+    {
+      "file": "01-main-menu.png",
+      "source_file": "codex-clipboard-5f96f84e-e684-46ba-852f-48153e50ec89.png",
+      "width": 1574,
+      "height": 857,
+      "frames": 1,
+      "sha256": "b792887de19e58fdecccc2cae6137e067dcfdb456bdaca3b5eb68850dfc20ef9"
+    },
+    {
+      "file": "02-save-profiles.png",
+      "source_file": "codex-clipboard-73f48e6b-d8ab-4380-8ef5-40be26e9dc33.png",
+      "width": 1575,
+      "height": 856,
+      "frames": 1,
+      "sha256": "2f6686d9a84e758d99e905df2ae8e5b67cb4f5cc6c0524b1db7aafa073284b7a"
+    },
+    {
+      "file": "03-overworld.png",
+      "source_file": "codex-clipboard-65a18933-b3a6-4481-86ea-b6e3ca94ef93.png",
+      "width": 1573,
+      "height": 853,
+      "frames": 1,
+      "sha256": "51e06a084d73f5dbf0a84da4ccfccdd675deb357ba0192443ef81dad849645af"
+    },
+    {
+      "file": "04-character-stats.png",
+      "source_file": "codex-clipboard-a5212292-b0cb-4175-92d9-0300d8455549.png",
+      "width": 1576,
+      "height": 854,
+      "frames": 1,
+      "sha256": "7ce7f728b072ad4e636296bee80df920bdeb8ef6a3df48cc3f52290cb416f379"
+    },
+    {
+      "file": "05-inventory.png",
+      "source_file": "codex-clipboard-e7fac8da-1d7d-4648-ac03-b6ca80b6a609.png",
+      "width": 1574,
+      "height": 854,
+      "frames": 1,
+      "sha256": "ff0a1f3c5dce50b3ce767592706d1fafcd359d285feca4957e45f3f9281d3322"
+    },
+    {
+      "file": "06-entrance-world.png",
+      "source_file": "codex-clipboard-58cd552d-aa70-42b7-8971-fd971618dfb0.png",
+      "width": 1572,
+      "height": 852,
+      "frames": 1,
+      "sha256": "bf981c14ace527d3726ae6506289fe2488cb7e99601afa42244660167b59db62"
+    },
+    {
+      "file": "07-interaction-prompt.png",
+      "source_file": "codex-clipboard-e3fb5492-db9f-4a5e-a4ab-a656cceb607d.png",
+      "width": 1575,
+      "height": 850,
+      "frames": 1,
+      "sha256": "0e234d6710da19809da1bd814d3f8bfb58358377120767c7157d16c6efd0ee8b"
+    },
+    {
+      "file": "08-combat-motion.gif",
+      "source_file": "codex-clipboard-f06f733b-90fe-4584-b2d6-df78708671f2.gif",
+      "width": 1570,
+      "height": 848,
+      "frames": 104,
+      "sha256": "62610dcc89393988bef1fe24470d3735507d8b0884fdf7e411521e6c13d16f37",
+      "duration_ms": 6900
+    }
+  ]
+}

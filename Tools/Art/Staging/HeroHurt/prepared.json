@@ -1,0 +1,31 @@
+{
+  "status": "PREPARED OUTSIDE ASSETS; import, compile and actual playback not yet accepted",
+  "manifest": "ArtDirection/Generated/SscaryMotion-20261009/hurt-native-v5-full/manifest-reviewed.json",
+  "manifestSha256": "6736ef38d27ceeffd099b2fb62009da3916103cc9df4787294be86c609640a36",
+  "files": [
+    {
+      "target": "Assets/RuinRunner/Runtime/Player/SscaryHurtFrames.cs",
+      "sourceSha256": null,
+      "candidate": "Tools/Art/Staging/HeroHurt/Runtime/Player/SscaryHurtFrames.cs",
+      "candidateSha256": "18f73c642bad197e206e67ca54c185964009ed6bbf2a999f3733b5b47190d4d4"
+    },
+    {
+      "target": "Assets/RuinRunner/Runtime/Player/PlayerController.cs",
+      "sourceSha256": "07b27f23ffd6a2c55753e476d785f3a3511b63d7c0f254d8923db84ebc38c0f1",
+      "candidate": "Tools/Art/Staging/HeroHurt/Runtime/Player/PlayerController.cs",
+      "candidateSha256": "690945fe33117df6a7761faa4d59cca840445b593da8f7d697762718817fb379"
+    },
+    {
+      "target": "Assets/RuinRunner/Runtime/Player/PlayerAnimationController.cs",
+      "sourceSha256": "7c14cd48988929c1b714324bdda893d7cefc70e0a5298cf9e4acb60aa10f6358",
+      "candidate": "Tools/Art/Staging/HeroHurt/Runtime/Player/PlayerAnimationController.cs",
+      "candidateSha256": "0812c27202ae61d1816b41c70b0f56b41e1a94ca37c9dfcd8b4fdd21f486c1ab"
+    },
+    {
+      "target": "Assets/RuinRunner/Runtime/Feedback/NativeHeroFrameCatalog.cs",
+      "sourceSha256": "27ea4adb8e5e31b6ab4709b7c104d933aacb4f411bb8c5f4a74aec1649a69cbb",
+      "candidate": "Tools/Art/Staging/HeroHurt/Runtime/Feedback/NativeHeroFrameCatalog.cs",
+      "candidateSha256": "991ecbbb6c2eaf155f163b041f3e40a2f3d7cbf9ab43d3cfece37f4142ec6061"
+    }
+  ]
+}

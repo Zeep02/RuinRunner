@@ -1,0 +1,21 @@
+Ruin Runner campaign music
+Music by Cleyton Kauffman - https://soundcloud.com/cleytonkauffman
+License: Creative Commons Zero (CC0) 1.0 Universal
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Stage 1: Forest Whisper (Forest Whisper Theme)
+https://opengameart.org/content/forest-whisper-theme
+Stage 2: Exploration Theme
+https://opengameart.org/content/exploration-theme
+Stage 3: Ruined City Theme
+https://opengameart.org/content/ruined-city-theme
+
+Author submission pages and the README included in each archive list CC0.
+Retrieved 2026-10-01. Attribution is provided voluntarily.
+The game applies a constant loudness adjustment to each original stereo WAV.
+Forest Whisper also receives a 5 ms edge de-click at each loop boundary.
+Original duration, tempo, pitch, arrangement and stereo are preserved.
+The source archives, original files and exact hashes are retained in the project.
+
+Terraria and DM DOKURO's sanctuary were references for the desired mood only.
+Their recordings, melodies and samples are not included in Ruin Runner.

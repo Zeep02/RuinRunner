@@ -1,0 +1,37 @@
+Native actor art attribution (2026-09-22)
+
+Pixel Frog — Tiny Swords (current Free Pack), Pawn character.
+https://pixelfrog-assets.itch.io/tiny-swords
+Personal/commercial game use and modification allowed; no redistribution, resale or repackaging as assets.
+Original body/head/hand cels exported at native resolution; equipment layer separated; original shadow preserved.
+The current Free Pack license is used, not the separate older CC0 release. No paid Enemy Pack purchased.
+
+CraftPix / Free Game Assets — Free Slime Mobs and Free Vampire 4-Direction Sprite Packs.
+https://free-game-assets.itch.io/free-slime-mobs-pixel-art-top-down-sprite-pack
+https://free-game-assets.itch.io/free-vampire-4-direction-pixel-character-sprite-pack
+https://craftpix.net/file-licenses/
+Game use and modification allowed; no standalone asset redistribution. Original body sheets separated into individual PNGs.
+
+Dotmancer — Diamond Top Down Pixel Art, original Boar sprite.
+https://dotmancer.itch.io/diamond-top-down-pixel-art
+Official free full_version archive. Game use/modification permitted; no standalone asset redistribution.
+No Godot source code/project included. Original sprite cells exported without resampling.
+
+Archive digests, original license pages and extraction metadata are retained in the development project's ArtDirection/ExternalCandidates/20260921.
+
+CraftPix / Free Game Assets — Free Orc Pixel Characters Sprites (Orc3), added 2026-10-03.
+https://free-game-assets.itch.io/free-top-down-orc-game-character-pixel-art
+https://craftpix.net/file-licenses/
+Freebie license permits personal/commercial game use and modification; no standalone asset redistribution.
+168 original 64x64 cells separated losslessly for four-direction idle, run, attack, running attack, hurt and death.
+Common foot pivot (32,24 in Unity pixels), 32 PPU. No resizing, repainted pixels, generated frames or paid content.
+Orc3 now presents the existing Charger role; original Dotmancer boar is retained as development history, not selected by active enemy art.
+Acquisition archive, SHA-256, official license page and source-cell map: ArtDirection/ExternalCandidates/20261003/craftpix-orcs and ArtDirection/Review-20261003/boar-motion/native-orc-import.json.
+
+Kronovi / Dark Pixel — Mecha-Stone Golem (free), added 2026-10-03.
+https://darkpixel-kronovi.itch.io/mecha-golem-free
+Author terms allow commercial/noncommercial game use and modification; credit appreciated. Do not resell or redistribute the asset pack.
+Original Mecha-stone Golem 0.1 ZIP retained in development only. 51 unchanged 100x100 source cells exported as individual PNGs: idle, glow, immune, laser_cast, shield_cast and death. No repainting, resizing or generated poses.
+Common ground pivot (49,6), 32 PPU, Point, no compression/mipmaps. Original source duplicate/held frames are retained and counted separately from unique poses. Gameplay uses a short partial guard fold as visual hit recoil only; it does not grant immunity.
+Source archive SHA-256: 79cb7d9864015f80c7eba72da620e57bf769ec346ce411e5cbbbc1dd35e766de.
+Used for the Tidekeeper's body and casting/collapse poses. No other boss is replaced by this art.

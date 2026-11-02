@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../RuinRunner.Generation/RuinRunner.Generation.csproj" />
+    <Compile Include="../../Assets/RuinRunner/Runtime/Backend/AccessoryTuningSchema.cs" Link="Shared/AccessoryTuningSchema.cs" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <Content Include="Migrations/*.sql" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../Content/*.json" Link="Content/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

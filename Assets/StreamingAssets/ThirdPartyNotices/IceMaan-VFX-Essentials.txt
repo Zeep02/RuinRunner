@@ -1,0 +1,8 @@
+FREE PIXEL VFX ESSENTIALS — IceMaan
+Source: https://icemaan.itch.io/pixel-vfx-essentials
+Used: Spritesheets/Slashes/Thrust.png, five exact native 32x32 cells; no repainting or resampling.
+Also used: Spritesheets/Hit Sparks/Hit Spark.png, five exact native 32x32 cells for player damage contact. Unchanged source pixels, centered pivot, Point filtering.
+Official license text retrieved 2026-10-01:
+Use them in any project, personal or commercial. Games you sell, client work, game jams, video, streams. Modify them freely, recolor, resize, retime, cut frames. No attribution required (it's welcome, never required). You may not resell or redistribute the effects as an asset pack, or upload them to another asset store or AI training set.
+
+Full source page retained in ArtDirection/ExternalCandidates/20261001/icemaan-vfx/official-page.html. These effects are shipped inside the game, not distributed as an asset pack.

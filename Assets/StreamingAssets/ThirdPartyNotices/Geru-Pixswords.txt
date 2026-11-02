@@ -1,0 +1,11 @@
+Pixswords by Geru
+Official source: https://gerumansi.itch.io/pixswords
+Retrieved: 2026-10-04
+
+Used: Dark Outline/dark_30.png, dark_33.png, dark_34.png.
+Original author-provided 16x32 PNG files copied without resizing or pixel changes.
+In-game IDs: training_katana, moon_blade, blood_moon_katana.
+
+The author permits free personal and commercial use and modification.
+Attribution is not required. Selling the asset pack/assets separately or claiming ownership is prohibited.
+Source and the original license statement are retained under ArtDirection/ExternalCandidates/20261004/geru-pixswords.

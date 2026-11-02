@@ -1,0 +1,39 @@
+Ninja Adventure Asset Pack
+Pixel-Boy and AAA
+https://pixel-boy.itch.io/ninja-adventure-asset-pack
+CC0 1.0 Universal
+Ruin Runner uses separately exported slash, cut, cross cut, curved slash, circle impact, spark and thunder animation frames. Original artwork is preserved; only cells and transparent canvas padding differ. Runtime scale, rotation, playback timing and critical-hit tint are presentation settings.
+
+2026-09-30 presentation update also uses native arrow, bolt, shell, energy,
+fireball, smoke and reward sparkle/ring/glint frames, plus 24 combat and reward
+WAV clips. Exact source cells and audio SHA256 values are recorded in
+ArtDirection/Review-20260930/combat-presentation-import.json and
+reward-presentation-import.json. No painting, resampling or source audio edits.
+
+2026-10-01 item combat actions additionally use 8 native Thunder poses
+(20x28 cells) and 6 native ShieldYellow poses (24x26 cells), exported as
+individual PNGs with common canvas/pivots, Point filtering and no compression.
+Exact original RGBA pixels, unique-pose hashes and import settings are recorded
+in ArtDirection/Review-20261001/item-effects-native-import.json and
+native-item-effects-identity-qa.json. Source artwork was not repainted or
+resampled. Runtime timing, uniform scale, rotation, tint and layering are
+presentation changes. Existing native Energy/Wind/Arcane/reward effects and
+the previously credited WAV clips are reused for the other item actions.
+
+2026-10-01 campaign ambience uses the original Ambient/Wind.wav,
+Ambient/WaveFar.wav and Ambient/Wind2.wav files without audio edits.
+Music uses separately credited works by Cleyton Kauffman.
+Exact source paths and SHA256: ArtDirection/Review-20261001/campaign-ambience-import.json.
+
+2026-10-01 weapon identity adds native Flam/Explosion/SmokeCircular/SlashDoubleCurved/Cut poses and Spark/RockGray/Leaf cosmetic variants. Exact source cells and hashes: ArtDirection/Review-20261001/weapon-fx/native-import.json. Original RGBA pixels retained; particle variants are not animation poses.
+
+2026-10-01 katana source correction: SpriteSheetSlash03.png (228x42) contains
+four complete 57x42 cells. The old six 38x42 clipped fragments are preserved
+outside runtime Resources with their GUIDs. Unity exports the four complete
+cells with unchanged source RGBA pixels, Point filtering, center pivot and
+57 PPU. No resize, repaint, generated animation frames or interpolation.
+Exact source cells, PNG hashes and independent RGBA/Sprite verification:
+ArtDirection/Review-20261001/melee-fx-binding/katana-native-import.json,
+katana-source-independent-qa.json and actual-native-import-qa.json.
+
+2026-10-03: Boss hazard ground eruptions use original WaterPillar (9 frames), Water (11), RockSpike (10), all at native pixels and 32 PPU. Water9.wav is copied byte-for-byte as hazard-water.wav. CC0, Pixel-Boy / AAA. No source recoloring or resizing.

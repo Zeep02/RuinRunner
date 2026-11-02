@@ -1,0 +1,6 @@
+Kyrise's Free 16x16 RPG Icon Pack v1.3, by Kyrise
+Source: https://kyrise.itch.io/kyrises-free-16x16-rpg-icon-pack
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Used: ring_03d.png as the crimson ring. Native pixels unchanged; transparent padding added.
+Original archive and acquisition evidence retained in ArtDirection/ExternalCandidates/20260922/kyrise-icons.

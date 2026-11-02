@@ -1,0 +1,20 @@
+Lucifer - Ancient Boss (1.0)
+Distributed by Foozle. Source: https://foozlecc.itch.io/lucifer-skeleton-ancient-boss
+License: Creative Commons Zero 1.0 Universal (CC0).
+https://creativecommons.org/publicdomain/zero/1.0/
+
+The source permits use and modification in personal and commercial projects;
+attribution is not required. No purchase or account was used.
+
+Author provenance: the current official page credits David (chroma_dave).
+The packaged Readme.txt credits Baldur (the__baldur). Both original records are
+preserved with the source archive; this notice does not resolve that discrepancy.
+
+Ruin Runner uses 192 losslessly separated native cells on a common 96x96 canvas across four
+directions: idle 7, walk 8, hurt 4, death 9, attack02 13, attack03 7 per direction.
+80px source cells receive 8px transparent padding per edge; 96px side walk cells stay intact. All original pixels are preserved. Pixels are not repainted, rescaled or interpolated. Runtime timing follows
+the existing boss warning, active and recovery phases. Source holds are
+preserved and are not claimed as additional authored poses.
+
+Archive: Foozle_2DC0020_Lucifer_Skeleton_Ancient_Pixel_Art.zip
+SHA256: 7280f8955f64da3081976f0c6407dfa83d8cb959f267bca655aef3fc669e5452

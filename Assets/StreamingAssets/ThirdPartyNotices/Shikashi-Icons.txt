@@ -1,0 +1,7 @@
+Shikashi's Fantasy Icons Pack v2, by Matt Firth (shikashipx), with game-icons.net
+Source: https://shikashipx.itch.io/shikashis-fantasy-icons-pack
+License: Creative Commons Attribution 4.0 International
+https://creativecommons.org/licenses/by/4.0/
+Used icons: skull, dice, heart, magnifying glass.
+Changes: individual transparent PNG extraction and padding. Original authored pixels retained.
+Original archive and acquisition evidence retained in ArtDirection/ExternalCandidates/20260922/shikashi-icons.

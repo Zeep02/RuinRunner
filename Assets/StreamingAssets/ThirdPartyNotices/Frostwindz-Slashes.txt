@@ -1,0 +1,16 @@
+Pixel Art VFX - Slashes by Frostwindz
+https://frostwindz.itch.io/pixel-art-slashes
+Official free archive acquired 2026-10-01. SHA256:
+273b180edacf5685fcc699e34ab81834ff23d03662911cbb191d7e74d4b3b428
+
+Bundled Frostwindz Asset License Agreement permits commercial and non-commercial
+games and modification. Standalone redistribution/resale and AI training are
+prohibited. Attribution is appreciated but not required; provided here.
+The full original license and download record are preserved in the development
+sources at ArtDirection/ExternalCandidates/20261001/frostwindz-slashes.
+
+Used: original separate 128x128 Slash3/color5 (9 poses).
+PNG bytes/colors/canvases are unchanged. Unity pivots, source orientation and
+playback at the real preparation/contact/recovery clock are configured for the
+greatsword. No paid files, generated images or resized replacement poses used.
+The Slash2/color4 branching wedge was rejected during review and is not used.
