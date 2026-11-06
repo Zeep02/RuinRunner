@@ -31,13 +31,22 @@ namespace RuinRunner
             EnemyType[] types;
             switch (region)
             {
-                case 0: types = new[] { EnemyType.Grunt, EnemyType.Grunt, EnemyType.Leaper }; break;
-                case 1: types = new[] { EnemyType.Grunt, EnemyType.Leaper, EnemyType.Leaper, EnemyType.Grunt }; break;
-                case 2: types = new[] { EnemyType.Grunt, EnemyType.Leaper, EnemyType.Charger, EnemyType.Leaper, EnemyType.Grunt, EnemyType.Grunt }; break;
-                default: types = new[] { EnemyType.Boss }; break;
+                case 0:
+                    types = new[] { EnemyType.Grunt, EnemyType.Grunt, EnemyType.Leaper };
+                    break;
+                case 1:
+                    types = new[] { EnemyType.Grunt, EnemyType.Leaper, EnemyType.Leaper, EnemyType.Grunt };
+                    break;
+                case 2:
+                    types = new[] { EnemyType.Grunt, EnemyType.Leaper, EnemyType.Charger, EnemyType.Leaper, EnemyType.Grunt, EnemyType.Grunt };
+                    break;
+                default:
+                    types = new[] { EnemyType.Boss };
+                    break;
             }
             var result = new EnemyPlacementData[types.Length];
-            for (var i = 0; i < types.Length; i++) result[i] = new EnemyPlacementData(types[i], 0, 0) { wave = i / 2 };
+            for (var i = 0; i < types.Length; i++)
+                result[i] = new EnemyPlacementData(types[i], 0, 0) { wave = i / 2 };
             return result;
         }
     }

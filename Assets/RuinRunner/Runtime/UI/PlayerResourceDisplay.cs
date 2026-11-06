@@ -43,8 +43,9 @@ namespace RuinRunner
 
         private void LateUpdate()
         {
-            if (player == null) return;
-            if(player.IsDead)
+            if (player == null)
+                return;
+            if (player.IsDead)
             {
                 ammoRoot.SetActive(false);
                 dashGauge.gameObject.SetActive(false);
@@ -80,8 +81,8 @@ namespace RuinRunner
             var part = new GameObject(name);
             part.transform.SetParent(parent, false);
             part.transform.localScale = scale;
-            var renderer = PrototypeVisuals.AddSprite(part, color, sortingOrder);
-            renderer.sprite = PrototypeVisuals.Capsule;
+            var renderer = GameVisuals.AddSprite(part, color, sortingOrder);
+            renderer.sprite = GameVisuals.Capsule;
             return part;
         }
     }

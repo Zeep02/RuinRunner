@@ -16,14 +16,21 @@ namespace RuinRunner
         public static void Create(Sprite sprite, Vector3 position, Vector3 scale, Color color,
             float lifetime, int sortingOrder, Vector2 drift = default, float finalScale = .2f)
         {
-            if (sprite == null) return;
-            var root = new GameObject("SpriteEcho"); root.transform.position = position;
+            if (sprite == null)
+                return;
+            var root = new GameObject("SpriteEcho");
+            root.transform.position = position;
             root.transform.localScale = scale;
             var effect = root.AddComponent<TransientSpriteEffect>();
-            effect.view = root.AddComponent<SpriteRenderer>(); effect.view.sprite = sprite;
-            effect.view.sortingOrder = sortingOrder; effect.view.color = color;
-            effect.tint = color; effect.duration = Mathf.Max(.01f, lifetime);
-            effect.startScale = scale; effect.velocity = drift; effect.endScale = finalScale;
+            effect.view = root.AddComponent<SpriteRenderer>();
+            effect.view.sprite = sprite;
+            effect.view.sortingOrder = sortingOrder;
+            effect.view.color = color;
+            effect.tint = color;
+            effect.duration = Mathf.Max(.01f, lifetime);
+            effect.startScale = scale;
+            effect.velocity = drift;
+            effect.endScale = finalScale;
         }
 
         private void Update()
@@ -32,8 +39,11 @@ namespace RuinRunner
             var progress = Mathf.Clamp01(age / duration);
             transform.position += (Vector3)(velocity * Time.deltaTime);
             transform.localScale = startScale * Mathf.Lerp(1f, endScale, progress);
-            var color = tint; color.a *= 1f - progress; view.color = color;
-            if (age >= duration) Destroy(gameObject);
+            var color = tint;
+            color.a *= 1f - progress;
+            view.color = color;
+            if (age >= duration)
+                Destroy(gameObject);
         }
     }
 }

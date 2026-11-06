@@ -28,11 +28,13 @@ namespace RuinRunner
             StageTerrainLayout navigationTerrain = null)
         {
             EnemyController boss = null;
-            if (room.enemies == null) return new WaveSpawnResult(0, null);
+            if (room.enemies == null)
+                return new WaveSpawnResult(0, null);
             var count = 0;
             for (var index = 0; index < room.enemies.Length; index++)
             {
-                if (room.GetWaveIndex(index) != waveIndex) continue;
+                if (room.GetWaveIndex(index) != waveIndex)
+                    continue;
                 var placement = room.enemies[index];
                 var enemy = EnemyController.Create(
                     placement.type,
@@ -44,7 +46,8 @@ namespace RuinRunner
                 enemy.ConfigureArena(new Rect(roomCenter - room.Size * .5f, room.Size));
                 enemy.ConfigureNavigation(navigationTerrain);
 
-                if (EnemyRoles.IsBoss(placement.type)) boss = enemy;
+                if (EnemyRoles.IsBoss(placement.type))
+                    boss = enemy;
                 count++;
             }
 
@@ -53,11 +56,13 @@ namespace RuinRunner
 
         public static EnemySpawnTelegraph[] CreateTelegraphs(RoomTemplate room, int waveIndex, Vector2 roomCenter)
         {
-            if (room.enemies == null) return new EnemySpawnTelegraph[0];
+            if (room.enemies == null)
+                return new EnemySpawnTelegraph[0];
             var telegraphs = new System.Collections.Generic.List<EnemySpawnTelegraph>();
             for (var index = 0; index < room.enemies.Length; index++)
             {
-                if (room.GetWaveIndex(index) != waveIndex) continue;
+                if (room.GetWaveIndex(index) != waveIndex)
+                    continue;
                 var placement = room.enemies[index];
                 telegraphs.Add(EnemySpawnTelegraph.Create(placement.position + roomCenter, placement.type));
             }

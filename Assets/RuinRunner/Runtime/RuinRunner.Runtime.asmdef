@@ -1,7 +1,11 @@
 {
   "name": "RuinRunner.Runtime",
   "rootNamespace": "RuinRunner",
-  "references": ["Unity.2D.PixelPerfect"],
+  "references": [
+    "Unity.2D.PixelPerfect",
+    "RuinRunner.Generation",
+    "RuinRunner.Backend"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

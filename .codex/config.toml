@@ -1,5 +1,0 @@
-# 프로젝트 범위 Codex 설정. 토큰은 여기에 쓰지 않고 PIXELLAB_API_TOKEN 환경 변수에서 읽는다.
-# 이 프로젝트를 Codex 에서 신뢰(trusted)로 열어야 적용된다. 안 되면 같은 블록을 ~/.codex/config.toml 에 넣는다.
-[mcp_servers.pixellab]
-url = "https://api.pixellab.ai/mcp"
-bearer_token_env_var = "PIXELLAB_API_TOKEN"

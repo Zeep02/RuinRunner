@@ -75,7 +75,10 @@ public static class Wire
 {
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
     public static string Encode<T>(T value) => JsonSerializer.Serialize(value, Json);
-    public static T Decode<T>(string json) => JsonSerializer.Deserialize<T>(json, Json) ?? throw new ApiFailure(400,"invalid_json","요청을 읽을 수 없습니다.");
+    public static T Decode<T>(string json) => JsonSerializer.Deserialize<T>(json, Json) ?? throw new ApiFailure(400, "invalid_json", "요청을 읽을 수 없습니다.");
     public static void Require(bool condition, string code, string message, int status = 400)
-    { if (!condition) throw new ApiFailure(status, code, message); }
+    {
+        if (!condition)
+            throw new ApiFailure(status, code, message);
+    }
 }

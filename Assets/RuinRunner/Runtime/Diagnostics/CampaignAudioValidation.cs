@@ -14,7 +14,7 @@ namespace RuinRunner
         private string folder;
         private GameController game;
         private GameSettingsService isolated;
-        private PrototypeAudioController controller;
+        private GameAudioController controller;
         private float oldTimeScale, oldListenerVolume;
         private bool oldListenerPause;
         private bool standalone;
@@ -24,13 +24,15 @@ namespace RuinRunner
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Boot()
         {
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-validate-campaign-audio") < 0) return;
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-validate-campaign-audio") < 0)
+                return;
             StartValidation(true);
         }
 
         public static string StartValidation(bool quitWhenFinished = false)
         {
-            if (FindAnyObjectByType<CampaignAudioValidation>() != null) throw new Exception("Audio validation already running.");
+            if (FindAnyObjectByType<CampaignAudioValidation>() != null)
+                throw new Exception("Audio validation already running.");
             var runner = new GameObject("CampaignAudioValidation").AddComponent<CampaignAudioValidation>();
             runner.standalone = quitWhenFinished;
             runner.oldRunInBackground = Application.runInBackground;
@@ -44,7 +46,8 @@ namespace RuinRunner
 
         private void Require(bool value, string label)
         {
-            if (!value) throw new Exception(label);
+            if (!value)
+                throw new Exception(label);
             checks.Add("PASS " + label);
             File.AppendAllText(Path.Combine(folder, "progress.txt"), "PASS " + label + "\n", new System.Text.UTF8Encoding(false));
         }
@@ -55,10 +58,21 @@ namespace RuinRunner
             Exception failure = null;
             while (true)
             {
-                object value = null; bool more;
-                try { more = run.MoveNext(); if (more) value = run.Current; }
-                catch (Exception ex) { failure = ex; break; }
-                if (!more) break;
+                object value = null;
+                bool more;
+                try
+                {
+                    more = run.MoveNext();
+                    if (more)
+                        value = run.Current;
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                    break;
+                }
+                if (!more)
+                    break;
                 yield return value;
             }
             if (capture != null)
@@ -68,15 +82,21 @@ namespace RuinRunner
             }
             Time.timeScale = oldTimeScale;
             // A hidden standalone must keep ticking until Unity processes its quit request.
-            if (!standalone) Application.runInBackground = oldRunInBackground;
+            if (!standalone)
+                Application.runInBackground = oldRunInBackground;
             AudioListener.volume = oldListenerVolume;
             AudioListener.pause = oldListenerPause;
-            if (game != null) PrototypeAudioController.Create(game.Settings);
-            PrototypeAudioController.SetStage(game != null && game.IsRunActive ? game.CurrentStageIndex : 0);
+            if (game != null)
+                GameAudioController.Create(game.Settings);
+            GameAudioController.SetStage(game != null && game.IsRunActive ? game.CurrentStageIndex : 0);
             var result = (failure == null ? "PASS " + checks.Count(x => x.StartsWith("PASS ")) + " checks" : "FAIL " + failure) + "\n" + string.Join("\n", checks);
             File.WriteAllText(Path.Combine(folder, "result.txt"), result, new System.Text.UTF8Encoding(false));
-            if (failure == null) Debug.Log("[CampaignAudioValidation] " + result); else Debug.LogError("[CampaignAudioValidation] " + result);
-            if (standalone) Application.Quit(failure == null ? 0 : 1);
+            if (failure == null)
+                Debug.Log("[CampaignAudioValidation] " + result);
+            else
+                Debug.LogError("[CampaignAudioValidation] " + result);
+            if (standalone)
+                Application.Quit(failure == null ? 0 : 1);
             Destroy(gameObject);
         }
 
@@ -89,13 +109,17 @@ namespace RuinRunner
             oldListenerPause = AudioListener.pause;
             var deadline = Time.realtimeSinceStartup + 15;
             while ((game = FindAnyObjectByType<GameController>()) == null || game.Settings == null)
-            { if (Time.realtimeSinceStartup > deadline) throw new Exception("Game startup timeout"); yield return null; }
+            {
+                if (Time.realtimeSinceStartup > deadline)
+                    throw new Exception("Game startup timeout");
+                yield return null;
+            }
             Require(!game.IsRunActive, "audio fixture stays in menu; no user slot or campaign state changed");
             isolated = new GameSettingsService(Path.Combine(folder, "isolated-settings.json"), false);
-            PrototypeAudioController.Create(isolated);
+            GameAudioController.Create(isolated);
             AudioListener.volume = .8f;
             AudioListener.pause = false;
-            controller = FindAnyObjectByType<PrototypeAudioController>();
+            controller = FindAnyObjectByType<GameAudioController>();
             var listeners = FindObjectsByType<AudioListener>();
             Require(listeners.Count(x => x.enabled) == 1, "one enabled AudioListener");
             capture = listeners.First(x => x.enabled).gameObject.AddComponent<CampaignAudioCapture>();
@@ -103,27 +127,28 @@ namespace RuinRunner
             Require(Sources().Length == 4, "fixed four sources for music and ambience crossfades");
             Require(Sources().All(s => s.spatialBlend == 0 && s.loop && !s.playOnAwake && s.pitch == 1), "2D original-pitch loop sources");
             for (var stage = 1; stage <= 3; stage++)
-            foreach (var kind in new[] { "music", "ambience" })
-            {
-                var clip = Resources.Load<AudioClip>("Audio/Campaign/stage" + stage + "-" + kind);
-                Require(clip != null && clip.channels == 2 && clip.frequency == 44100 && clip.loadType == AudioClipLoadType.Streaming,
-                    "stage " + stage + " " + kind + " stereo 44.1k streaming asset");
-                if (kind == "music") Require(clip.length > 80, "stage " + stage + " authored full-length loop");
-            }
-            PrototypeAudioController.SetStage(0);
+                foreach (var kind in new[] { "music", "ambience" })
+                {
+                    var clip = Resources.Load<AudioClip>("Audio/Campaign/stage" + stage + "-" + kind);
+                    Require(clip != null && clip.channels == 2 && clip.frequency == 44100 && clip.loadType == AudioClipLoadType.Streaming,
+                        "stage " + stage + " " + kind + " stereo 44.1k streaming asset");
+                    if (kind == "music")
+                        Require(clip.length > 80, "stage " + stage + " authored full-length loop");
+                }
+            GameAudioController.SetStage(0);
             yield return new WaitForSecondsRealtime(3.5f);
             var first = Music();
             Require(first.clip.name == "stage1-music" && first.isPlaying, "stage one replacement actually playing");
             float before = first.time;
-            PrototypeAudioController.SetStage(0);
+            GameAudioController.SetStage(0);
             yield return new WaitForSecondsRealtime(.45f);
             Require(first.time > before, "same stage request preserves playback position");
-            PrototypeAudioController.SetStage(1);
+            GameAudioController.SetStage(1);
             yield return new WaitForSecondsRealtime(.85f);
             var music = Sources().Where(s => s.name.StartsWith("CampaignMusic_")).ToArray();
             Require(music.All(s => s.isPlaying && s.volume > .01f), "both real music clips overlap during crossfade");
             Require(first.time > before, "outgoing clip continues instead of restarting or cutting");
-            float energy = music.Sum(s => Mathf.Pow(s.volume / (isolated.GetVolume(AudioChannel.Music) * PrototypeAudioController.MusicLevel(s.clip.name.StartsWith("stage1") ? 0 : 1)), 2));
+            float energy = music.Sum(s => Mathf.Pow(s.volume / (isolated.GetVolume(AudioChannel.Music) * GameAudioController.MusicLevel(s.clip.name.StartsWith("stage1") ? 0 : 1)), 2));
             Require(Mathf.Abs(energy - 1) < .015f, "crossfade has equal power without doubled gain");
             Time.timeScale = 0;
             yield return new WaitForSecondsRealtime(2.7f);
@@ -145,7 +170,7 @@ namespace RuinRunner
             // Exercise a real decoder crossing the end of each imported loop.
             for (var stage = 0; stage < 3; stage++)
             {
-                PrototypeAudioController.SetStage(stage);
+                GameAudioController.SetStage(stage);
                 yield return new WaitForSecondsRealtime(2.8f);
                 var source = Music();
                 Require(source.clip.name == "stage" + (stage + 1) + "-music", "select correct stage " + (stage + 1));
@@ -153,16 +178,16 @@ namespace RuinRunner
                 yield return new WaitForSecondsRealtime(.85f);
                 Require(source.isPlaying && source.time < 2, "stage " + (stage + 1) + " decoder loops without stopping");
             }
-            PrototypeAudioController.SetStage(1);
+            GameAudioController.SetStage(1);
             yield return new WaitForSecondsRealtime(.45f);
-            PrototypeAudioController.SetStage(0);
-            PrototypeAudioController.SetStage(2);
-            PrototypeAudioController.SetStage(0);
+            GameAudioController.SetStage(0);
+            GameAudioController.SetStage(2);
+            GameAudioController.SetStage(0);
             yield return new WaitForSecondsRealtime(5.3f);
             Require(Music().clip.name == "stage1-music" && Sources().Length == 4, "rapid stage changes settle on latest request with no extra sources");
             var same = controller;
-            PrototypeAudioController.Create(isolated);
-            Require(FindObjectsByType<PrototypeAudioController>().Length == 1 && same == controller,
+            GameAudioController.Create(isolated);
+            Require(FindObjectsByType<GameAudioController>().Length == 1 && same == controller,
                 "reconfigure does not duplicate controller");
             checks.Add("INFO outputRate=" + AudioSettings.outputSampleRate + " capturedFrames=" + capture.Frames + " peak=" + capture.Peak);
         }
@@ -175,7 +200,11 @@ namespace RuinRunner
         private int rate, channels;
         public float Peak { get; private set; }
         public int Frames { get; private set; }
-        public void Configure(int sampleRate) { rate = sampleRate; MasterLimiter.OutputHandedOn = true; }
+        public void Configure(int sampleRate)
+        {
+            rate = sampleRate;
+            MasterLimiter.OutputHandedOn = true;
+        }
         private void OnAudioFilterRead(float[] data, int channelCount)
         {
             lock (gate)
@@ -185,24 +214,35 @@ namespace RuinRunner
                     channels = channelCount;
                     samples.AddRange(data);
                     Frames += data.Length / channels;
-                    foreach (var sample in data) Peak = Mathf.Max(Peak, Mathf.Abs(sample));
+                    foreach (var sample in data)
+                        Peak = Mathf.Max(Peak, Mathf.Abs(sample));
                 }
             }
-            if (MasterLimiter.SilentRun) System.Array.Clear(data, 0, data.Length);
+            if (MasterLimiter.SilentRun)
+                System.Array.Clear(data, 0, data.Length);
         }
         public void Write(string path)
         {
             lock (gate)
             {
-                if (channels == 0) return;
+                if (channels == 0)
+                    return;
                 using (var writer = new BinaryWriter(File.Create(path)))
                 {
-                    writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); writer.Write(36 + samples.Count * 2);
-                    writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt ")); writer.Write(16); writer.Write((short)1);
-                    writer.Write((short)channels); writer.Write(rate); writer.Write(rate * channels * 2);
-                    writer.Write((short)(channels * 2)); writer.Write((short)16);
-                    writer.Write(System.Text.Encoding.ASCII.GetBytes("data")); writer.Write(samples.Count * 2);
-                    foreach (var sample in samples) writer.Write((short)Mathf.Clamp(Mathf.RoundToInt(sample * 32767), -32768, 32767));
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
+                    writer.Write(36 + samples.Count * 2);
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "));
+                    writer.Write(16);
+                    writer.Write((short)1);
+                    writer.Write((short)channels);
+                    writer.Write(rate);
+                    writer.Write(rate * channels * 2);
+                    writer.Write((short)(channels * 2));
+                    writer.Write((short)16);
+                    writer.Write(System.Text.Encoding.ASCII.GetBytes("data"));
+                    writer.Write(samples.Count * 2);
+                    foreach (var sample in samples)
+                        writer.Write((short)Mathf.Clamp(Mathf.RoundToInt(sample * 32767), -32768, 32767));
                 }
             }
         }

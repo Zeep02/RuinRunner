@@ -10,31 +10,48 @@ namespace RuinRunner
     {
         sealed class Clip
         {
-            public readonly string Name; public readonly Vector2[][] Hands; public readonly int[][] Contacts;
-            public Clip(string name, Vector2[][] hands, int[][] contacts) { Name = name; Hands = hands; Contacts = contacts; }
+            public readonly string Name;
+            public readonly Vector2[][] Hands;
+            public readonly int[][] Contacts;
+            public Clip(string name, Vector2[][] hands, int[][] contacts)
+            {
+                Name = name;
+                Hands = hands;
+                Contacts = contacts;
+            }
         }
 
         sealed class Step
         {
-            public readonly Clip Clip; public readonly float[] Blade, ContactProgress; public readonly float Seconds, Lunge; public readonly bool Dust;
+            public readonly Clip Clip;
+            public readonly float[] Blade, ContactProgress;
+            public readonly float Seconds, Lunge;
+            public readonly bool Dust;
             public Step(string clip, float[] blade, float[] contactProgress, float seconds, float lunge, bool dust)
-            { Clip = Clips[clip]; Blade = blade; ContactProgress = contactProgress; Seconds = seconds; Lunge = lunge; Dust = dust; }
+            {
+                Clip = Clips[clip];
+                Blade = blade;
+                ContactProgress = contactProgress;
+                Seconds = seconds;
+                Lunge = lunge;
+                Dust = dust;
+            }
         }
 
         static readonly Dictionary<string, Clip> Clips = new Dictionary<string, Clip>
         {
-            ["UpCut"]=new Clip("UpCut",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(29.5f,32.5f),new Vector2(30.5f,33.5f),new Vector2(31.5f,32.5f),new Vector2(33.5f,35.5f),new Vector2(33.5f,26.5f),new Vector2(34.5f,28.5f),new Vector2(31.5f,34.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(29.5f,35.5f),new Vector2(28.5f,36.5f),new Vector2(33.5f,34.5f),new Vector2(32.5f,26.5f),new Vector2(33.5f,27.5f),new Vector2(31.5f,28.5f),new Vector2(30.5f,31.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{6},new[]{6}}),
-            ["DownChop"]=new Clip("DownChop",new[]{new[]{new Vector2(28.3f,36.3f),new Vector2(31.3f,32.3f),new Vector2(31.1f,26.0f),new Vector2(28.8f,20.7f),new Vector2(27.4f,21.9f),new Vector2(28.8f,21.4f),new Vector2(32.5f,27.5f),new Vector2(30.5f,36.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(31.5f,31.5f),new Vector2(30.5f,28.5f),new Vector2(28.5f,29.5f),new Vector2(28.0f,34.0f),new Vector2(28.5f,29.5f),new Vector2(29.5f,31.5f),new Vector2(30.5f,36.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{6},new[]{6}}),
-            ["Spin"]=new Clip("Spin",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(32.5f,35.5f),new Vector2(35.5f,30.5f),new Vector2(33.5f,31.5f),new Vector2(32.5f,32.5f),new Vector2(32.5f,34.5f),new Vector2(33.5f,33.5f),new Vector2(34.5f,29.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(32.5f,33.5f),new Vector2(35.5f,33.5f),new Vector2(36.5f,29.5f),new Vector2(36.5f,29.5f),new Vector2(36.5f,31.5f),new Vector2(33.5f,34.5f),new Vector2(29.5f,34.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{3},new[]{3}}),
-            ["CrossLunge"]=new Clip("CrossLunge",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(26.5f,35.5f),new Vector2(29.5f,30.5f),new Vector2(29.5f,31.5f),new Vector2(29.5f,31.5f),new Vector2(28.5f,31.5f),new Vector2(32.5f,33.5f),new Vector2(32.5f,33.5f),new Vector2(29.5f,36.5f),new Vector2(28.5f,36.5f),new Vector2(31.5f,34.5f),new Vector2(32.5f,34.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(31.5f,33.5f),new Vector2(32.5f,31.5f),new Vector2(33.5f,30.5f),new Vector2(32.5f,31.5f),new Vector2(28.5f,30.5f),new Vector2(27.5f,29.5f),new Vector2(27.5f,27.5f),new Vector2(28.5f,27.5f),new Vector2(28.5f,26.5f),new Vector2(28.5f,28.5f),new Vector2(30.5f,36.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{6,9},new[]{6,9}}),
-            ["QuickA"]=new Clip("QuickA",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(29.5f,36.5f),new Vector2(30.5f,35.5f),new Vector2(31.5f,34.5f),new Vector2(31.5f,34.5f),new Vector2(30.5f,30.5f),new Vector2(29.5f,35.5f),new Vector2(32.5f,34.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(30.5f,34.5f),new Vector2(29.5f,37.5f),new Vector2(27.5f,37.5f),new Vector2(26.5f,36.5f),new Vector2(26.5f,36.5f),new Vector2(28.5f,36.5f),new Vector2(30.5f,34.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{7},new[]{7}}),
-            ["QuickB"]=new Clip("QuickB",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(29.5f,36.5f),new Vector2(31.5f,36.5f),new Vector2(32.5f,32.5f),new Vector2(32.5f,31.5f),new Vector2(32.5f,31.5f),new Vector2(32.5f,34.5f),new Vector2(30.5f,36.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(30.5f,33.5f),new Vector2(29.5f,35.5f),new Vector2(30.5f,33.5f),new Vector2(30.5f,27.5f),new Vector2(31.5f,30.5f),new Vector2(30.5f,33.5f),new Vector2(29.5f,36.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{4},new[]{5}}),
-            ["DashThrust"]=new Clip("DashThrust",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(29.5f,35.5f),new Vector2(31.5f,35.5f),new Vector2(34.5f,32.5f),new Vector2(34.5f,32.5f),new Vector2(34.5f,32.5f),new Vector2(31.5f,34.5f),new Vector2(31.5f,36.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(31.5f,31.5f),new Vector2(30.5f,35.5f),new Vector2(25.5f,35.5f),new Vector2(28.5f,38.5f),new Vector2(30.5f,31.5f),new Vector2(30.5f,26.5f),new Vector2(29.5f,30.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{4},new[]{3}}),
-            ["Thrust"]=new Clip("Thrust",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(30.5f,36.5f),new Vector2(32.5f,35.5f),new Vector2(36.5f,32.5f),new Vector2(38.5f,33.5f),new Vector2(38.5f,33.5f),new Vector2(37.5f,32.5f),new Vector2(34.5f,35.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(32.5f,31.5f),new Vector2(31.5f,34.5f),new Vector2(28.5f,36.5f),new Vector2(26.5f,36.5f),new Vector2(26.5f,36.5f),new Vector2(28.5f,37.5f),new Vector2(33.5f,33.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{4},new[]{7}}),
-            ["WideSweep"]=new Clip("WideSweep",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(29.5f,35.5f),new Vector2(33.5f,33.5f),new Vector2(34.5f,30.5f),new Vector2(34.5f,31.5f),new Vector2(34.5f,30.5f),new Vector2(33.5f,31.5f),new Vector2(32.5f,35.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(30.5f,34.5f),new Vector2(33.5f,33.5f),new Vector2(33.5f,31.5f),new Vector2(32.5f,33.5f),new Vector2(33.5f,32.5f),new Vector2(32.5f,34.5f),new Vector2(30.5f,35.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{3},new[]{3}}),
-            ["HeavyA"]=new Clip("HeavyA",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(31.5f,35.5f),new Vector2(30.5f,36.5f),new Vector2(29.5f,27.5f),new Vector2(30.5f,28.5f),new Vector2(29.5f,27.5f),new Vector2(30.5f,29.5f),new Vector2(33.5f,36.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(30.5f,34.5f),new Vector2(28.5f,34.5f),new Vector2(25.5f,34.5f),new Vector2(25.5f,34.5f),new Vector2(26.5f,34.5f),new Vector2(27.5f,34.5f),new Vector2(28.5f,34.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{7},new[]{7}}),
-            ["HeavyB"]=new Clip("HeavyB",new[]{new[]{new Vector2(28.5f,36.5f),new Vector2(28.5f,37.5f),new Vector2(31.5f,35.5f),new Vector2(30.5f,29.5f),new Vector2(31.5f,30.5f),new Vector2(31.5f,30.5f),new Vector2(31.5f,34.5f),new Vector2(31.5f,36.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(31.5f,32.5f),new Vector2(31.5f,34.5f),new Vector2(29.5f,28.5f),new Vector2(27.5f,27.5f),new Vector2(28.5f,28.5f),new Vector2(28.5f,29.5f),new Vector2(29.5f,36.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{6},new[]{6}}),
-            ["LeapSlam"]=new Clip("LeapSlam",new[]{new[]{new Vector2(21.5f,35.5f),new Vector2(21.5f,38.5f),new Vector2(18.5f,38.5f),new Vector2(18.5f,28.5f),new Vector2(14.5f,24.5f),new Vector2(14.5f,24.5f),new Vector2(16.5f,25.5f),new Vector2(27.5f,37.5f),new Vector2(32.5f,42.5f),new Vector2(32.5f,42.5f),new Vector2(31.5f,38.5f),new Vector2(31.5f,33.5f),new Vector2(28.5f,36.5f)},new[]{new Vector2(30.5f,34.5f),new Vector2(31.5f,34.5f),new Vector2(31.5f,30.5f),new Vector2(31.5f,26.5f),new Vector2(29.0f,33.0f),new Vector2(28.5f,32.0f),new Vector2(30.5f,24.5f),new Vector2(32.5f,28.5f),new Vector2(32.5f,33.5f),new Vector2(30.5f,38.5f),new Vector2(29.5f,38.5f),new Vector2(30.5f,36.5f),new Vector2(30.5f,34.5f)}},new[]{new[]{8},new[]{9}})
+            ["UpCut"] = new Clip("UpCut", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(29.5f, 32.5f), new Vector2(30.5f, 33.5f), new Vector2(31.5f, 32.5f), new Vector2(33.5f, 35.5f), new Vector2(33.5f, 26.5f), new Vector2(34.5f, 28.5f), new Vector2(31.5f, 34.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(29.5f, 35.5f), new Vector2(28.5f, 36.5f), new Vector2(33.5f, 34.5f), new Vector2(32.5f, 26.5f), new Vector2(33.5f, 27.5f), new Vector2(31.5f, 28.5f), new Vector2(30.5f, 31.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 6 }, new[] { 6 } }),
+            ["DownChop"] = new Clip("DownChop", new[] { new[] { new Vector2(28.3f, 36.3f), new Vector2(31.3f, 32.3f), new Vector2(31.1f, 26.0f), new Vector2(28.8f, 20.7f), new Vector2(27.4f, 21.9f), new Vector2(28.8f, 21.4f), new Vector2(32.5f, 27.5f), new Vector2(30.5f, 36.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(31.5f, 31.5f), new Vector2(30.5f, 28.5f), new Vector2(28.5f, 29.5f), new Vector2(28.0f, 34.0f), new Vector2(28.5f, 29.5f), new Vector2(29.5f, 31.5f), new Vector2(30.5f, 36.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 6 }, new[] { 6 } }),
+            ["Spin"] = new Clip("Spin", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(32.5f, 35.5f), new Vector2(35.5f, 30.5f), new Vector2(33.5f, 31.5f), new Vector2(32.5f, 32.5f), new Vector2(32.5f, 34.5f), new Vector2(33.5f, 33.5f), new Vector2(34.5f, 29.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(32.5f, 33.5f), new Vector2(35.5f, 33.5f), new Vector2(36.5f, 29.5f), new Vector2(36.5f, 29.5f), new Vector2(36.5f, 31.5f), new Vector2(33.5f, 34.5f), new Vector2(29.5f, 34.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 3 }, new[] { 3 } }),
+            ["CrossLunge"] = new Clip("CrossLunge", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(26.5f, 35.5f), new Vector2(29.5f, 30.5f), new Vector2(29.5f, 31.5f), new Vector2(29.5f, 31.5f), new Vector2(28.5f, 31.5f), new Vector2(32.5f, 33.5f), new Vector2(32.5f, 33.5f), new Vector2(29.5f, 36.5f), new Vector2(28.5f, 36.5f), new Vector2(31.5f, 34.5f), new Vector2(32.5f, 34.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(31.5f, 33.5f), new Vector2(32.5f, 31.5f), new Vector2(33.5f, 30.5f), new Vector2(32.5f, 31.5f), new Vector2(28.5f, 30.5f), new Vector2(27.5f, 29.5f), new Vector2(27.5f, 27.5f), new Vector2(28.5f, 27.5f), new Vector2(28.5f, 26.5f), new Vector2(28.5f, 28.5f), new Vector2(30.5f, 36.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 6, 9 }, new[] { 6, 9 } }),
+            ["QuickA"] = new Clip("QuickA", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(29.5f, 36.5f), new Vector2(30.5f, 35.5f), new Vector2(31.5f, 34.5f), new Vector2(31.5f, 34.5f), new Vector2(30.5f, 30.5f), new Vector2(29.5f, 35.5f), new Vector2(32.5f, 34.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(30.5f, 34.5f), new Vector2(29.5f, 37.5f), new Vector2(27.5f, 37.5f), new Vector2(26.5f, 36.5f), new Vector2(26.5f, 36.5f), new Vector2(28.5f, 36.5f), new Vector2(30.5f, 34.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 7 }, new[] { 7 } }),
+            ["QuickB"] = new Clip("QuickB", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(29.5f, 36.5f), new Vector2(31.5f, 36.5f), new Vector2(32.5f, 32.5f), new Vector2(32.5f, 31.5f), new Vector2(32.5f, 31.5f), new Vector2(32.5f, 34.5f), new Vector2(30.5f, 36.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(30.5f, 33.5f), new Vector2(29.5f, 35.5f), new Vector2(30.5f, 33.5f), new Vector2(30.5f, 27.5f), new Vector2(31.5f, 30.5f), new Vector2(30.5f, 33.5f), new Vector2(29.5f, 36.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 4 }, new[] { 5 } }),
+            ["DashThrust"] = new Clip("DashThrust", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(29.5f, 35.5f), new Vector2(31.5f, 35.5f), new Vector2(34.5f, 32.5f), new Vector2(34.5f, 32.5f), new Vector2(34.5f, 32.5f), new Vector2(31.5f, 34.5f), new Vector2(31.5f, 36.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(31.5f, 31.5f), new Vector2(30.5f, 35.5f), new Vector2(25.5f, 35.5f), new Vector2(28.5f, 38.5f), new Vector2(30.5f, 31.5f), new Vector2(30.5f, 26.5f), new Vector2(29.5f, 30.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 4 }, new[] { 3 } }),
+            ["Thrust"] = new Clip("Thrust", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(30.5f, 36.5f), new Vector2(32.5f, 35.5f), new Vector2(36.5f, 32.5f), new Vector2(38.5f, 33.5f), new Vector2(38.5f, 33.5f), new Vector2(37.5f, 32.5f), new Vector2(34.5f, 35.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(32.5f, 31.5f), new Vector2(31.5f, 34.5f), new Vector2(28.5f, 36.5f), new Vector2(26.5f, 36.5f), new Vector2(26.5f, 36.5f), new Vector2(28.5f, 37.5f), new Vector2(33.5f, 33.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 4 }, new[] { 7 } }),
+            ["WideSweep"] = new Clip("WideSweep", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(29.5f, 35.5f), new Vector2(33.5f, 33.5f), new Vector2(34.5f, 30.5f), new Vector2(34.5f, 31.5f), new Vector2(34.5f, 30.5f), new Vector2(33.5f, 31.5f), new Vector2(32.5f, 35.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(30.5f, 34.5f), new Vector2(33.5f, 33.5f), new Vector2(33.5f, 31.5f), new Vector2(32.5f, 33.5f), new Vector2(33.5f, 32.5f), new Vector2(32.5f, 34.5f), new Vector2(30.5f, 35.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 3 }, new[] { 3 } }),
+            ["HeavyA"] = new Clip("HeavyA", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(31.5f, 35.5f), new Vector2(30.5f, 36.5f), new Vector2(29.5f, 27.5f), new Vector2(30.5f, 28.5f), new Vector2(29.5f, 27.5f), new Vector2(30.5f, 29.5f), new Vector2(33.5f, 36.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(30.5f, 34.5f), new Vector2(28.5f, 34.5f), new Vector2(25.5f, 34.5f), new Vector2(25.5f, 34.5f), new Vector2(26.5f, 34.5f), new Vector2(27.5f, 34.5f), new Vector2(28.5f, 34.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 7 }, new[] { 7 } }),
+            ["HeavyB"] = new Clip("HeavyB", new[] { new[] { new Vector2(28.5f, 36.5f), new Vector2(28.5f, 37.5f), new Vector2(31.5f, 35.5f), new Vector2(30.5f, 29.5f), new Vector2(31.5f, 30.5f), new Vector2(31.5f, 30.5f), new Vector2(31.5f, 34.5f), new Vector2(31.5f, 36.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(31.5f, 32.5f), new Vector2(31.5f, 34.5f), new Vector2(29.5f, 28.5f), new Vector2(27.5f, 27.5f), new Vector2(28.5f, 28.5f), new Vector2(28.5f, 29.5f), new Vector2(29.5f, 36.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 6 }, new[] { 6 } }),
+            ["LeapSlam"] = new Clip("LeapSlam", new[] { new[] { new Vector2(21.5f, 35.5f), new Vector2(21.5f, 38.5f), new Vector2(18.5f, 38.5f), new Vector2(18.5f, 28.5f), new Vector2(14.5f, 24.5f), new Vector2(14.5f, 24.5f), new Vector2(16.5f, 25.5f), new Vector2(27.5f, 37.5f), new Vector2(32.5f, 42.5f), new Vector2(32.5f, 42.5f), new Vector2(31.5f, 38.5f), new Vector2(31.5f, 33.5f), new Vector2(28.5f, 36.5f) }, new[] { new Vector2(30.5f, 34.5f), new Vector2(31.5f, 34.5f), new Vector2(31.5f, 30.5f), new Vector2(31.5f, 26.5f), new Vector2(29.0f, 33.0f), new Vector2(28.5f, 32.0f), new Vector2(30.5f, 24.5f), new Vector2(32.5f, 28.5f), new Vector2(32.5f, 33.5f), new Vector2(30.5f, 38.5f), new Vector2(29.5f, 38.5f), new Vector2(30.5f, 36.5f), new Vector2(30.5f, 34.5f) } }, new[] { new[] { 8 }, new[] { 9 } })
         };
 
         // When a swing's damage lands, the same clocks ResolvePendingMelee uses.
@@ -93,7 +110,11 @@ namespace RuinRunner
         static int ViewIndex(int facing) => facing <= 1 ? 0 : facing <= 3 ? 1 : facing <= 5 ? 2 : 3;
         static bool FacesLeft(int facing) => facing >= 4;
         // Index into a clip's drawn views: 0 faces lower right, 1 faces upper right. Left views share them, mirrored.
-        static int DrawnView(int facing) { var view = ViewIndex(facing); return view == 1 || view == 2 ? 0 : 1; }
+        static int DrawnView(int facing)
+        {
+            var view = ViewIndex(facing);
+            return view == 1 || view == 2 ? 0 : 1;
+        }
 
         public static bool Has(WeaponFamily family, int step) => step >= 0 && Combos.TryGetValue(family, out var combo) && step < combo.Length;
         public static int StepCount(WeaponFamily family) => Combos.TryGetValue(family, out var combo) ? combo.Length : 0;
@@ -109,18 +130,22 @@ namespace RuinRunner
         static float Curve(float[] keys, float progress)
         {
             for (var i = 2; i < keys.Length; i += 2)
-                if (progress <= keys[i]) return Mathf.Lerp(keys[i - 1], keys[i + 1], Mathf.InverseLerp(keys[i - 2], keys[i], progress));
+                if (progress <= keys[i])
+                    return Mathf.Lerp(keys[i - 1], keys[i + 1], Mathf.InverseLerp(keys[i - 2], keys[i], progress));
             return keys[keys.Length - 1];
         }
 
         static float FrameAt(Step step, int view, float progress)
         {
             var contacts = step.Clip.Contacts[view];
-            var fromProgress = 0f; var fromFrame = 0f;
+            var fromProgress = 0f;
+            var fromFrame = 0f;
             for (var i = 0; i < contacts.Length; i++)
             {
-                if (progress < step.ContactProgress[i]) return Mathf.Lerp(fromFrame, contacts[i], Mathf.InverseLerp(fromProgress, step.ContactProgress[i], progress));
-                fromProgress = step.ContactProgress[i]; fromFrame = contacts[i];
+                if (progress < step.ContactProgress[i])
+                    return Mathf.Lerp(fromFrame, contacts[i], Mathf.InverseLerp(fromProgress, step.ContactProgress[i], progress));
+                fromProgress = step.ContactProgress[i];
+                fromFrame = contacts[i];
             }
             return Mathf.Lerp(fromFrame, step.Clip.Hands[view].Length - 1, Mathf.InverseLerp(fromProgress, 1f, progress));
         }
@@ -157,9 +182,11 @@ namespace RuinRunner
 
         public static void Preload(WeaponFamily family)
         {
-            if (!Combos.TryGetValue(family, out var combo)) return;
+            if (!Combos.TryGetValue(family, out var combo))
+                return;
             foreach (var step in combo)
-                foreach (var view in Views) NativeCombatEffect.Frames("HeroCombo" + step.Clip.Name + view);
+                foreach (var view in Views)
+                    NativeCombatEffect.Frames("HeroCombo" + step.Clip.Name + view);
         }
     }
 }

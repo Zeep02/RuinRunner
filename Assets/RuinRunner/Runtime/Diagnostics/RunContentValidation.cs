@@ -18,11 +18,13 @@ namespace RuinRunner
                 {
                     var a = RunContent.RollChest(seed, 2, 2, false);
                     // Content must not change with render rate or unrelated effects.
-                    for (var noise = 0; noise < 11; noise++) _ = UnityEngine.Random.value;
+                    for (var noise = 0; noise < 11; noise++)
+                        _ = UnityEngine.Random.value;
                     var b = RunContent.RollChest(seed, 2, 2, false);
                     Require(a.Weapon == b.Weapon && a.BonusWeapon == b.BonusWeapon && a.Accessory == b.Accessory, "reward reproducibility " + seed);
                     weapons.Add(a.Weapon.Id);
-                    if (a.BonusWeapon != null) weapons.Add(a.BonusWeapon.Id);
+                    if (a.BonusWeapon != null)
+                        weapons.Add(a.BonusWeapon.Id);
                     var first = RunContent.Choices(seed, 0, 2);
                     var second = RunContent.Choices(seed, 0, 2);
                     var unique = new HashSet<string>();
@@ -34,7 +36,8 @@ namespace RuinRunner
                     }
                     var encounter = RunContent.Encounters(seed, 2, false);
                     var signature = "";
-                    foreach (var enemy in encounter) signature += enemy.type + ":" + enemy.wave + ",";
+                    foreach (var enemy in encounter)
+                        signature += enemy.type + ":" + enemy.wave + ",";
                     signatures.Add(signature);
                     Require(RunContent.RollChest(seed, 3, 2, true).Accessory != null, "boss accessory guarantee");
                 }
@@ -66,11 +69,15 @@ namespace RuinRunner
                 Debug.LogError("[Run Content] FAIL " + error);
                 return false;
             }
-            finally { UnityEngine.Random.state = before; }
+            finally
+            {
+                UnityEngine.Random.state = before;
+            }
         }
         private static void Require(bool condition, string name)
         {
-            if (!condition) throw new InvalidOperationException(name);
+            if (!condition)
+                throw new InvalidOperationException(name);
         }
     }
 }

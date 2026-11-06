@@ -35,7 +35,8 @@ namespace RuinRunner
         // Feet driving into the floor on the big moves of a combo, whether or not the blow lands.
         void PlayComboStepDust()
         {
-            if (!MeleeComboFrames.RaisesDust(EquippedWeapon.Family, activeComboAnimationStep)) return;
+            if (!MeleeComboFrames.RaisesDust(EquippedWeapon.Family, activeComboAnimationStep))
+                return;
             SigFx.Play("GroundDust", (Vector2)transform.position + Vector2.down * .28f, 0, -1, true, false, ComboDustScale);
         }
     }

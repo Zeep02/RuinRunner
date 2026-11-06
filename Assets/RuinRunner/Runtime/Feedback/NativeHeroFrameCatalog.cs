@@ -34,7 +34,8 @@ namespace RuinRunner
                 if (loaded[version] == null)
                 {
                     var request = Resources.LoadAsync<NativeHeroFrameCatalog>(CatalogRoot + CurrentVersions[version]);
-                    while (!request.isDone) await Awaitable.NextFrameAsync(cancellation);
+                    while (!request.isDone)
+                        await Awaitable.NextFrameAsync(cancellation);
                     loaded[version] = request.asset as NativeHeroFrameCatalog;
                 }
                 var catalog = loaded[version];
@@ -48,11 +49,14 @@ namespace RuinRunner
                 {
                     cancellation.ThrowIfCancellationRequested();
                     var sprite = catalog.frames[frame];
-                    if (sprite == null) throw new InvalidOperationException("Missing native hero frame: " + catalog.logicalRoot + "/" + frame);
+                    if (sprite == null)
+                        throw new InvalidOperationException("Missing native hero frame: " + catalog.logicalRoot + "/" + frame);
                     var texture = sprite.texture;
-                    if (texture != null && textures.Add(texture)) _ = texture.width;
+                    if (texture != null && textures.Add(texture))
+                        _ = texture.width;
                     IndividualArt.CachePreparedSprite(catalog.logicalRoot + "/" + frame.ToString("D5"), sprite);
-                    if (batch.Elapsed.TotalMilliseconds < 4) continue;
+                    if (batch.Elapsed.TotalMilliseconds < 4)
+                        continue;
                     longestBatch = Math.Max(longestBatch, batch.Elapsed.TotalMilliseconds);
                     await Awaitable.NextFrameAsync(cancellation);
                     batch.Restart();
@@ -66,13 +70,18 @@ namespace RuinRunner
         }
         public static int ExpectedFrames(int version)
         {
-            switch(CurrentVersions[version])
+            switch (CurrentVersions[version])
             {
-                case "ArmedGripV3":return SscaryArmedFrames.UniqueSpriteCount;
-                case "WeaponStandingV4":return WeaponStandingFrames.UniqueSpriteCount;
-                case "WeaponReloadV3":return WeaponReloadFrames.UniqueSpriteCount;
-                case "WeaponHurtV1":return SscaryHurtFrames.UniqueSpriteCount;
-                default:throw new InvalidOperationException("Unknown native hero catalog: "+CurrentVersions[version]);
+                case "ArmedGripV3":
+                    return SscaryArmedFrames.UniqueSpriteCount;
+                case "WeaponStandingV4":
+                    return WeaponStandingFrames.UniqueSpriteCount;
+                case "WeaponReloadV3":
+                    return WeaponReloadFrames.UniqueSpriteCount;
+                case "WeaponHurtV1":
+                    return SscaryHurtFrames.UniqueSpriteCount;
+                default:
+                    throw new InvalidOperationException("Unknown native hero catalog: " + CurrentVersions[version]);
             }
         }
         public static NativeHeroFrameCatalog Load(int version)
@@ -89,9 +98,11 @@ namespace RuinRunner
                     var textures = new System.Collections.Generic.HashSet<Texture2D>();
                     foreach (var sprite in catalog.frames)
                     {
-                        if (sprite == null) continue;
+                        if (sprite == null)
+                            continue;
                         var texture = sprite.texture;
-                        if (texture != null && textures.Add(texture)) _ = texture.width;
+                        if (texture != null && textures.Add(texture))
+                            _ = texture.width;
                     }
                 }
             }
@@ -104,7 +115,8 @@ namespace RuinRunner
             for (int version = 0; version < CurrentVersions.Length; version++)
             {
                 string prefix = LogicalRoot + CurrentVersions[version] + "/";
-                if (!id.StartsWith(prefix, StringComparison.Ordinal)) continue;
+                if (!id.StartsWith(prefix, StringComparison.Ordinal))
+                    continue;
                 var catalog = Load(version);
 #if UNITY_EDITOR
                 // Authoring tools may run before a new catalog is generated.
@@ -145,14 +157,14 @@ namespace RuinRunner
             var bytes = new byte[rect.width * rect.height * 4];
             int offset = 0;
             for (int y = 0; y < rect.height; y++)
-            for (int x = 0; x < rect.width; x++)
-            {
-                Color32 color = pixels[(rect.y + y) * stride + rect.x + x];
-                bytes[offset++] = color.a == 0 ? (byte)0 : color.r;
-                bytes[offset++] = color.a == 0 ? (byte)0 : color.g;
-                bytes[offset++] = color.a == 0 ? (byte)0 : color.b;
-                bytes[offset++] = color.a;
-            }
+                for (int x = 0; x < rect.width; x++)
+                {
+                    Color32 color = pixels[(rect.y + y) * stride + rect.x + x];
+                    bytes[offset++] = color.a == 0 ? (byte)0 : color.r;
+                    bytes[offset++] = color.a == 0 ? (byte)0 : color.g;
+                    bytes[offset++] = color.a == 0 ? (byte)0 : color.b;
+                    bytes[offset++] = color.a;
+                }
             using (var hash = SHA256.Create())
                 return BitConverter.ToString(hash.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
         }

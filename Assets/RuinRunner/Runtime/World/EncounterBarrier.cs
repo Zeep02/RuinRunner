@@ -19,7 +19,9 @@ namespace RuinRunner
 
         public static EncounterBarrier Create(Transform parent, Vector2 position, bool verticalTravel, bool closed, float width = StageTerrainLayout.CorridorWidth, string theme = "Outer")
         {
-            var root = new GameObject("EncounterSeal"); root.transform.SetParent(parent, false); root.transform.position = position;
+            var root = new GameObject("EncounterSeal");
+            root.transform.SetParent(parent, false);
+            root.transform.position = position;
             root.layer = GameLayers.Ground;
             var barrier = root.AddComponent<EncounterBarrier>();
             barrier.closed = closed;
@@ -48,7 +50,8 @@ namespace RuinRunner
                 posts[i] = NewSprite("Seal post", offset, 900 - Mathf.RoundToInt(world.y * 100f));
                 // From both walls toward the middle, so the gap closes in front of the player.
                 delays[i] = Mathf.Min(i, count - 1 - i) * StaggerSeconds;
-                if (i == count - 1) break;
+                if (i == count - 1)
+                    break;
                 links[i] = NewSprite("Seal rune link", offset + Vector2.up * RuneHeight, 900 - Mathf.RoundToInt(world.y * 100f) + 1);
                 links[i].sharedMaterial = PixelFxMaterial.Shared;
                 links[i].transform.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(tangent.y, tangent.x) * Mathf.Rad2Deg);
@@ -59,30 +62,42 @@ namespace RuinRunner
 
         private SpriteRenderer NewSprite(string name, Vector2 point, int order)
         {
-            var obj = new GameObject(name); obj.transform.SetParent(transform, false); obj.transform.localPosition = point;
-            var view = obj.AddComponent<SpriteRenderer>(); view.sortingOrder = order;
+            var obj = new GameObject(name);
+            obj.transform.SetParent(transform, false);
+            obj.transform.localPosition = point;
+            var view = obj.AddComponent<SpriteRenderer>();
+            view.sortingOrder = order;
             return view;
         }
 
         public void SetClosed(bool value)
         {
-            if (closed == value) return;
+            if (closed == value)
+                return;
             closed = value;
             blocker.enabled = value;
             clock = 0f;
             // Closing and opening are both events: the stone has to move.
-            foreach (var post in posts) BossNativeEffect.CreateOnFloor("ERushDust", post.transform.position, .34f);
+            foreach (var post in posts)
+                BossNativeEffect.CreateOnFloor("ERushDust", post.transform.position, .34f);
             var view = FindAnyObjectByType<CameraFollow>();
-            if (view != null) view.Shake(value ? .22f : .12f, value ? .2f : .1f);
-            if (!value) { CombatAudio.Native("block", AudioChannel.Monster, .16f, .7f); return; }
+            if (view != null)
+                view.Shake(value ? .22f : .12f, value ? .2f : .1f);
+            if (!value)
+            {
+                CombatAudio.Native("block", AudioChannel.Monster, .16f, .7f);
+                return;
+            }
             CombatAudio.Native("heavy-impact", AudioChannel.Monster, .3f, .8f);
         }
 
         private void Update()
         {
-            if (!closed && clock >= SettledClock) return;
+            if (!closed && clock >= SettledClock)
+                return;
             clock += Time.deltaTime;
-            if (!closed && clock > RiseSeconds + delays[delays.Length / 2]) clock = SettledClock;
+            if (!closed && clock > RiseSeconds + delays[delays.Length / 2])
+                clock = SettledClock;
             Show();
         }
 
@@ -95,11 +110,13 @@ namespace RuinRunner
                 var height = closed ? raised : 1f - raised;
                 posts[i].enabled = height > 0f;
                 posts[i].sprite = postFrames[Mathf.Clamp(Mathf.FloorToInt(height * RiseFrames), 0, RiseFrames - 1)];
-                if (i == posts.Length - 1) continue;
+                if (i == posts.Length - 1)
+                    continue;
                 var nextRaised = Mathf.Clamp01((clock - delays[i + 1]) / RiseSeconds);
                 var linked = closed && raised >= 1f && nextRaised >= 1f;
                 links[i].enabled = linked;
-                if (linked) links[i].sprite = linkFrames[(runeFrame + i) % linkFrames.Length];
+                if (linked)
+                    links[i].sprite = linkFrames[(runeFrame + i) % linkFrames.Length];
             }
         }
     }

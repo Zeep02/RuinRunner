@@ -18,7 +18,8 @@ namespace RuinRunner
         public static ProximityGate Attach(GameObject target, SpriteRenderer view, float reach)
         {
             var gate = target.AddComponent<ProximityGate>();
-            gate.view = view; gate.reach = reach;
+            gate.view = view;
+            gate.reach = reach;
             gate.frames = IndividualArt.Frames(ArtRoot, FrameCount);
             view.sprite = gate.frames[0];
             return gate;
@@ -28,7 +29,8 @@ namespace RuinRunner
         {
             var opening = false;
             foreach (var player in PlayerController.ActiveCombatants)
-                if (player != null && !player.IsDead && Vector2.Distance(player.transform.position, transform.position) <= reach) opening = true;
+                if (player != null && !player.IsDead && Vector2.Distance(player.transform.position, transform.position) <= reach)
+                    opening = true;
             if (opening != wasOpening)
             {
                 CombatAudio.Native("block", AudioChannel.Ambience, .2f, opening ? .62f : .5f);

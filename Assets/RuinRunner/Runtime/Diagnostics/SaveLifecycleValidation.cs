@@ -40,10 +40,12 @@ namespace RuinRunner
         }
         private void Update()
         {
-            if (sequence == null) return;
+            if (sequence == null)
+                return;
             try
             {
-                if (sequence.MoveNext()) return;
+                if (sequence.MoveNext())
+                    return;
                 sequence = null;
                 Debug.Log("[Save Lifecycle] PASS phase=" + (relaunch ? "relaunch" : "post-victory") + " checks=" + checks + " profile=" + game.SaveSlots.SaveDirectory);
                 Application.Quit(0);
@@ -70,36 +72,43 @@ namespace RuinRunner
                     summary.TotalKills == proof.kills && summary.LegacyShards == proof.shards &&
                     summary.CampaignVictories == proof.campaignVictories && summary.BestCampaignStage == proof.bestCampaignStage, "slot summary restored from disk");
                 game.StartSlot(1);
-                for (var i = 0; i < 12; i++) yield return null;
+                for (var i = 0; i < 12; i++)
+                    yield return null;
                 VerifyReload(proof);
                 var deadline = Time.unscaledTime + 5f;
-                while (RuntimeSceneObjects.FindAll<EnemySpawnTelegraph>().Length == 0 && Time.unscaledTime < deadline) yield return null;
+                while (RuntimeSceneObjects.FindAll<EnemySpawnTelegraph>().Length == 0 && Time.unscaledTime < deadline)
+                    yield return null;
                 Require(RuntimeSceneObjects.FindAll<EnemySpawnTelegraph>().Length > 0, "exercise menu return during active wave telegraph");
                 game.ReturnToMainMenu();
-                for (var i = 0; i < 3; i++) yield return null;
+                for (var i = 0; i < 3; i++)
+                    yield return null;
                 Require(!game.IsRunActive && game.Player == null && game.SaveSlots.ActiveSlot == 0, "menu return clears active run and slot");
                 Require(RuntimeSceneObjects.FindAll<EnemySpawnTelegraph>().Length == 0, "interrupted wave leaves no spawn indicators");
                 game.StartSlot(1);
-                for (var i = 0; i < 12; i++) yield return null;
+                for (var i = 0; i < 12; i++)
+                    yield return null;
                 VerifyReload(proof);
                 game.ReturnToMainMenu();
-                for (var i = 0; i < 3; i++) yield return null;
+                for (var i = 0; i < 3; i++)
+                    yield return null;
                 Require(RuntimeSceneObjects.FindAll<PlayerController>().Length == 0 && RuntimeSceneObjects.FindAll<EnemyController>().Length == 0,
                     "second menu return leaves no actors");
                 yield break;
             }
 
             // Allow the actual ending and real-time recorder to finish before the injected retry fixture.
-            var endingUntil=Time.unscaledTime+2f;
-            while(Time.unscaledTime<endingUntil)yield return null;
-            Require(game.IsGameOver && game.IsVictory && game.StagesCleared==CampaignStage.Count, "normal-rule full campaign victory reached before lifecycle fixture");
+            var endingUntil = Time.unscaledTime + 2f;
+            while (Time.unscaledTime < endingUntil)
+                yield return null;
+            Require(game.IsGameOver && game.IsVictory && game.StagesCleared == CampaignStage.Count, "normal-rule full campaign victory reached before lifecycle fixture");
             var data = game.SaveSlots.ActiveData;
             Require(game.SaveSlots.ActiveSlot == 1 && data.totalRuns == 1 && data.victories == 1 && data.campaignVictories == 1 && data.bestCampaignStage == 3 && data.totalKills > 0,
                 "new slot recorded one real automated victory");
             var beforeResult = JsonUtility.FromJson<SaveSlotData>(File.ReadAllText(Path.Combine(game.SaveSlots.SaveDirectory, "save1.json.bak")));
             Require(beforeResult.totalRuns == 0 && beforeResult.legacyShards == new SaveSlotData().legacyShards,
                 "victory reward and run counters persisted as one atomic snapshot");
-            foreach (var upgrade in data.upgrades) Require(upgrade.rank == 0, "first victory used no permanent upgrades");
+            foreach (var upgrade in data.upgrades)
+                Require(upgrade.rank == 0, "first victory used no permanent upgrades");
             var runs = data.totalRuns;
             var victories = data.victories;
             var shards = data.legacyShards;
@@ -108,9 +117,10 @@ namespace RuinRunner
             game.ShowStageResult();
             Require(data.totalRuns == runs && data.victories == victories && data.legacyShards == shards, "result cannot award twice");
             game.RestartRun();
-            for (var i = 0; i < 12; i++) yield return null;
+            for (var i = 0; i < 12; i++)
+                yield return null;
             Require(game.IsRunActive && !game.IsGameOver && game.CurrentRoom == 0, "retry starts first room");
-            Require(RuntimeSceneObjects.FindAll<PlayerController>().Length == 1 && RuntimeSceneObjects.FindAll<PrototypeAudioController>().Length == 1,
+            Require(RuntimeSceneObjects.FindAll<PlayerController>().Length == 1 && RuntimeSceneObjects.FindAll<GameAudioController>().Length == 1,
                 "retry has one player and one audio controller");
             Require(data.totalRuns == runs && data.victories == victories, "starting retry does not settle another run");
 
@@ -127,8 +137,12 @@ namespace RuinRunner
             Require(data.totalRuns == runs + 1 && data.legacyShards == lossShards && data.totalKills == kills, "duplicate defeat event cannot duplicate reward/statistics");
             var saved = new Proof
             {
-                runs = data.totalRuns, victories = data.victories, kills = data.totalKills, shards = data.legacyShards,
-                campaignVictories=data.campaignVictories, bestCampaignStage=data.bestCampaignStage,
+                runs = data.totalRuns,
+                victories = data.victories,
+                kills = data.totalKills,
+                shards = data.legacyShards,
+                campaignVictories = data.campaignVictories,
+                bestCampaignStage = data.bestCampaignStage,
                 retryMaxHealth = game.Player.MaxHealth,
                 firstProcess = System.Diagnostics.Process.GetCurrentProcess().Id
             };
@@ -139,7 +153,8 @@ namespace RuinRunner
             Require(!File.Exists(proofPath), "do not overwrite an earlier lifecycle proof");
             File.WriteAllText(proofPath, JsonUtility.ToJson(saved, true));
             game.ReturnToMainMenu();
-            for (var i = 0; i < 3; i++) yield return null;
+            for (var i = 0; i < 3; i++)
+                yield return null;
             Require(!game.IsRunActive && game.SaveSlots.ActiveSlot == 0, "first process leaves the main menu cleanly");
         }
 
@@ -147,15 +162,16 @@ namespace RuinRunner
         {
             Require(game.SaveSlots.ActiveData.totalRuns == proof.runs && game.SaveSlots.ActiveData.totalKills == proof.kills &&
                 game.MetaProgression.LegacyShards == proof.shards &&
-                game.SaveSlots.ActiveData.campaignVictories==proof.campaignVictories && game.SaveSlots.ActiveData.bestCampaignStage==proof.bestCampaignStage,
+                game.SaveSlots.ActiveData.campaignVictories == proof.campaignVictories && game.SaveSlots.ActiveData.bestCampaignStage == proof.bestCampaignStage,
                 "loaded run preserves progression and counters");
             Require(Mathf.Approximately(game.Player.MaxHealth, proof.retryMaxHealth), "relaunch applies persistent bonus exactly once");
-            Require(RuntimeSceneObjects.FindAll<PlayerController>().Length == 1 && RuntimeSceneObjects.FindAll<PrototypeAudioController>().Length == 1,
+            Require(RuntimeSceneObjects.FindAll<PlayerController>().Length == 1 && RuntimeSceneObjects.FindAll<GameAudioController>().Length == 1,
                 "reopened slot has no duplicate player/audio");
         }
         private void Require(bool condition, string description)
         {
-            if (!condition) throw new InvalidOperationException(description);
+            if (!condition)
+                throw new InvalidOperationException(description);
             checks++;
             Debug.Log("[Save Lifecycle] OK " + description);
         }

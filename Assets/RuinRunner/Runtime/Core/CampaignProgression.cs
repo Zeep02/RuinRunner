@@ -20,21 +20,34 @@ namespace RuinRunner
         {
             if (!IsStageResultReady || !IsNearStageExit || IsPaused || PendingStageRewards == 0 ||
                 !Settings.GetKey(GameAction.Interact))
-            { leaveEquipmentHeld = 0; return; }
+            {
+                leaveEquipmentHeld = 0;
+                return;
+            }
             leaveEquipmentHeld += Time.unscaledDeltaTime;
-            if (leaveEquipmentHeld >= 1.2f) { LeaveUncollectedStageEquipment(); leaveEquipmentHeld = 0; }
+            if (leaveEquipmentHeld >= 1.2f)
+            {
+                LeaveUncollectedStageEquipment();
+                leaveEquipmentHeld = 0;
+            }
         }
         public int PendingStageRewards => FieldLootPickup.PendingDecisions;
         private Action<EnemyController> CaptureEnemyDeathCallback()
         {
             var epoch = stageEpoch;
-            return enemy => { if (epoch == stageEpoch) EnemyDied(enemy); };
+            return enemy =>
+            {
+                if (epoch == stageEpoch)
+                    EnemyDied(enemy);
+            };
         }
         // An explicit choice at the portal lets a full bag leave loot without a softlock.
         public void LeaveUncollectedStageEquipment()
         {
-            if (!IsStageResultReady || !IsNearStageExit || IsPaused) return;
-            foreach (var item in RuntimeSceneObjects.FindAll<FieldLootPickup>()) item.RequiresStageDecision = false;
+            if (!IsStageResultReady || !IsNearStageExit || IsPaused)
+                return;
+            foreach (var item in RuntimeSceneObjects.FindAll<FieldLootPickup>())
+                item.RequiresStageDecision = false;
         }
         private void CreateStageExit()
         {
@@ -53,7 +66,7 @@ namespace RuinRunner
         const float MinimumTitleSeconds = 1.3f;
         private void BeginNextStage()
         {
-            priorStageVisitedRegions+=DungeonMap==null?0:DungeonMap.VisitedRegionCount;
+            priorStageVisitedRegions += DungeonMap == null ? 0 : DungeonMap.VisitedRegionCount;
             // Invalidate callbacks first; teardown's deferred Destroy cannot re-enter this run.
             stageEpoch++;
             StopAllCoroutines();
@@ -79,16 +92,23 @@ namespace RuinRunner
                 DungeonMap.Root.SetActive(false);
                 Destroy(DungeonMap.Root);
             }
-            Boss = null; ActiveChest = null; EnemiesAlive = 0;
+            Boss = null;
+            ActiveChest = null;
+            EnemiesAlive = 0;
             RefreshTimeScale();
             var titleSince = Time.unscaledTime;
             yield return new WaitForSecondsRealtime(.3f);
             CurrentStageIndex++;
-            WeaponLootTable.SetDropStage(CurrentStageIndex);AccessoryLootTable.SetDropStage(CurrentStageIndex);
-            PrototypeAudioController.SetStage(CurrentStageIndex);
+            WeaponLootTable.SetDropStage(CurrentStageIndex);
+            AccessoryLootTable.SetDropStage(CurrentStageIndex);
+            GameAudioController.SetStage(CurrentStageIndex);
             var epoch = stageEpoch;
-            yield return DungeonMap.BuildStageProgressively(map => DungeonMap=map,
-                room => { if (epoch == stageEpoch) EnterRoom(room); }, RunSeed, CurrentStageIndex);
+            yield return DungeonMap.BuildStageProgressively(map => DungeonMap = map,
+                room =>
+                {
+                    if (epoch == stageEpoch)
+                        EnterRoom(room);
+                }, RunSeed, CurrentStageIndex);
             CurrentRoom = DungeonMap.EntranceRoomIndex;
             DungeonMap.ResetExits();
             // Same Player / Inventory / Stats / Progression instances. This is the only stage teleport.
@@ -101,7 +121,8 @@ namespace RuinRunner
             rewardSpawnedForRoom = false;
             Player.SetStageClearSafety(false);
             var titleLeft = MinimumTitleSeconds - (Time.unscaledTime - titleSince);
-            if (titleLeft > 0f) yield return new WaitForSecondsRealtime(titleLeft);
+            if (titleLeft > 0f)
+                yield return new WaitForSecondsRealtime(titleLeft);
             IsStageTransitioning = false;
             sessionPhase = GameSessionPhase.Expedition;
             StageIntroUntil = Time.unscaledTime + 5.5f;
@@ -114,12 +135,18 @@ namespace RuinRunner
         private void CreateExplorationRewards()
         {
             var rewards = DungeonMap.Definition?.explorationRewards;
-            if (rewards == null) return;
-            var map = DungeonMap; var epoch = stageEpoch;
+            if (rewards == null)
+                return;
+            var map = DungeonMap;
+            var epoch = stageEpoch;
             for (var index = 0; index < rewards.Length; index++)
             {
-                var reward = rewards[index]; var rewardIndex = index; var opened = false;
-                AccessoryDefinition accessory = null; RewardChest chest = null; var sampledLuck = float.NaN;
+                var reward = rewards[index];
+                var rewardIndex = index;
+                var opened = false;
+                AccessoryDefinition accessory = null;
+                RewardChest chest = null;
+                var sampledLuck = float.NaN;
                 AccessoryDefinition ResolveAccessory()
                 {
                     var luck = Player.Stats.Luck;
@@ -132,12 +159,13 @@ namespace RuinRunner
                 }
                 chest = RewardChest.Create(reward.position, () =>
                 {
-                    if (opened || epoch != stageEpoch) return;
+                    if (opened || epoch != stageEpoch)
+                        return;
                     opened = true;
                     map.Regions[reward.region].ChestOpened = true;
                     accessory = ResolveAccessory();
-                    SpawnEquipmentPickup(reward.position,null,accessory,0,false,"exploration:"+CurrentStageIndex+":"+rewardIndex);
-                    Player.Stats.Heal(Player.MaxHealth*.10f);
+                    SpawnEquipmentPickup(reward.position, null, accessory, 0, false, "exploration:" + CurrentStageIndex + ":" + rewardIndex);
+                    Player.Stats.Heal(Player.MaxHealth * .10f);
                     LootMessage = "보급함 발견";
                     LootMessageUntil = Time.unscaledTime + 4;
                     Debug.Log("[Campaign] Exploration reward stage=" + CurrentStageIndex + " id=" + rewardIndex);

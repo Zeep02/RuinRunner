@@ -12,7 +12,8 @@ namespace RuinRunner
         private static void Install()
         {
             var obj = new GameObject("Window presentation policy");
-            DontDestroyOnLoad(obj); obj.AddComponent<GameDisplayPolicy>();
+            DontDestroyOnLoad(obj);
+            obj.AddComponent<GameDisplayPolicy>();
             if (Screen.width >= 640 && Screen.height >= 360)
                 windowSize = new Vector2Int(Screen.width, Screen.height);
         }
@@ -20,7 +21,8 @@ namespace RuinRunner
         {
             if (fullscreen)
             {
-                if (!Screen.fullScreen) windowSize = new Vector2Int(Screen.width, Screen.height);
+                if (!Screen.fullScreen)
+                    windowSize = new Vector2Int(Screen.width, Screen.height);
                 Screen.fullScreenMode = FullScreenMode.FullScreenWindow;
             }
             else if (Screen.fullScreen)
@@ -28,7 +30,8 @@ namespace RuinRunner
         }
         private void Update()
         {
-            if (!Screen.fullScreen) windowSize = new Vector2Int(Screen.width, Screen.height);
+            if (!Screen.fullScreen)
+                windowSize = new Vector2Int(Screen.width, Screen.height);
         }
     }
 }

@@ -29,7 +29,8 @@ namespace RuinRunner
             var data = saveSlots.ActiveData;
             LegacyShards = data == null ? 3 : Mathf.Max(0, data.legacyShards);
             ranks.Clear();
-            if (data == null || data.upgrades == null) return;
+            if (data == null || data.upgrades == null)
+                return;
             foreach (var upgrade in data.upgrades)
                 ranks[upgrade.type] = Mathf.Max(0, upgrade.rank);
         }

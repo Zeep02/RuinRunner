@@ -1,0 +1,19 @@
+{
+  "name": "RuinRunner.Diagnostics",
+  "rootNamespace": "RuinRunner",
+  "references": [
+    "RuinRunner.Runtime",
+    "RuinRunner.Generation",
+    "RuinRunner.Backend",
+    "Unity.2D.PixelPerfect"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

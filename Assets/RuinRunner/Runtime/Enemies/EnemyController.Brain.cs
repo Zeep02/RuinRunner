@@ -12,8 +12,11 @@ namespace RuinRunner
     {
         sealed class AiMove
         {
-            public string Name; public AiTag Tag; public float Min, Max, Ideal, Weight;
-            public Func<Vector2, IEnumerator> Run; public Func<bool> Allowed;
+            public string Name;
+            public AiTag Tag;
+            public float Min, Max, Ideal, Weight;
+            public Func<Vector2, IEnumerator> Run;
+            public Func<bool> Allowed;
             public float LastUsed = -99f;
         }
 
@@ -29,16 +32,29 @@ namespace RuinRunner
 
         void EnsureBrain()
         {
-            if (director != null) return;
+            if (director != null)
+                return;
             director = EnemyAiDirector.For(player);
             director.Join(this);
             BuildMoves();
         }
-        void LeaveSquad() { if (director != null) { director.Leave(this); director = null; } }
+        void LeaveSquad()
+        {
+            if (director != null)
+            {
+                director.Leave(this);
+                director = null;
+            }
+        }
 
         void Add(string name, AiTag tag, float min, float max, float ideal, float weight, Func<Vector2, IEnumerator> run, Func<bool> allowed = null) =>
             moves.Add(new AiMove { Name = name, Tag = tag, Min = min, Max = max, Ideal = ideal, Weight = weight, Run = run, Allowed = allowed });
-        void Stance(SquadRole role, float range, float scale = 1f) { Role = role; DesiredRange = range; moveScale = scale; }
+        void Stance(SquadRole role, float range, float scale = 1f)
+        {
+            Role = role;
+            DesiredRange = range;
+            moveScale = scale;
+        }
 
         void BuildMoves()
         {
@@ -115,16 +131,22 @@ namespace RuinRunner
         private void UpdateBrain(Vector2 delta, Vector2 direction)
         {
             EnsureBrain();
-            if (acting) return;
+            if (acting)
+                return;
             director.ReleaseTokens(this);
             MoveToSlot(delta, direction);
-            if (specialTimer > 0f) return;
+            if (specialTimer > 0f)
+                return;
             ChooseMove(delta.magnitude, direction);
         }
 
         void MoveToSlot(Vector2 delta, Vector2 direction)
         {
-            if (Role == SquadRole.Anchor) { SetPlanar(Vector2.zero, true); return; }
+            if (Role == SquadRole.Anchor)
+            {
+                SetPlanar(Vector2.zero, true);
+                return;
+            }
             if (Role == SquadRole.Rusher || EnemyAiDirector.Baseline)
             {
                 var chase = Role == SquadRole.Rusher || delta.magnitude > DesiredRange ? direction : delta.magnitude < DesiredRange * .7f ? -direction : Vector2.zero;
@@ -136,10 +158,12 @@ namespace RuinRunner
             // Bodies keep apart, so a squad reads as a formation instead of a pile.
             foreach (var other in director.Members)
             {
-                if (other == this || other == null) continue;
+                if (other == this || other == null)
+                    continue;
                 var away = body.position - (Vector2)other.transform.position;
                 var distance = away.magnitude;
-                if (distance > .01f && distance < SameRoomSpacing) heading += away / distance * (1f - distance / SameRoomSpacing) * 1.4f;
+                if (distance > .01f && distance < SameRoomSpacing)
+                    heading += away / distance * (1f - distance / SameRoomSpacing) * 1.4f;
             }
             SetPlanar(heading.sqrMagnitude < .001f ? Vector2.zero : SteerAround(heading) * speed * moveScale);
         }
@@ -151,21 +175,45 @@ namespace RuinRunner
             var report = new StringBuilder();
             foreach (var move in moves)
             {
-                if (distance < move.Min || distance > move.Max) continue;
-                if (move.Allowed != null && !move.Allowed()) continue;
+                if (distance < move.Min || distance > move.Max)
+                    continue;
+                if (move.Allowed != null && !move.Allowed())
+                    continue;
                 var score = Score(move, distance);
                 report.Append(move.Name).Append('=').Append(score.ToString("0.0")).Append(' ');
-                if (score > bestScore) { second = best; secondScore = bestScore; best = move; bestScore = score; }
-                else if (score > secondScore) { second = move; secondScore = score; }
+                if (score > bestScore)
+                {
+                    second = best;
+                    secondScore = bestScore;
+                    best = move;
+                    bestScore = score;
+                }
+                else if (score > secondScore)
+                {
+                    second = move;
+                    secondScore = score;
+                }
             }
-            if (best == null) { specialTimer = .2f; return; }
+            if (best == null)
+            {
+                specialTimer = .2f;
+                return;
+            }
             // Close calls go either way, or the same situation would always get the same answer and be easy to read.
             var chosen = best;
-            if (second != null && !EnemyAiDirector.Baseline && bestScore - secondScore < .35f && UnityEngine.Random.value < .4f) { chosen = second; bestScore = secondScore; }
+            if (second != null && !EnemyAiDirector.Baseline && bestScore - secondScore < .35f && UnityEngine.Random.value < .4f)
+            {
+                chosen = second;
+                bestScore = secondScore;
+            }
             if (!director.TryTakeToken(this, chosen.Tag))
             {
                 LastDecision = "대기 · " + report;
-                if (Time.time >= nextChoiceLog) { nextChoiceLog = Time.time + 1f; director.Record("wait-token", this, chosen.Name, bestScore, report.ToString().Trim()); }
+                if (Time.time >= nextChoiceLog)
+                {
+                    nextChoiceLog = Time.time + 1f;
+                    director.Record("wait-token", this, chosen.Name, bestScore, report.ToString().Trim());
+                }
                 specialTimer = .25f;
                 return;
             }
@@ -181,37 +229,48 @@ namespace RuinRunner
             var span = Mathf.Max(1f, move.Max < 90f ? move.Max - move.Min : 8f);
             var score = move.Weight + 1f - Mathf.Abs(distance - move.Ideal) / span;
             score += Mathf.Clamp01((Time.time - move.LastUsed) / FreshAfterSeconds) * .8f;
-            if (move == lastMove) score -= RepeatPenalty;
-            if (EnemyAiDirector.Baseline) return score;
+            if (move == lastMove)
+                score -= RepeatPenalty;
+            if (EnemyAiDirector.Baseline)
+                return score;
             switch (move.Tag)
             {
                 case AiTag.Zone:
                     // A floor attack lands best where someone just finished dashing or is standing still.
-                    if (director.PlayerDashedRecently) score += .6f;
-                    if (director.PlayerStandingStill) score += .4f;
+                    if (director.PlayerDashedRecently)
+                        score += .6f;
+                    if (director.PlayerStandingStill)
+                        score += .4f;
                     break;
                 case AiTag.Aimed:
-                    if (director.PlayerStandingStill) score += .5f;
-                    if (director.PlayerDashedRecently) score -= .4f;
+                    if (director.PlayerStandingStill)
+                        score += .5f;
+                    if (director.PlayerDashedRecently)
+                        score -= .4f;
                     break;
                 case AiTag.Melee:
-                    if (director.HealthRatio < .4f) score += .5f;
+                    if (director.HealthRatio < .4f)
+                        score += .5f;
                     break;
                 case AiTag.Gapcloser:
-                    if (director.PlayerKeepsAway) score += .8f;
+                    if (director.PlayerKeepsAway)
+                        score += .8f;
                     break;
                 case AiTag.Retreat:
-                    if (director.Phase == PacingPhase.Relax) score += .4f;
+                    if (director.Phase == PacingPhase.Relax)
+                        score += .4f;
                     break;
             }
-            if (director.Phase == PacingPhase.Peak && move.Tag != AiTag.Retreat) score += .2f;
+            if (director.Phase == PacingPhase.Peak && move.Tag != AiTag.Retreat)
+                score += .2f;
             return score;
         }
 
         // Aimed shots go where the player is heading, with the same warning line as always: a dodge across it still works.
         Vector2 Aim(AiMove move, Vector2 direction)
         {
-            if (move.Tag != AiTag.Aimed || EnemyAiDirector.Baseline || director.Phase == PacingPhase.Relax) return direction;
+            if (move.Tag != AiTag.Aimed || EnemyAiDirector.Baseline || director.Phase == PacingPhase.Relax)
+                return direction;
             var ahead = PlayerPoint + director.PlayerVelocity * Lead - (Vector2)transform.position;
             return ahead.sqrMagnitude > .01f ? ahead.normalized : direction;
         }

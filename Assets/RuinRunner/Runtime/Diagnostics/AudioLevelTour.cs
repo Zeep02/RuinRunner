@@ -27,15 +27,15 @@ namespace RuinRunner
             var settings = new GameSettingsService(Path.Combine(folder, "settings.json"), false);
             capture = follow.gameObject.AddComponent<CampaignAudioCapture>();
             capture.Configure(AudioSettings.outputSampleRate);
-            PrototypeAudio.Configure(settings);
+            GameAudio.Configure(settings);
             for (var stage = 0; stage < 3; stage++)
             {
-                PrototypeAudioController.SetStage(stage);
+                GameAudioController.SetStage(stage);
                 yield return new WaitForSecondsRealtime(3f);
                 Mark("music" + stage);
                 yield return new WaitForSecondsRealtime(5f);
             }
-            PrototypeAudioController.SetStage(0);
+            GameAudioController.SetStage(0);
             yield return new WaitForSecondsRealtime(3f);
             foreach (var id in Weapons)
             {
@@ -50,7 +50,7 @@ namespace RuinRunner
                 yield return new WaitForSecondsRealtime(.55f);
             }
             Mark("ui");
-            PrototypeAudio.Play(PrototypeSound.UiClick, AudioChannel.Interface, .5f);
+            GameAudio.Play(GameSound.UiClick, AudioChannel.Interface, .5f);
             yield return new WaitForSecondsRealtime(.4f);
             // The worst case: a shotgun and a room of enemies hit on the same instant, again and again.
             Mark("pileup");

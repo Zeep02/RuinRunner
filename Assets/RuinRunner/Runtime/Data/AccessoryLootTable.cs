@@ -75,8 +75,13 @@ namespace RuinRunner
             count = Mathf.Clamp(count, 0, remaining.Count);
             while (choices.Count < count)
             {
-                if(!string.IsNullOrEmpty(PinnedCatalogVersion))
-                {var direct=WeightedAccessory(remaining,luck);choices.Add(direct);remaining.Remove(direct);continue;}
+                if (!string.IsNullOrEmpty(PinnedCatalogVersion))
+                {
+                    var direct = WeightedAccessory(remaining, luck);
+                    choices.Add(direct);
+                    remaining.Remove(direct);
+                    continue;
+                }
                 var rarity = WeaponLootTable.RollRarity(luck);
                 // Choose the closest available tier when the rolled tier is exhausted.
                 var candidates = new List<AccessoryDefinition>();
@@ -84,8 +89,13 @@ namespace RuinRunner
                 foreach (var item in remaining)
                 {
                     var distance = Mathf.Abs((int)item.Rarity - (int)rarity);
-                    if (distance < nearest) { candidates.Clear(); nearest = distance; }
-                    if (distance == nearest) candidates.Add(item);
+                    if (distance < nearest)
+                    {
+                        candidates.Clear();
+                        nearest = distance;
+                    }
+                    if (distance == nearest)
+                        candidates.Add(item);
                 }
                 var chosen = WeightedAccessory(candidates);
                 choices.Add(chosen);
@@ -95,20 +105,25 @@ namespace RuinRunner
             for (var i = choices.Count - 1; i > 0; i--)
             {
                 var j = Random.Range(0, i + 1);
-                var item = choices[i]; choices[i] = choices[j]; choices[j] = item;
+                var item = choices[i];
+                choices[i] = choices[j];
+                choices[j] = item;
             }
             return choices.ToArray();
         }
 
         public static AccessoryDefinition Roll(float luck)
         {
-            if(!string.IsNullOrEmpty(PinnedCatalogVersion))return WeightedAccessory(EligibleAccessories(),luck);
+            if (!string.IsNullOrEmpty(PinnedCatalogVersion))
+                return WeightedAccessory(EligibleAccessories(), luck);
             var rarity = WeaponLootTable.RollRarity(luck);
             var candidates = new List<AccessoryDefinition>();
             foreach (var accessory in Accessories)
-                if (accessory.Rarity == rarity) candidates.Add(accessory);
+                if (accessory.Rarity == rarity)
+                    candidates.Add(accessory);
 
-            if (candidates.Count == 0) return Accessories[0];
+            if (candidates.Count == 0)
+                return Accessories[0];
             return WeightedAccessory(candidates);
         }
     }

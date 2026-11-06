@@ -9,18 +9,35 @@ namespace RuinRunner
         public float ReloadRemaining => Item?.ReloadRemaining ?? 0;
         public bool IsReloading => Item != null && Item.IsReloading;
         public float ReloadProgress => !IsReloading ? 0 : 1 - ReloadRemaining / Weapon.ReloadSeconds;
-        public void Assign(WeaponDefinition weapon) { Item = weapon == null ? null : new OwnedWeapon(weapon); }
+        public void Assign(WeaponDefinition weapon)
+        {
+            Item = weapon == null ? null : new OwnedWeapon(weapon);
+        }
         public void Assign(WeaponDefinition weapon, int ammo, float reloadRemaining)
-        { Item = weapon == null ? null : new OwnedWeapon(weapon, ammo, reloadRemaining); }
-        internal void AssignItem(OwnedWeapon item) { Item = item; }
+        {
+            Item = weapon == null ? null : new OwnedWeapon(weapon, ammo, reloadRemaining);
+        }
+        internal void AssignItem(OwnedWeapon item)
+        {
+            Item = item;
+        }
         public void SwapWith(WeaponSlotState other)
         {
-            if (other == null || ReferenceEquals(this, other)) return;
-            var item = Item; Item = other.Item; other.Item = item;
+            if (other == null || ReferenceEquals(this, other))
+                return;
+            var item = Item;
+            Item = other.Item;
+            other.Item = item;
         }
         public bool TryConsumeAmmo() => Item == null || Item.TryConsumeAmmo();
         public bool StartReload() => Item != null && Item.StartReload();
-        public void Tick(float deltaTime) { Item?.Tick(deltaTime); }
-        public void RefreshBalance() { Item?.RefreshBalance(); }
+        public void Tick(float deltaTime)
+        {
+            Item?.Tick(deltaTime);
+        }
+        public void RefreshBalance()
+        {
+            Item?.RefreshBalance();
+        }
     }
 }

@@ -5,19 +5,24 @@ namespace RuinRunner
     {
         public readonly float Mana, Cooldown;
         public readonly string Description;
-        public WeaponActionSpec(float mana,float cooldown,string description)
-        { Mana=mana;Cooldown=cooldown;Description=description; }
+        public WeaponActionSpec(float mana, float cooldown, string description)
+        {
+            Mana = mana;
+            Cooldown = cooldown;
+            Description = description;
+        }
     }
 
     public static class WeaponActionCatalog
     {
         // Mana is the only price of a skill. This only stops one click from registering twice.
-        const float PressRecovery=.15f;
+        const float PressRecovery = .15f;
         public static WeaponActionSpec Get(WeaponDefinition weapon)
         {
-            if(weapon==null||!SignatureWeaponCatalog.TryGet(weapon.Id,out var signature))return default;
-            float mana=weapon.CatalogSpecialMana>=0?weapon.CatalogSpecialMana:signature.Mana;
-            return new WeaponActionSpec(mana,PressRecovery,signature.Description+"\n마나 "+mana.ToString("0.#"));
+            if (weapon == null || !SignatureWeaponCatalog.TryGet(weapon.Id, out var signature))
+                return default;
+            float mana = weapon.CatalogSpecialMana >= 0 ? weapon.CatalogSpecialMana : signature.Mana;
+            return new WeaponActionSpec(mana, PressRecovery, signature.Description + "\n마나 " + mana.ToString("0.#"));
         }
     }
 }

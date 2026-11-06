@@ -12,9 +12,11 @@ namespace RuinRunner
             var track = IndividualArt.Texture("ThrustOptions/VolumeTrack");
             GUI.DrawTexture(rect, track, ScaleMode.StretchToFill, true);
             var fill = FillRect(rect, ratio);
-            if (fill.width <= 0) return;
+            if (fill.width <= 0)
+                return;
             var previous = GUI.color;
-            GUI.color = new Color(.65f, .49f, .30f); GUI.DrawTexture(fill, Texture2D.whiteTexture);
+            GUI.color = new Color(.65f, .49f, .30f);
+            GUI.DrawTexture(fill, Texture2D.whiteTexture);
             GUI.color = new Color(.88f, .73f, .46f);
             GUI.DrawTexture(new Rect(fill.x, fill.y, fill.width, 2), Texture2D.whiteTexture);
             GUI.color = new Color(.36f, .25f, .20f);

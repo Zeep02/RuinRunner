@@ -53,53 +53,86 @@ namespace RuinRunner
             if (Current == null)
             {
                 Current = new GameObject("EnemyAiDirector").AddComponent<EnemyAiDirector>();
-                if (ShowOverlay) Current.gameObject.AddComponent<AiDebugOverlay>();
+                if (ShowOverlay)
+                    Current.gameObject.AddComponent<AiDebugOverlay>();
                 OpenLog();
             }
-            if (Current.Player != player) Current.Bind(player);
+            if (Current.Player != player)
+                Current.Bind(player);
             return Current;
         }
 
         void Bind(PlayerController player)
         {
-            Player = player; Members.Clear(); meleeHolders.Clear(); rangedHolders.Clear(); slots.Clear();
-            Stress = 0; Phase = PacingPhase.Build; lastHealth = -1; SecondsSinceHurt = 99; SecondsSinceDash = 99;
+            Player = player;
+            Members.Clear();
+            meleeHolders.Clear();
+            rangedHolders.Clear();
+            slots.Clear();
+            Stress = 0;
+            Phase = PacingPhase.Build;
+            lastHealth = -1;
+            SecondsSinceHurt = 99;
+            SecondsSinceDash = 99;
             lastPlayerPoint = player == null ? Vector2.zero : (Vector2)player.transform.position;
         }
 
-        public void Join(EnemyController enemy) { if (!Members.Contains(enemy)) Members.Add(enemy); }
+        public void Join(EnemyController enemy)
+        {
+            if (!Members.Contains(enemy))
+                Members.Add(enemy);
+        }
         public void Leave(EnemyController enemy)
         {
-            Members.Remove(enemy); slots.Remove(enemy); ReleaseTokens(enemy);
+            Members.Remove(enemy);
+            slots.Remove(enemy);
+            ReleaseTokens(enemy);
         }
 
         /// <summary>The squad's answer to "may I attack now". Moves that are not attacks never need one.</summary>
         public bool TryTakeToken(EnemyController enemy, AiTag tag)
         {
-            if (Baseline) return true;
+            if (Baseline)
+                return true;
             var holders = tag == AiTag.Melee || tag == AiTag.Gapcloser ? meleeHolders : tag == AiTag.Aimed || tag == AiTag.Zone ? rangedHolders : null;
-            if (holders == null) return true;
+            if (holders == null)
+                return true;
             var limit = holders == meleeHolders ? MeleeTokenLimit : RangedTokenLimit;
-            if (holders.Count >= limit) return false;
+            if (holders.Count >= limit)
+                return false;
             holders.Add(enemy);
             return true;
         }
-        public void ReleaseTokens(EnemyController enemy) { meleeHolders.Remove(enemy); rangedHolders.Remove(enemy); }
+        public void ReleaseTokens(EnemyController enemy)
+        {
+            meleeHolders.Remove(enemy);
+            rangedHolders.Remove(enemy);
+        }
 
         /// <summary>Where the squad wants this enemy to stand: spread around the player by role, never in one clump.</summary>
         public Vector2 SlotFor(EnemyController enemy)
         {
-            if (Baseline || Player == null) return Player == null ? (Vector2)enemy.transform.position : (Vector2)Player.transform.position;
+            if (Baseline || Player == null)
+                return Player == null ? (Vector2)enemy.transform.position : (Vector2)Player.transform.position;
             return slots.TryGetValue(enemy, out var slot) ? slot : (Vector2)Player.transform.position;
         }
 
         void Update()
         {
-            if (Player == null) { Members.Clear(); return; }
-            if (Time.deltaTime <= 0f) return;
+            if (Player == null)
+            {
+                Members.Clear();
+                return;
+            }
+            if (Time.deltaTime <= 0f)
+                return;
             ObservePlayer();
             UpdatePacing();
-            if (Time.time >= nextSlotsAt && !Baseline) { nextSlotsAt = Time.time + SlotRefreshSeconds; AssignSlots(); }
+            if (Time.time >= nextSlotsAt && !Baseline)
+            {
+                nextSlotsAt = Time.time + SlotRefreshSeconds;
+                AssignSlots();
+            }
         }
 
         void ObservePlayer()
@@ -108,7 +141,8 @@ namespace RuinRunner
             PlayerVelocity = Vector2.Lerp(PlayerVelocity, (point - lastPlayerPoint) / Time.deltaTime, 8f * Time.deltaTime);
             lastPlayerPoint = point;
             SecondsSinceDash = Player.IsDashing ? 0 : SecondsSinceDash + Time.deltaTime;
-            if (Player.IsDashing && !wasDashing) Record("player-dash", null, "", 0, "");
+            if (Player.IsDashing && !wasDashing)
+                Record("player-dash", null, "", 0, "");
             wasDashing = Player.IsDashing;
             HealthRatio = Player.MaxHealth <= 0 ? 1 : Player.Health / Player.MaxHealth;
             if (lastHealth >= 0 && Player.Health < lastHealth - .01f && Player.MaxHealth > 0)
@@ -116,31 +150,56 @@ namespace RuinRunner
                 Stress = Mathf.Clamp01(Stress + (lastHealth - Player.Health) / Player.MaxHealth * StressPerHealthLost);
                 SecondsSinceHurt = 0;
             }
-            else SecondsSinceHurt += Time.deltaTime;
+            else
+                SecondsSinceHurt += Time.deltaTime;
             lastHealth = Player.Health;
             var nearest = float.MaxValue;
             foreach (var member in Members)
-                if (member != null) nearest = Mathf.Min(nearest, Vector2.Distance(member.transform.position, point));
-            if (nearest < float.MaxValue) KeptDistance = Mathf.Lerp(KeptDistance, nearest, RangeSmoothing * Time.deltaTime);
+                if (member != null)
+                    nearest = Mathf.Min(nearest, Vector2.Distance(member.transform.position, point));
+            if (nearest < float.MaxValue)
+                KeptDistance = Mathf.Lerp(KeptDistance, nearest, RangeSmoothing * Time.deltaTime);
         }
 
         void UpdatePacing()
         {
             Stress = Mathf.Max(0, Stress - StressDecay * Time.deltaTime);
             var next = Phase;
-            if (Baseline) next = PacingPhase.Build;
-            else if (Phase == PacingPhase.Relax) { if (Stress <= RelaxUntil && Time.time - relaxedAt >= MinRelaxSeconds) next = PacingPhase.Build; }
-            else if (Stress >= RelaxAt) { next = PacingPhase.Relax; relaxedAt = Time.time; }
-            else if (SecondsSinceHurt >= PeakAfterUnhurtSeconds && HealthRatio >= PeakMinimumHealth) next = PacingPhase.Peak;
-            else next = PacingPhase.Build;
-            if (next != Phase) { Phase = next; Record("pacing", null, next.ToString(), Stress, ""); }
+            if (Baseline)
+                next = PacingPhase.Build;
+            else if (Phase == PacingPhase.Relax)
+            {
+                if (Stress <= RelaxUntil && Time.time - relaxedAt >= MinRelaxSeconds)
+                    next = PacingPhase.Build;
+            }
+            else if (Stress >= RelaxAt)
+            {
+                next = PacingPhase.Relax;
+                relaxedAt = Time.time;
+            }
+            else if (SecondsSinceHurt >= PeakAfterUnhurtSeconds && HealthRatio >= PeakMinimumHealth)
+                next = PacingPhase.Peak;
+            else
+                next = PacingPhase.Build;
+            if (next != Phase)
+            {
+                Phase = next;
+                Record("pacing", null, next.ToString(), Stress, "");
+            }
         }
 
         void AssignSlots()
         {
-            var alive = 0; var centroid = Vector2.zero;
-            foreach (var member in Members) if (member != null) { centroid += (Vector2)member.transform.position; alive++; }
-            if (alive == 0) return;
+            var alive = 0;
+            var centroid = Vector2.zero;
+            foreach (var member in Members)
+                if (member != null)
+                {
+                    centroid += (Vector2)member.transform.position;
+                    alive++;
+                }
+            if (alive == 0)
+                return;
             var player = (Vector2)Player.transform.position;
             centroid /= alive;
             var awayFromPlayer = centroid - player;
@@ -150,18 +209,35 @@ namespace RuinRunner
             foreach (SquadRole role in Enum.GetValues(typeof(SquadRole)))
             {
                 var group = new List<EnemyController>();
-                foreach (var member in Members) if (member != null && member.Role == role) group.Add(member);
+                foreach (var member in Members)
+                    if (member != null && member.Role == role)
+                        group.Add(member);
                 for (var i = 0; i < group.Count; i++)
                 {
                     float angle, arc;
                     switch (role)
                     {
                         // Frontline meets the player head on; flankers go for the back the weapon is not pointing at.
-                        case SquadRole.Flanker: angle = behind; arc = 70f; break;
-                        case SquadRole.Skirmisher: angle = front + 90f; arc = 200f; break;
-                        case SquadRole.Backline: angle = front; arc = 80f; break;
-                        case SquadRole.Support: angle = front; arc = 50f; break;
-                        default: angle = front; arc = 100f; break;
+                        case SquadRole.Flanker:
+                            angle = behind;
+                            arc = 70f;
+                            break;
+                        case SquadRole.Skirmisher:
+                            angle = front + 90f;
+                            arc = 200f;
+                            break;
+                        case SquadRole.Backline:
+                            angle = front;
+                            arc = 80f;
+                            break;
+                        case SquadRole.Support:
+                            angle = front;
+                            arc = 50f;
+                            break;
+                        default:
+                            angle = front;
+                            arc = 100f;
+                            break;
                     }
                     var spread = group.Count > 1 ? arc * (i / (group.Count - 1f) - .5f) : 0f;
                     slots[group[i]] = Fit(player, angle + spread, group[i].DesiredRange);
@@ -181,22 +257,28 @@ namespace RuinRunner
 
         static void OpenLog()
         {
-            if (log != null) return;
+            if (log != null)
+                return;
             var arguments = Environment.GetCommandLineArgs();
             var index = Array.IndexOf(arguments, "--ai-log");
-            if (index < 0 || index + 1 >= arguments.Length) return;
+            if (index < 0 || index + 1 >= arguments.Length)
+                return;
             try
             {
                 log = new StreamWriter(arguments[index + 1], false) { AutoFlush = true };
                 log.WriteLine("time,event,enemy,role,choice,score,alternatives,phase,stress,player_health,kept_distance,melee_tokens,ranged_tokens,alive");
             }
-            catch (IOException e) { Debug.LogWarning("AI log unavailable: " + e.Message); }
+            catch (IOException e)
+            {
+                Debug.LogWarning("AI log unavailable: " + e.Message);
+            }
         }
 
         /// <summary>One line per decision, so a run can be charted afterwards.</summary>
         public void Record(string kind, EnemyController enemy, string choice, float score, string alternatives)
         {
-            if (log == null) return;
+            if (log == null)
+                return;
             log.WriteLine(string.Join(",", Time.time.ToString("0.00"), kind, enemy == null ? "" : enemy.Type.ToString(), enemy == null ? "" : enemy.Role.ToString(), choice, score.ToString("0.00"),
                 alternatives, Phase, Stress.ToString("0.00"), HealthRatio.ToString("0.00"), KeptDistance.ToString("0.0"), MeleeTokensInUse, RangedTokensInUse, Members.Count));
         }

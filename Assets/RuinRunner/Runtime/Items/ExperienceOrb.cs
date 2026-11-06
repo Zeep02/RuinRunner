@@ -23,12 +23,15 @@ namespace RuinRunner
 
         public static ExperienceOrb Create(Vector2 position, int experience, PlayerProgression progression, Func<bool> collectionQuery)
         {
-            if (experience <= 0) return null;
+            if (experience <= 0)
+                return null;
             var orbObject = new GameObject("ExperienceOrb");
             orbObject.transform.position = position;
             var orb = orbObject.AddComponent<ExperienceOrb>();
-            var visual = new GameObject("AnimatedOrb"); visual.transform.SetParent(orbObject.transform, false);
-            orb.view = visual.AddComponent<SpriteRenderer>(); orb.view.sortingOrder = 14;
+            var visual = new GameObject("AnimatedOrb");
+            visual.transform.SetParent(orbObject.transform, false);
+            orb.view = visual.AddComponent<SpriteRenderer>();
+            orb.view.sortingOrder = 14;
             orb.frames = IndividualArt.Frames("Feedback/Experience/" + SizeForAmount(experience), 6);
             orb.animationTime = UnityEngine.Random.value * .6f;
             orb.view.sprite = orb.frames[Mathf.FloorToInt(orb.animationTime * 10f) % orb.frames.Length];
@@ -41,7 +44,8 @@ namespace RuinRunner
 
         public static void CreateBurst(Vector2 position, int totalExperience, int count, PlayerProgression progression, Func<bool> canCollect = null)
         {
-            if (totalExperience <= 0) return;
+            if (totalExperience <= 0)
+                return;
             var rewards = SplitBurst(totalExperience, count);
             count = rewards.Length;
             for (var index = 0; index < count; index++)
@@ -59,9 +63,11 @@ namespace RuinRunner
         // Different denominations, never extra XP or zero-value objects.
         public static int[] SplitBurst(int total, int requestedCount)
         {
-            if (total <= 0) return Array.Empty<int>();
+            if (total <= 0)
+                return Array.Empty<int>();
             var count = Mathf.Clamp(requestedCount, 1, total);
-            var result = new int[count]; var remaining = total;
+            var result = new int[count];
+            var remaining = total;
             for (var i = 0; i < count - 1; i++)
             {
                 var slotsLeft = count - i;
@@ -74,7 +80,8 @@ namespace RuinRunner
 
         private void Update()
         {
-            if (collected || Time.deltaTime <= 0f) return;
+            if (collected || Time.deltaTime <= 0f)
+                return;
             if (target == null)
             {
                 Destroy(gameObject);
@@ -114,7 +121,8 @@ namespace RuinRunner
             }
             transform.position = Vector2.MoveTowards(transform.position, target.transform.position, homingSpeed * Time.deltaTime);
 
-            if (Vector2.Distance(transform.position, target.transform.position) <= .42f) Collect();
+            if (Vector2.Distance(transform.position, target.transform.position) <= .42f)
+                Collect();
         }
 
         private void ScatterFromChest()
@@ -133,7 +141,8 @@ namespace RuinRunner
 
         private void Collect()
         {
-            if (collected) return;
+            if (collected)
+                return;
             collected = true;
             var point = target.transform.position;
             TransientSpriteEffect.Create(view.sprite, point, Vector3.one * 1.15f, new Color(1f, 1f, .8f, .8f), .18f, 16, finalScale: 1.7f);

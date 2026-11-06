@@ -24,8 +24,13 @@ namespace RuinRunner
             fx.view = root.AddComponent<SpriteRenderer>();
             fx.view.sprite = fx.frames[0];
             PixelFxMaterial.Apply(fx.view, clip);
-            if (onFloor) { fx.view.sortingLayerName = "WorldFloor"; fx.view.sortingOrder = 4; }
-            else fx.view.sortingOrder = 900 - Mathf.RoundToInt(position.y * 100f);
+            if (onFloor)
+            {
+                fx.view.sortingLayerName = "WorldFloor";
+                fx.view.sortingOrder = 4;
+            }
+            else
+                fx.view.sortingOrder = 900 - Mathf.RoundToInt(position.y * 100f);
             // Spread by position, so a stage comes out the same every time on the same seed.
             fx.phase = Mathf.Abs(position.x * 7.31f + position.y * 3.17f) % (fx.frames.Length / FramesPerSecond);
             return fx;
@@ -33,13 +38,15 @@ namespace RuinRunner
 
         void Update()
         {
-            if (viewCamera == null) viewCamera = Camera.main;
+            if (viewCamera == null)
+                viewCamera = Camera.main;
             if (viewCamera != null)
             {
                 var offset = (Vector2)(transform.position - viewCamera.transform.position);
                 var visible = Mathf.Abs(offset.y) < viewCamera.orthographicSize + OffScreenMargin && Mathf.Abs(offset.x) < viewCamera.orthographicSize * viewCamera.aspect + OffScreenMargin;
                 view.enabled = visible;
-                if (!visible) return;
+                if (!visible)
+                    return;
             }
             view.sprite = frames[Mathf.FloorToInt((Time.unscaledTime + phase) * FramesPerSecond) % frames.Length];
         }
@@ -48,7 +55,13 @@ namespace RuinRunner
     /// <summary>Dust in the air of a stage. They keep to the screen by wrapping round it, so there are always a few and they are never many.</summary>
     public sealed class AmbientMotes : MonoBehaviour
     {
-        struct Mote { public Transform view; public SpriteRenderer sprite; public Vector2 offset, drift; public float phase, life; }
+        struct Mote
+        {
+            public Transform view;
+            public SpriteRenderer sprite;
+            public Vector2 offset, drift;
+            public float phase, life;
+        }
         const int Count = 26;
         static Sprite dot;
         readonly List<Mote> motes = new List<Mote>();
@@ -66,7 +79,8 @@ namespace RuinRunner
             if (dot == null)
             {
                 var pixel = new Texture2D(1, 1, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
-                pixel.SetPixel(0, 0, Color.white); pixel.Apply();
+                pixel.SetPixel(0, 0, Color.white);
+                pixel.Apply();
                 dot = Sprite.Create(pixel, new Rect(0, 0, 1, 1), new Vector2(.5f, .5f), 32f);
             }
             for (var i = 0; i < Count; i++)
@@ -74,12 +88,18 @@ namespace RuinRunner
                 var view = new GameObject("Mote");
                 view.transform.SetParent(root.transform, false);
                 var sprite = view.AddComponent<SpriteRenderer>();
-                sprite.sprite = dot; sprite.sortingOrder = 2002;
-                if (i % 5 == 0) view.transform.localScale = Vector3.one * 2f;
+                sprite.sprite = dot;
+                sprite.sortingOrder = 2002;
+                if (i % 5 == 0)
+                    view.transform.localScale = Vector3.one * 2f;
                 field.motes.Add(new Mote
                 {
-                    view = view.transform, sprite = sprite, offset = new Vector2(Random.value, Random.value),
-                    drift = new Vector2(Random.Range(-.06f, .06f), Random.Range(-.04f, .08f)), phase = Random.value * 10f, life = Random.Range(2.5f, 6f)
+                    view = view.transform,
+                    sprite = sprite,
+                    offset = new Vector2(Random.value, Random.value),
+                    drift = new Vector2(Random.Range(-.06f, .06f), Random.Range(-.04f, .08f)),
+                    phase = Random.value * 10f,
+                    life = Random.Range(2.5f, 6f)
                 });
             }
             return field;
@@ -87,8 +107,10 @@ namespace RuinRunner
 
         void LateUpdate()
         {
-            if (viewCamera == null) viewCamera = Camera.main;
-            if (viewCamera == null) return;
+            if (viewCamera == null)
+                viewCamera = Camera.main;
+            if (viewCamera == null)
+                return;
             var center = (Vector2)viewCamera.transform.position;
             var size = new Vector2(viewCamera.orthographicSize * viewCamera.aspect * 2f + 1f, viewCamera.orthographicSize * 2f + 1f);
             var time = Time.time;
@@ -119,7 +141,11 @@ namespace RuinRunner
         public static void Ensure(GameController owner)
         {
             var existing = FindAnyObjectByType<ScreenVignette>();
-            if (existing != null) { existing.game = owner; return; }
+            if (existing != null)
+            {
+                existing.game = owner;
+                return;
+            }
             var root = new GameObject("ScreenVignette");
             DontDestroyOnLoad(root);
             root.AddComponent<ScreenVignette>().game = owner;
@@ -127,17 +153,21 @@ namespace RuinRunner
 
         static Texture2D Ring()
         {
-            if (ring != null) return ring;
+            if (ring != null)
+                return ring;
             ring = new Texture2D(Width, Height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
             // Stepped and dithered, so the falloff is drawn in the same pixels as everything else instead of a smooth photo gradient.
             for (var y = 0; y < Height; y++)
                 for (var x = 0; x < Width; x++)
                 {
-                    var dx = (x + .5f) / Width * 2f - 1f; var dy = (y + .5f) / Height * 2f - 1f;
+                    var dx = (x + .5f) / Width * 2f - 1f;
+                    var dy = (y + .5f) / Height * 2f - 1f;
                     var value = Mathf.Clamp01((Mathf.Sqrt(dx * dx + dy * dy) - Inner) / (Outer - Inner));
                     value *= value;
-                    var scaled = value * Bands; var band = Mathf.Floor(scaled);
-                    if (scaled - band > (((x ^ y) & 1) == 0 ? .35f : .7f)) band += 1f;
+                    var scaled = value * Bands;
+                    var band = Mathf.Floor(scaled);
+                    if (scaled - band > (((x ^ y) & 1) == 0 ? .35f : .7f))
+                        band += 1f;
                     ring.SetPixel(x, y, new Color(1f, 1f, 1f, Mathf.Min(1f, band / Bands)));
                 }
             ring.Apply();
@@ -148,7 +178,8 @@ namespace RuinRunner
         {
             // Depth is read from every GUI event, not only the one that draws.
             GUI.depth = Depth;
-            if (Event.current.type != EventType.Repaint || game == null || !game.IsRunActive || game.IsTown) return;
+            if (Event.current.type != EventType.Repaint || game == null || !game.IsRunActive || game.IsTown)
+                return;
             var area = new Rect(0, 0, Screen.width, Screen.height);
             var old = GUI.color;
             GUI.color = new Color(.012f, .012f, .03f, DarkEdge);

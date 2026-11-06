@@ -33,8 +33,14 @@ namespace RuinRunner.EditorTools
             if (!File.Exists(json)) return;
 
             ClipMeta meta;
-            try { meta = JsonUtility.FromJson<ClipMeta>(File.ReadAllText(json)); }
-            catch (System.Exception e) { Debug.LogError("[pixelfx] " + json + " 을 읽지 못했습니다: " + e.Message); return; }
+            try { 
+meta = JsonUtility.FromJson<ClipMeta>(File.ReadAllText(json)); 
+}
+            catch (System.Exception e) 
+{ 
+Debug.LogError("[pixelfx] " + json + " 을 읽지 못했습니다: " + e.Message); 
+return; 
+}
 
             var importer = (TextureImporter)assetImporter;
             importer.textureType = TextureImporterType.Sprite;
@@ -59,7 +65,7 @@ namespace RuinRunner.EditorTools
             importer.SetTextureSettings(settings);
         }
 
-        [MenuItem("Prototype/Art/Reimport pixelfx CombatFX Clips")]
+        [MenuItem("RuinRunner/Art/Reimport pixelfx CombatFX Clips")]
         static void ReimportAll()
         {
             var count = 0;

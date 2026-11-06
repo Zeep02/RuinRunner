@@ -1,3 +1,4 @@
+# Unity
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -6,6 +7,12 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 MemoryCaptures/
+/Assets/_Recovery/
+/Assets/_Recovery.meta
+/Assets/Logs/
+/Assets/Logs.meta
+
+# IDE and generated projects
 .vs/
 .idea/
 *.csproj
@@ -20,48 +27,44 @@ MemoryCaptures/
 *.opendb
 *.VC.db
 sysinfo.txt
-.pptx-build/
-.codex-finalizer/
-rendered_slides/
 /*.log
-
-# 로컬 산출물·검증 사본
-/.work/
-/deliverables/
-/Backups/
-/CheckImagegen/
-/Assets/_Recovery/
-/Assets/_Recovery.meta
 __pycache__/
 
-# 상용 게임 사본은 절대 올리지 않는다
-/Sep/
+# Build output and release packages
+/deliverables/
+/Backups/
+/.work/
 
-# 로컬 DB·런타임과 검증 출력
+# Local backend runtime (SDK, database, logs)
 /Backend/.local/
 /Backend/Validation/
 /Tools/.python-deps/
-/Tools/Art/*Compile/
-/Tools/Art/HurtPreflight/
-/Tools/Validation/*Compile/
-/Tools/Validation/GoalCombat20261009/
-/Tools/Validation/ProceduralGeneration20261004/
 /Tools/**/bin/
 /Tools/**/*.dll
 /Tools/**/*.cache
 /Tools/pixelfx/.vendored.tgz
 /Tools/pixelfx/.git-empty-vendored/
 
-# 대용량 아트 작업 자료는 로컬에만 둔다
-/ArtDirection/*
-!/ArtDirection/*.md
-!/ArtDirection/References/
-!/ArtDirection/UserProvided/
-
-# 루트의 참고 영상·캡처
+# Art work in progress and review captures (local only)
+/Tools/Art/Staging/
+/CheckImagegen/
 /*.gif
 /*.png
 
-# 아트 작업 중간 산출물 (로컬 전용)
-/Tools/Art/Staging/
-/Tools/Art/HeroPixels/out/
+# Third-party source packs and reference images (not redistributable)
+/Sep/
+/Dungeon Gathering Free Version/
+/ArtDirection/
+
+# Work logs and one-off scripts (local only)
+/Archive/
+
+# Agent settings (local only)
+/AGENTS.md
+/.agents/
+/.claude/
+/.codex/
+/.codex-finalizer/
+/.mcp.json
+.pptx-build/
+rendered_slides/

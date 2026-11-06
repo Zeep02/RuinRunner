@@ -13,8 +13,10 @@ namespace RuinRunner
         // a hero who has pushed against living bodies for a moment: a crowd must never hold someone in place to die.
         void StopAtEnemyBodies(Vector2 desired)
         {
-            if (Time.time < slipUntil) return;
-            if (footCollider == null) footCollider = GetComponent<Collider2D>();
+            if (Time.time < slipUntil)
+                return;
+            if (footCollider == null)
+                footCollider = GetComponent<Collider2D>();
             var moving = LinearVelocity;
             var filter = new ContactFilter2D { useTriggers = false, useLayerMask = true, layerMask = 1 << GameLayers.Enemy };
             var reach = .5f + moving.magnitude * Time.fixedDeltaTime;
@@ -28,7 +30,12 @@ namespace RuinRunner
                 heldByMover |= stopped && (body == null || body.constraints != RigidbodyConstraints2D.FreezeAll);
             }
             pinnedFor = heldByMover && desired.magnitude > 1f && free.magnitude < desired.magnitude * .25f ? pinnedFor + Time.fixedDeltaTime : 0f;
-            if (pinnedFor >= PinnedSeconds) { pinnedFor = 0f; slipUntil = Time.time + SlipSeconds; return; }
+            if (pinnedFor >= PinnedSeconds)
+            {
+                pinnedFor = 0f;
+                slipUntil = Time.time + SlipSeconds;
+                return;
+            }
             LinearVelocity = free;
         }
     }

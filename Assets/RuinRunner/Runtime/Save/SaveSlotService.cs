@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace RuinRunner
 {
-    public sealed class SaveSlotService
+    public sealed class SaveSlotService : IProfileStore
     {
         private const int SlotCount = 3;
         private readonly string saveDirectory;
@@ -28,9 +28,11 @@ namespace RuinRunner
             var profileIndex = Array.IndexOf(args, "--validation-profile-name");
             if (IsValidationProfile && profileIndex >= 0)
             {
-                if (profileIndex + 1 >= args.Length) throw new ArgumentException("Validation profile name required");
+                if (profileIndex + 1 >= args.Length)
+                    throw new ArgumentException("Validation profile name required");
                 profileName = args[profileIndex + 1];
-                if (profileName.Length == 0 || profileName.Length > 80) throw new ArgumentException("Invalid validation profile name");
+                if (profileName.Length == 0 || profileName.Length > 80)
+                    throw new ArgumentException("Invalid validation profile name");
                 foreach (var character in profileName)
                     if (!char.IsLetterOrDigit(character) && character != '-' && character != '_')
                         throw new ArgumentException("Validation profile name may not contain path components");
@@ -48,15 +50,18 @@ namespace RuinRunner
 
         public bool OpenSlot(int slotNumber)
         {
-            if (ServerBound) return false; // Normal profiles must await the authenticated API selection.
-            if (!IsValidSlot(slotNumber)) return false;
+            if (ServerBound)
+                return false; // Normal profiles must await the authenticated API selection.
+            if (!IsValidSlot(slotNumber))
+                return false;
 
             var data = LoadSlot(slotNumber);
             var isNew = data == null;
             if (isNew)
             {
                 data = CreateNewData(slotNumber);
-                if (slotNumber == 1 && !IsValidationProfile) TryImportLegacyProgression(data);
+                if (slotNumber == 1 && !IsValidationProfile)
+                    TryImportLegacyProgression(data);
             }
 
             ActiveSlot = slotNumber;
@@ -76,8 +81,10 @@ namespace RuinRunner
 
         public bool DeleteSlot(int slotNumber)
         {
-            if (ServerBound) return false; // Never delete the legacy source behind a server profile.
-            if (!IsValidSlot(slotNumber)) return false;
+            if (ServerBound)
+                return false; // Never delete the legacy source behind a server profile.
+            if (!IsValidSlot(slotNumber))
+                return false;
             try
             {
                 DeleteIfPresent(GetPath(slotNumber));
@@ -109,17 +116,21 @@ namespace RuinRunner
         public void SaveRunResult(int legacyShards, IReadOnlyDictionary<MetaUpgradeType, int> ranks,
             int enemiesDefeated, int roomsReached, bool victory, int stagesCleared = 0)
         {
-            if (ServerBound) throw new InvalidOperationException("Run settlement must be confirmed by the backend.");
-            if (ActiveData == null) return;
+            if (ServerBound)
+                throw new InvalidOperationException("Run settlement must be confirmed by the backend.");
+            if (ActiveData == null)
+                return;
             // Progression and statistics are one logical result. Persist one
             // complete snapshot, never a reward with the previous run counters.
             UpdateProgression(legacyShards, ranks);
             ActiveData.totalRuns++;
             ActiveData.totalKills += Mathf.Max(0, enemiesDefeated);
             ActiveData.deepestRoom = Mathf.Max(ActiveData.deepestRoom, roomsReached);
-            if (victory) ActiveData.victories++;
-            if (victory && stagesCleared == CampaignStage.Count) ActiveData.campaignVictories++;
-            ActiveData.bestCampaignStage = Mathf.Max(ActiveData.bestCampaignStage, Mathf.Clamp(stagesCleared,0,CampaignStage.Count));
+            if (victory)
+                ActiveData.victories++;
+            if (victory && stagesCleared == CampaignStage.Count)
+                ActiveData.campaignVictories++;
+            ActiveData.bestCampaignStage = Mathf.Max(ActiveData.bestCampaignStage, Mathf.Clamp(stagesCleared, 0, CampaignStage.Count));
             SaveActive();
         }
 
@@ -132,8 +143,10 @@ namespace RuinRunner
 
         private void SaveActive()
         {
-            if (ServerBound) return;
-            if (ActiveData == null || ActiveSlot == 0) return;
+            if (ServerBound)
+                return;
+            if (ActiveData == null || ActiveSlot == 0)
+                return;
             try
             {
                 Directory.CreateDirectory(saveDirectory);
@@ -163,26 +176,34 @@ namespace RuinRunner
         {
             try
             {
-                if (!File.Exists(path)) return null;
-                var data=JsonUtility.FromJson<SaveSlotData>(File.ReadAllText(path, Encoding.UTF8));
-                if(data==null)return null;
-                data.totalRuns=Mathf.Max(0,data.totalRuns);
-                data.victories=Mathf.Clamp(data.victories,0,data.totalRuns);
-                data.campaignVictories=Mathf.Clamp(data.campaignVictories,0,data.victories);
-                data.bestCampaignStage=Mathf.Clamp(data.bestCampaignStage,0,CampaignStage.Count);
-                data.totalKills=Mathf.Max(0,data.totalKills);data.deepestRoom=Mathf.Max(0,data.deepestRoom);
-                data.legacyShards=Mathf.Max(0,data.legacyShards);
-                var ranks=new Dictionary<MetaUpgradeType,int>();
-                if(data.upgrades!=null)foreach(var upgrade in data.upgrades)
-                {
-                    if(upgrade==null)continue;
-                    var definition=Array.Find(MetaUpgradeCatalog.Definitions,item=>item.Type==upgrade.type);
-                    if(definition==null)continue;
-                    var rank=Mathf.Clamp(upgrade.rank,0,definition.MaxRank);
-                    if(!ranks.TryGetValue(upgrade.type,out var previous) || rank>previous)ranks[upgrade.type]=rank;
-                }
-                data.upgrades=new List<SaveUpgradeRankData>();
-                foreach(var rank in ranks)data.upgrades.Add(new SaveUpgradeRankData{type=rank.Key,rank=rank.Value});
+                if (!File.Exists(path))
+                    return null;
+                var data = JsonUtility.FromJson<SaveSlotData>(File.ReadAllText(path, Encoding.UTF8));
+                if (data == null)
+                    return null;
+                data.totalRuns = Mathf.Max(0, data.totalRuns);
+                data.victories = Mathf.Clamp(data.victories, 0, data.totalRuns);
+                data.campaignVictories = Mathf.Clamp(data.campaignVictories, 0, data.victories);
+                data.bestCampaignStage = Mathf.Clamp(data.bestCampaignStage, 0, CampaignStage.Count);
+                data.totalKills = Mathf.Max(0, data.totalKills);
+                data.deepestRoom = Mathf.Max(0, data.deepestRoom);
+                data.legacyShards = Mathf.Max(0, data.legacyShards);
+                var ranks = new Dictionary<MetaUpgradeType, int>();
+                if (data.upgrades != null)
+                    foreach (var upgrade in data.upgrades)
+                    {
+                        if (upgrade == null)
+                            continue;
+                        var definition = Array.Find(MetaUpgradeCatalog.Definitions, item => item.Type == upgrade.type);
+                        if (definition == null)
+                            continue;
+                        var rank = Mathf.Clamp(upgrade.rank, 0, definition.MaxRank);
+                        if (!ranks.TryGetValue(upgrade.type, out var previous) || rank > previous)
+                            ranks[upgrade.type] = rank;
+                    }
+                data.upgrades = new List<SaveUpgradeRankData>();
+                foreach (var rank in ranks)
+                    data.upgrades.Add(new SaveUpgradeRankData { type = rank.Key, rank = rank.Value });
                 return data;
             }
             catch (Exception exception)
@@ -194,7 +215,8 @@ namespace RuinRunner
 
         private void RefreshSummaries()
         {
-            if (ServerBound) return;
+            if (ServerBound)
+                return;
             for (var slot = 1; slot <= SlotCount; slot++)
             {
                 var data = LoadSlot(slot);
@@ -205,7 +227,8 @@ namespace RuinRunner
         private static SaveSlotSummary CreateSummary(int slotNumber, SaveSlotData data)
         {
             var summary = new SaveSlotSummary { SlotNumber = slotNumber, Exists = data != null };
-            if (data == null) return summary;
+            if (data == null)
+                return summary;
 
             DateTime playedUtc;
             if (DateTime.TryParse(data.lastPlayedUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out playedUtc))
@@ -213,7 +236,7 @@ namespace RuinRunner
             summary.TotalRuns = Mathf.Max(0, data.totalRuns);
             summary.Victories = Mathf.Max(0, data.victories);
             summary.CampaignVictories = Mathf.Max(0, data.campaignVictories);
-            summary.BestCampaignStage = Mathf.Clamp(data.bestCampaignStage,0,CampaignStage.Count);
+            summary.BestCampaignStage = Mathf.Clamp(data.bestCampaignStage, 0, CampaignStage.Count);
             summary.DeepestRoom = Mathf.Max(0, data.deepestRoom);
             summary.TotalKills = Mathf.Max(0, data.totalKills);
             summary.LegacyShards = Mathf.Max(0, data.legacyShards);
@@ -229,7 +252,8 @@ namespace RuinRunner
         private static bool HasCommandLineArgument(string expected)
         {
             foreach (var argument in Environment.GetCommandLineArgs())
-                if (string.Equals(argument, expected, StringComparison.OrdinalIgnoreCase)) return true;
+                if (string.Equals(argument, expected, StringComparison.OrdinalIgnoreCase))
+                    return true;
             return false;
         }
 
@@ -245,9 +269,11 @@ namespace RuinRunner
             try
             {
                 var legacyPath = Path.Combine(Application.persistentDataPath, "RuinRunner", "meta-progression.json");
-                if (!File.Exists(legacyPath)) return;
+                if (!File.Exists(legacyPath))
+                    return;
                 var legacy = JsonUtility.FromJson<LegacyMetaData>(File.ReadAllText(legacyPath, Encoding.UTF8));
-                if (legacy == null) return;
+                if (legacy == null)
+                    return;
                 data.legacyShards = Mathf.Max(0, legacy.legacyShards);
                 data.upgrades = legacy.upgrades ?? new List<SaveUpgradeRankData>();
             }
@@ -264,9 +290,12 @@ namespace RuinRunner
 
         public string ExistingLegacyPath(int slotNumber)
         {
-            if (!IsValidSlot(slotNumber)) return null;
-            if (File.Exists(GetPath(slotNumber))) return GetPath(slotNumber);
-            if (File.Exists(GetBackupPath(slotNumber))) return GetBackupPath(slotNumber);
+            if (!IsValidSlot(slotNumber))
+                return null;
+            if (File.Exists(GetPath(slotNumber)))
+                return GetPath(slotNumber);
+            if (File.Exists(GetBackupPath(slotNumber)))
+                return GetBackupPath(slotNumber);
             var old = Path.Combine(Path.GetDirectoryName(saveDirectory), "meta-progression.json");
             return slotNumber == 1 && File.Exists(old) ? old : null;
         }
@@ -277,32 +306,53 @@ namespace RuinRunner
             {
                 var profile = Array.Find(profiles ?? Array.Empty<ProfileView>(), p => p.slot == slot);
                 var summary = CreateSummary(slot, profile == null ? LoadSlot(slot) : Project(profile));
-                summary.ProfileId = profile?.profileId; summary.Name = profile?.name; summary.IsServerProfile = profile != null;
+                summary.ProfileId = profile?.profileId;
+                summary.Name = profile?.name;
+                summary.IsServerProfile = profile != null;
                 summaries[slot - 1] = summary;
             }
         }
         public void ApplyServerProfile(ProfileView profile)
         {
-            if (profile == null || !IsValidSlot(profile.slot)) throw new ArgumentException("Valid confirmed profile required.");
-            ServerBound = true; ActiveSlot = profile.slot; ActiveData = Project(profile);
+            if (profile == null || !IsValidSlot(profile.slot))
+                throw new ArgumentException("Valid confirmed profile required.");
+            ServerBound = true;
+            ActiveSlot = profile.slot;
+            ActiveData = Project(profile);
             var summary = CreateSummary(profile.slot, ActiveData);
-            summary.ProfileId = profile.profileId; summary.Name = profile.name; summary.IsServerProfile = true;
+            summary.ProfileId = profile.profileId;
+            summary.Name = profile.name;
+            summary.IsServerProfile = true;
             summaries[profile.slot - 1] = summary;
         }
         static SaveSlotData Project(ProfileView p)
         {
             var s = p.state ?? throw new ArgumentException("Profile state missing.");
-            return new SaveSlotData { slotNumber = p.slot, serverProfileId = p.profileId, serverRevision = p.revision,
-                totalRuns = s.totalRuns, victories = s.victories, campaignVictories = s.campaignVictories,
-                bestCampaignStage = s.bestCampaignStage, deepestRoom = s.deepestRoom, totalKills = s.totalKills,
-                legacyShards = checked((int)p.legacyShards), legacyMigrationVersion = s.legacyMigrationVersion, legacyRefundVersion = s.legacyRefundVersion,
-                startingWeaponId = s.startingWeaponId, unlockedWeaponIds = s.unlockedWeaponIds ?? Array.Empty<string>(),
-                unlockedTalentIds = s.unlockedTalentIds ?? Array.Empty<string>(), activeTalentIds = s.activeTalentIds ?? Array.Empty<string>() };
+            return new SaveSlotData
+            {
+                slotNumber = p.slot,
+                serverProfileId = p.profileId,
+                serverRevision = p.revision,
+                totalRuns = s.totalRuns,
+                victories = s.victories,
+                campaignVictories = s.campaignVictories,
+                bestCampaignStage = s.bestCampaignStage,
+                deepestRoom = s.deepestRoom,
+                totalKills = s.totalKills,
+                legacyShards = checked((int)p.legacyShards),
+                legacyMigrationVersion = s.legacyMigrationVersion,
+                legacyRefundVersion = s.legacyRefundVersion,
+                startingWeaponId = s.startingWeaponId,
+                unlockedWeaponIds = s.unlockedWeaponIds ?? Array.Empty<string>(),
+                unlockedTalentIds = s.unlockedTalentIds ?? Array.Empty<string>(),
+                activeTalentIds = s.activeTalentIds ?? Array.Empty<string>()
+            };
         }
 
         private static void DeleteIfPresent(string path)
         {
-            if (File.Exists(path)) File.Delete(path);
+            if (File.Exists(path))
+                File.Delete(path);
         }
     }
 }

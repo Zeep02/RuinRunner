@@ -1,7 +1,3 @@
-using System;
-using RuinRunner.Backend;
-using UnityEngine;
-
 namespace RuinRunner
 {
     public sealed partial class GameController
@@ -24,7 +20,8 @@ namespace RuinRunner
 
         void RefreshSettlementProjection()
         {
-            if (legacyFixture || !ResultSettlementConfirmed || projectedSettlementRunId == settlementRunId) return;
+            if (legacyFixture || !ResultSettlementConfirmed || projectedSettlementRunId == settlementRunId)
+                return;
             LastMetaReward = checked((int)BackendRun.legacyReward);
             MetaProgression = new MetaProgressionService(SaveSlots);
             projectedSettlementRunId = settlementRunId;
@@ -34,7 +31,8 @@ namespace RuinRunner
         public void RequestProfileReset(int slot)
         {
             if (IsRunActive || SessionOperationPending || BackendBusy || BackendHasPending ||
-                !SaveSlots.GetSummary(slot).IsServerProfile) return;
+                !SaveSlots.GetSummary(slot).IsServerProfile)
+                return;
             backendFlow?.CancelReset();
             ResetProfileSlot = slot;
             SessionMessage = "";
@@ -42,7 +40,8 @@ namespace RuinRunner
 
         public async void PrepareProfileReset()
         {
-            if (ResetProfileSlot == 0 || IsRunActive || SessionOperationPending || BackendBusy) return;
+            if (ResetProfileSlot == 0 || IsRunActive || SessionOperationPending || BackendBusy)
+                return;
             int epoch = sessionEpoch;
             int slot = ResetProfileSlot;
             SessionOperationPending = true;
@@ -51,12 +50,16 @@ namespace RuinRunner
                 if (await backendFlow.BeginResetAsync(slot) && SessionMatches(epoch) && ResetProfileSlot == slot)
                     SessionMessage = "";
             }
-            finally { SessionOperationPending = false; }
+            finally
+            {
+                SessionOperationPending = false;
+            }
         }
 
         public async void ConfirmProfileReset()
         {
-            if (!ResetProfileChallengeReady || IsRunActive || SessionOperationPending || BackendBusy) return;
+            if (!ResetProfileChallengeReady || IsRunActive || SessionOperationPending || BackendBusy)
+                return;
             int epoch = sessionEpoch;
             var challenge = backendFlow.ResetChallenge;
             SessionOperationPending = true;
@@ -68,12 +71,16 @@ namespace RuinRunner
                     SessionMessage = "";
                 }
             }
-            finally { SessionOperationPending = false; }
+            finally
+            {
+                SessionOperationPending = false;
+            }
         }
 
         public void CancelProfileReset()
         {
-            if (SessionOperationPending || BackendBusy) return;
+            if (SessionOperationPending || BackendBusy)
+                return;
             backendFlow?.CancelReset();
             ResetProfileSlot = 0;
         }

@@ -16,11 +16,16 @@ namespace RuinRunner
         private void PreloadGrandMoves()
         {
             string[] clips;
-            if (Type == EnemyType.Boss) clips = new[] { "EQuakeRift", "EShotRockBig", "EShotRockBigHit" };
-            else if (Type == EnemyType.Tidekeeper) clips = new[] { "EWhirlpool", "EWaveCrash", "EGeyserBlast", "EShotWave", "EShotWaveHit" };
-            else if (Type == EnemyType.SealHeart) clips = new[] { "ESealBeamLoop", "ESmite", "ESealCircle", "EManaBurst", "EShotOrbit", "EShotOrbitHit" };
-            else return;
-            foreach (var clip in clips) NativeCombatEffect.Frames(clip);
+            if (Type == EnemyType.Boss)
+                clips = new[] { "EQuakeRift", "EShotRockBig", "EShotRockBigHit" };
+            else if (Type == EnemyType.Tidekeeper)
+                clips = new[] { "EWhirlpool", "EWaveCrash", "EGeyserBlast", "EShotWave", "EShotWaveHit" };
+            else if (Type == EnemyType.SealHeart)
+                clips = new[] { "ESealBeamLoop", "ESmite", "ESealCircle", "EManaBurst", "EShotOrbit", "EShotOrbitHit" };
+            else
+                return;
+            foreach (var clip in clips)
+                NativeCombatEffect.Frames(clip);
         }
         // Gone from view and from harm: the body travels under the floor or through the seal.
         private void SetBodyAway(bool away)
@@ -28,7 +33,8 @@ namespace RuinRunner
             roarInvulnerable = away;
             spriteRenderer.enabled = !away;
             var shadow = transform.Find("NativeGroundShadow");
-            if (shadow != null) shadow.gameObject.SetActive(!away);
+            if (shadow != null)
+                shadow.gameObject.SetActive(!away);
         }
         private IEnumerator ArriveAt(Vector2 root)
         {
@@ -49,7 +55,8 @@ namespace RuinRunner
                 acting = true;
                 var last = leap == leaps - 1;
                 HeavyImpact(transform.position, last ? .85f : .45f);
-                if (last) HitFreeze(.1f);
+                if (last)
+                    HitFreeze(.1f);
                 RingBurst(last ? 14 : 7, 4.6f, .7f, Random.Range(0f, 30f));
             }
             bossAnimator.Play(BossPose.Radial, 5, 7, .7f);
@@ -83,7 +90,7 @@ namespace RuinRunner
             bossAnimator.Play(BossPose.Leap, 2, 4, .3f);
             HitFreeze(.07f);
             HeavyImpact(from, .75f, aim);
-            PrototypeAudio.Play(PrototypeSound.HeavyAttack, AudioChannel.Monster, .55f);
+            GameAudio.Play(GameSound.HeavyAttack, AudioChannel.Monster, .55f);
             yield return new WaitForSeconds(.55f);
             bossAnimator.Play(BossPose.Leap, 5, 7, .55f);
             yield return EndMove(.6f, WardenGap(.7f));
@@ -104,9 +111,11 @@ namespace RuinRunner
                 for (var spike = 0; spike < counts[ring]; spike++)
                 {
                     var angle = spike * 360f / counts[ring] + ring * 11f;
-                    if (Mathf.Abs(Mathf.DeltaAngle(angle, lane + ring * 32f)) < 34f) continue;
+                    if (Mathf.Abs(Mathf.DeltaAngle(angle, lane + ring * 32f)) < 34f)
+                        continue;
                     var point = center + Heading(angle) * radii[ring];
-                    if (!OnFloor(point)) continue;
+                    if (!OnFloor(point))
+                        continue;
                     Circle(point, .82f, delay, .16f);
                     StartCoroutine(DelayedFx("WardenSpike", point, delay, 1.05f));
                 }
@@ -129,15 +138,17 @@ namespace RuinRunner
                 BeginMove(aim, Color.white);
                 bossAnimator.Play(BossPose.Volley, 0, 2, .5f);
                 var turns = wave % 2 == 0 ? new[] { -34f, -17f, 0f, 17f, 34f } : new[] { -26f, -9f, 9f, 26f };
-                foreach (var turn in turns) AimLine(ShotOrigin, Rotate(aim, turn), .5f);
+                foreach (var turn in turns)
+                    AimLine(ShotOrigin, Rotate(aim, turn), .5f);
                 yield return new WaitForSeconds(.5f);
                 AttackVisualPhase = 1;
                 bossAnimator.Play(BossPose.Volley, 3, 5, .2f);
-                foreach (var turn in turns) Fired(ShotOrigin, Rotate(aim, turn), 6.6f, .62f, "EShotRockBig");
+                foreach (var turn in turns)
+                    Fired(ShotOrigin, Rotate(aim, turn), 6.6f, .62f, "EShotRockBig");
                 FloorStrike("EBurstStone", (Vector2)transform.position + aim * 1.2f, 2.4f, 0f);
                 HitFreeze(.04f);
                 HeavyImpact(transform.position, .35f, aim);
-                PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Monster, .45f);
+                GameAudio.Play(GameSound.Hit, AudioChannel.Monster, .45f);
                 yield return new WaitForSeconds(.22f);
             }
             bossAnimator.Play(BossPose.Volley, 6, 7, .55f);
@@ -170,7 +181,8 @@ namespace RuinRunner
                 if (elapsed >= nextVolley)
                 {
                     nextVolley += .17f;
-                    for (var arm = 0; arm < arms; arm++) Shoot(center, Heading(spin + arm * 360f / arms), 4.6f, contactDamage, .42f);
+                    for (var arm = 0; arm < arms; arm++)
+                        Shoot(center, Heading(spin + arm * 360f / arms), 4.6f, contactDamage, .42f);
                     spin += 19f;
                     CombatAudio.Native("hazard-water", AudioChannel.Monster, .1f, 1.2f);
                 }
@@ -203,14 +215,16 @@ namespace RuinRunner
                     for (var step = .6f; step < Mathf.Max(arena.width, arena.height); step += .5f)
                     {
                         var candidate = across * row + (sideways ? Vector2.right : Vector2.up) * (rear + (sideways ? travel.x : travel.y) * step);
-                        if (OnFloor(candidate)) return candidate;
+                        if (OnFloor(candidate))
+                            return candidate;
                     }
                     return new Vector2(float.NaN, float.NaN);
                 }
                 foreach (var edge in new[] { gap - GapHalf, gap + GapHalf })
                 {
                     var from = RowStart(edge);
-                    if (!float.IsNaN(from.x)) AimLine(from, travel, Warn);
+                    if (!float.IsNaN(from.x))
+                        AimLine(from, travel, Warn);
                 }
                 yield return new WaitForSeconds(wall == 0 ? Warn : Warn * .6f);
                 CampaignRelease(.6f);
@@ -218,14 +232,18 @@ namespace RuinRunner
                 for (var row = low + .5f; row < high; row += .95f)
                 {
                     var start = RowStart(row);
-                    if (float.IsNaN(start.x)) continue;
-                    if (Mathf.Abs(row - gap) >= GapHalf) Fired(start, travel, Speed, .85f, "EShotWave");
+                    if (float.IsNaN(start.x))
+                        continue;
+                    if (Mathf.Abs(row - gap) >= GapHalf)
+                        Fired(start, travel, Speed, .85f, "EShotWave");
                     if (sideways && crest++ % 4 == 0)
                     {
                         var rise = BossNativeEffect.CreateOverActors(this, "EWaveCrash", start, 0f).Fit(5f);
-                        if (travel.x < 0f) rise.transform.localScale = Vector3.Scale(rise.transform.localScale, new Vector3(-1f, 1f, 1f));
+                        if (travel.x < 0f)
+                            rise.transform.localScale = Vector3.Scale(rise.transform.localScale, new Vector3(-1f, 1f, 1f));
                     }
-                    else if (!sideways && crest++ % 3 == 0) BossNativeEffect.Create(this, "TideSplash", start, .55f);
+                    else if (!sideways && crest++ % 3 == 0)
+                        BossNativeEffect.Create(this, "TideSplash", start, .55f);
                 }
                 CombatAudio.Native("hazard-water", AudioChannel.Monster, .45f, .85f);
                 HeavyImpact(transform.position, .4f);
@@ -246,8 +264,10 @@ namespace RuinRunner
                 yield return new WaitForSeconds(.2f);
                 SetBodyAway(true);
                 var target = player.FeetPoint;
-                if (!CanStandAt(target)) target = PlayerPoint;
-                if (!CanStandAt(target)) target = transform.position;
+                if (!CanStandAt(target))
+                    target = PlayerPoint;
+                if (!CanStandAt(target))
+                    target = transform.position;
                 BossNativeEffect.Create(this, "EWhirlpool", target, Warn).Fit(3.4f);
                 Circle(target, 1.65f, Warn, .16f);
                 CombatAudio.Native("hazard-water", AudioChannel.Monster, .25f, 1.1f);
@@ -258,7 +278,8 @@ namespace RuinRunner
                 Strike("EGeyserBlast", target, 3.6f, 0f);
                 var count = CampaignSecondPhase ? 12 : 8;
                 var turn = Random.Range(0f, 45f);
-                for (var drop = 0; drop < count; drop++) Shoot(target, Heading(turn + drop * 360f / count), 4.8f, contactDamage, .42f);
+                for (var drop = 0; drop < count; drop++)
+                    Shoot(target, Heading(turn + drop * 360f / count), 4.8f, contactDamage, .42f);
                 HitFreeze(.05f);
                 HeavyImpact(target, .5f);
                 CombatAudio.Native("hazard-water", AudioChannel.Monster, .45f, .9f);
@@ -293,7 +314,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(delay);
             Strike("EGeyserBlast", point, 2.5f, 0f);
             CombatAudio.Native("hazard-water", AudioChannel.Monster, .2f, 1.2f);
-            if (cameraFollow != null) cameraFollow.Shake(.1f, .08f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.1f, .08f);
         }
 
         // ---- Seal Heart: it judges from everywhere at once.
@@ -324,7 +346,8 @@ namespace RuinRunner
                 if (second && elapsed >= nextBloom)
                 {
                     nextBloom += 1.1f;
-                    for (var shot = 0; shot < 8; shot++) Fired(ShotOrigin, Heading(elapsed * 40f + shot * 45f), 3.2f, .42f, "EShotOrbit");
+                    for (var shot = 0; shot < 8; shot++)
+                        Fired(ShotOrigin, Heading(elapsed * 40f + shot * 45f), 3.2f, .42f, "EShotOrbit");
                 }
                 yield return null;
             }
@@ -348,7 +371,11 @@ namespace RuinRunner
                 for (var attempt = 0; attempt < 8; attempt++)
                 {
                     var candidate = PlayerPoint + Heading(side + attempt * 45f) * 3.3f;
-                    if (CanStandAt(candidate)) { arrival = candidate; break; }
+                    if (CanStandAt(candidate))
+                    {
+                        arrival = candidate;
+                        break;
+                    }
                 }
                 yield return ArriveAt(arrival);
                 SetBodyAway(false);
@@ -363,11 +390,12 @@ namespace RuinRunner
                 CutAlong("EKnightHeavy", arrival + aim * reach * .5f, reach, AngleOf(aim), .3f);
                 HitFreeze(.05f);
                 HeavyImpact(arrival, .4f, aim);
-                PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Monster, .45f);
+                GameAudio.Play(GameSound.Hit, AudioChannel.Monster, .45f);
                 yield return CampaignRush(aim, reach, .14f, false);
             }
             Strike("EManaBurst", transform.position, 5f, 0f);
-            for (var shot = 0; shot < 12; shot++) Fired(ShotOrigin, Heading(shot * 30f), 4.6f, .42f, "EShotOrbit");
+            for (var shot = 0; shot < 12; shot++)
+                Fired(ShotOrigin, Heading(shot * 30f), 4.6f, .42f, "EShotOrbit");
             HeavyImpact(transform.position, .6f);
             yield return Recover(1.2f);
         }
@@ -383,7 +411,8 @@ namespace RuinRunner
             for (var bolt = 0; bolt < count; bolt++)
             {
                 var point = player.FeetPoint;
-                if (bolt % 2 == 1) point += Random.insideUnitCircle.normalized * Random.Range(1.6f, 3.2f);
+                if (bolt % 2 == 1)
+                    point += Random.insideUnitCircle.normalized * Random.Range(1.6f, 3.2f);
                 if (OnFloor(point))
                 {
                     Circle(point, 1.3f, SmiteHitSeconds, .2f);
@@ -398,7 +427,8 @@ namespace RuinRunner
         private IEnumerator SmiteShake(float delay)
         {
             yield return new WaitForSeconds(delay);
-            if (cameraFollow != null) cameraFollow.Shake(.12f, .1f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.12f, .1f);
             CombatAudio.Native("heavy-impact", AudioChannel.Monster, .2f, 1.3f);
         }
         // Draws a great circle, stands exposed while it fills, then a column of light and rings of seal shots.

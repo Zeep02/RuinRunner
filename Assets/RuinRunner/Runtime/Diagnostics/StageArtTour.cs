@@ -23,16 +23,22 @@ namespace RuinRunner
                 for (var stage = 0; stage < CampaignStage.Count; stage++)
                 {
                     var graph = ProceduralStageGenerator.Generate(50000 + seed, stage);
-                    if (graph.Diagnostics.UsedFallback) fallbacks++;
+                    if (graph.Diagnostics.UsedFallback)
+                        fallbacks++;
                     retries += graph.Diagnostics.Attempts - 1;
                     var report = GeneratedStageGeometry.Validate(graph, true);
                     errors += report.Errors.Count;
-                    foreach (var error in report.Errors) Debug.LogError("[Stage Art Tour] seed " + seed + " stage " + stage + ": " + error);
+                    foreach (var error in report.Errors)
+                        Debug.LogError("[Stage Art Tour] seed " + seed + " stage " + stage + ": " + error);
                     foreach (var region in graph.Regions)
                     {
-                        if (region.Role != RegionRole.Combat) continue;
+                        if (region.Role != RegionRole.Combat)
+                            continue;
                         var count = region.Module.Obstacles.Length;
-                        rooms++; obstacles += count; fewest = Mathf.Min(fewest, count); most = Mathf.Max(most, count);
+                        rooms++;
+                        obstacles += count;
+                        fewest = Mathf.Min(fewest, count);
+                        most = Mathf.Max(most, count);
                         layouts.Add(region.Module.Id.Substring(region.Module.Id.IndexOf('-') + 1));
                     }
                 }
@@ -43,7 +49,12 @@ namespace RuinRunner
         {
             var args = System.Environment.GetCommandLineArgs();
             var at = System.Array.IndexOf(args, Argument);
-            if (at + 1 >= args.Length) { Debug.LogError(Argument + " needs a folder"); Application.Quit(2); yield break; }
+            if (at + 1 >= args.Length)
+            {
+                Debug.LogError(Argument + " needs a folder");
+                Application.Quit(2);
+                yield break;
+            }
             var folder = args[at + 1];
             var seed = at + 2 < args.Length && int.TryParse(args[at + 2], out var given) ? given : 4242;
             Directory.CreateDirectory(folder);
@@ -63,18 +74,23 @@ namespace RuinRunner
                 var onWalls = 0;
                 foreach (var placed in map.Root.GetComponentsInChildren<SpriteRenderer>())
                 {
-                    if (!placed.name.Contains("dressing") && placed.name != "Floor detail") continue;
+                    if (!placed.name.Contains("dressing") && placed.name != "Floor detail")
+                        continue;
                     // A moving piece's frames carry empty room to move in; it was placed by its still picture, which this check already covered.
                     var living = placed.GetComponent<EnvironmentProp>();
-                    if (living != null && living.LivingClip != null && living.LivingClip.StartsWith("Prop")) continue;
+                    if (living != null && living.LivingClip != null && living.LivingClip.StartsWith("Prop"))
+                        continue;
                     var picture = new Rect(placed.bounds.min, placed.bounds.size);
-                    if (StageDressing.OnBareFloor(map.Terrain, picture)) continue;
+                    if (StageDressing.OnBareFloor(map.Terrain, picture))
+                        continue;
                     onWalls++;
                     Debug.LogError("[Stage Art Tour] on a wall: " + placed.name + " " + placed.sprite.name + " at " + picture);
                 }
                 Debug.Log("[Stage Art Tour] stage " + stage + ": " + onWalls + " pictures on walls");
-                if (System.Array.IndexOf(args, RouteCheckArgument) >= 0) yield return CheckEnemyRoutes(map, follow, stage);
-                if (System.Array.IndexOf(args, LivingPropsArgument) >= 0) yield return PhotographLivingProps(follow, view, folder);
+                if (System.Array.IndexOf(args, RouteCheckArgument) >= 0)
+                    yield return CheckEnemyRoutes(map, follow, stage);
+                if (System.Array.IndexOf(args, LivingPropsArgument) >= 0)
+                    yield return PhotographLivingProps(follow, view, folder);
                 WritePlan(map, Path.Combine(folder, "plan" + stage + ".png"));
                 foreach (var region in map.Graph.Regions)
                 {
@@ -101,7 +117,8 @@ namespace RuinRunner
                     yield return new WaitForEndOfFrame();
                     Capture(view, Path.Combine(folder, "seal" + stage + "-open-" + after.ToString("0.00") + ".png"));
                 }
-                foreach (var prop in FindObjectsByType<EnvironmentProp>()) dressing++;
+                foreach (var prop in FindObjectsByType<EnvironmentProp>())
+                    dressing++;
                 Debug.Log("[Stage Art Tour] stage " + stage + ": " + map.Graph.Regions.Length + " regions, " + dressing + " props");
                 Destroy(map.Root);
                 yield return null;
@@ -120,7 +137,8 @@ namespace RuinRunner
             var seen = new System.Collections.Generic.HashSet<string>();
             foreach (var prop in FindObjectsByType<EnvironmentProp>())
             {
-                if (prop.LivingClip == null || !(prop.LivingClip.StartsWith("Prop") || prop.LivingClip.StartsWith("FxProp")) || !seen.Add(prop.LivingClip)) continue;
+                if (prop.LivingClip == null || !(prop.LivingClip.StartsWith("Prop") || prop.LivingClip.StartsWith("FxProp")) || !seen.Add(prop.LivingClip))
+                    continue;
                 var at = (Vector2)prop.transform.position;
                 hero.Teleport(at + new Vector2(1.1f, -.2f));
                 view.transform.position = new Vector3(at.x, at.y + .4f, view.transform.position.z);
@@ -144,7 +162,8 @@ namespace RuinRunner
             private void OnAudioFilterRead(float[] data, int channels)
             {
                 Buffers++;
-                foreach (var sample in data) Peak = Mathf.Max(Peak, Mathf.Abs(sample));
+                foreach (var sample in data)
+                    Peak = Mathf.Max(Peak, Mathf.Abs(sample));
             }
         }
 
@@ -165,7 +184,8 @@ namespace RuinRunner
             var clock = new System.Diagnostics.Stopwatch();
             foreach (var region in map.Graph.Regions)
             {
-                if (!map.RequiresCombat(region.Index)) continue;
+                if (!map.RequiresCombat(region.Index))
+                    continue;
                 var room = map.GetRoom(region.Index);
                 var center = map.GetRoomCenter(region.Index);
                 map.BeginEncounter(region.Index);
@@ -176,7 +196,8 @@ namespace RuinRunner
                     clock.Restart();
                     StageNavigation.FindPath(map.Terrain, center, stand);
                     clock.Stop();
-                    searches++; slowest = Mathf.Max(slowest, (float)clock.Elapsed.TotalMilliseconds);
+                    searches++;
+                    slowest = Mathf.Max(slowest, (float)clock.Elapsed.TotalMilliseconds);
                     for (var wave = 0; wave < room.WaveCount; wave++)
                         WaveDirector.SpawnWave(room, wave, hero, () => false, _ => { }, follow, center, map.Terrain);
                     var enemies = FindObjectsByType<EnemyController>();
@@ -190,9 +211,11 @@ namespace RuinRunner
                     }
                     foreach (var enemy in enemies)
                     {
-                        if (enemy == null || enemy.Type == EnemyType.RuneTotem) continue;
+                        if (enemy == null || enemy.Type == EnemyType.RuneTotem)
+                            continue;
                         checkedEnemies++;
-                        if (reached.Contains(enemy)) continue;
+                        if (reached.Contains(enemy))
+                            continue;
                         stuck++;
                         Debug.LogError("[Stage Art Tour] stuck: " + enemy.Type + " in " + region.Id + " at " + enemy.transform.position + ", hero at " + stand + ": " + enemy.RouteReport());
                     }
@@ -215,14 +238,24 @@ namespace RuinRunner
         {
             const int Scale = 4;
             var bounds = map.Terrain.Bounds;
-            var width = Mathf.CeilToInt(bounds.width) * Scale; var height = Mathf.CeilToInt(bounds.height) * Scale;
+            var width = Mathf.CeilToInt(bounds.width) * Scale;
+            var height = Mathf.CeilToInt(bounds.height) * Scale;
             var plan = new Texture2D(width, height, TextureFormat.RGB24, false);
             for (var y = 0; y < height; y++)
-            for (var x = 0; x < width; x++)
-                plan.SetPixel(x, y, map.Terrain.IsOpen(bounds.min + new Vector2((x + .5f) / Scale, (y + .5f) / Scale)) ? new Color(.82f, .78f, .62f) : new Color(.12f, .12f, .16f));
-            var screenWidth = Mathf.RoundToInt(CameraFollow.ViewHalfHeight * 2f * 16f / 9f) * Scale; var screenHeight = Mathf.RoundToInt(CameraFollow.ViewHalfHeight * 2f) * Scale;
-            for (var x = 0; x < screenWidth && x < width; x++) { plan.SetPixel(x, 0, Color.red); plan.SetPixel(x, Mathf.Min(screenHeight, height - 1), Color.red); }
-            for (var y = 0; y < screenHeight && y < height; y++) { plan.SetPixel(0, y, Color.red); plan.SetPixel(Mathf.Min(screenWidth, width - 1), y, Color.red); }
+                for (var x = 0; x < width; x++)
+                    plan.SetPixel(x, y, map.Terrain.IsOpen(bounds.min + new Vector2((x + .5f) / Scale, (y + .5f) / Scale)) ? new Color(.82f, .78f, .62f) : new Color(.12f, .12f, .16f));
+            var screenWidth = Mathf.RoundToInt(CameraFollow.ViewHalfHeight * 2f * 16f / 9f) * Scale;
+            var screenHeight = Mathf.RoundToInt(CameraFollow.ViewHalfHeight * 2f) * Scale;
+            for (var x = 0; x < screenWidth && x < width; x++)
+            {
+                plan.SetPixel(x, 0, Color.red);
+                plan.SetPixel(x, Mathf.Min(screenHeight, height - 1), Color.red);
+            }
+            for (var y = 0; y < screenHeight && y < height; y++)
+            {
+                plan.SetPixel(0, y, Color.red);
+                plan.SetPixel(Mathf.Min(screenWidth, width - 1), y, Color.red);
+            }
             plan.Apply();
             File.WriteAllBytes(path, plan.EncodeToPNG());
             Destroy(plan);
@@ -262,11 +295,17 @@ namespace RuinRunner
             var target = new RenderTexture(1280, 720, 24);
             var pixels = new Texture2D(1280, 720, TextureFormat.RGB24, false);
             var previous = RenderTexture.active;
-            view.targetTexture = target; view.Render(); RenderTexture.active = target;
-            pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); pixels.Apply();
-            view.targetTexture = null; RenderTexture.active = previous;
+            view.targetTexture = target;
+            view.Render();
+            RenderTexture.active = target;
+            pixels.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+            pixels.Apply();
+            view.targetTexture = null;
+            RenderTexture.active = previous;
             File.WriteAllBytes(path, pixels.EncodeToPNG());
-            target.Release(); Destroy(target); Destroy(pixels);
+            target.Release();
+            Destroy(target);
+            Destroy(pixels);
         }
     }
 }

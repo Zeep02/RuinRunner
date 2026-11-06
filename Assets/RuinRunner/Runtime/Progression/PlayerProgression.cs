@@ -28,15 +28,17 @@ namespace RuinRunner
                 Level++;
                 PendingLevelRewards++;
                 RequiredExperience = 28 + (Level - 1) * 16;
-                PrototypeAudio.Play(PrototypeSound.Upgrade, AudioChannel.Interface, .55f);
+                GameAudio.Play(GameSound.Upgrade, AudioChannel.Interface, .55f);
                 BossNativeEffect.CreateOverActors(null, "FxManaBurst", transform.position, 0f);
-                if (onLevelRewardEarned != null) onLevelRewardEarned();
+                if (onLevelRewardEarned != null)
+                    onLevelRewardEarned();
             }
         }
 
         public bool SpendLevelReward()
         {
-            if (PendingLevelRewards <= 0) return false;
+            if (PendingLevelRewards <= 0)
+                return false;
             PendingLevelRewards--;
             return true;
         }

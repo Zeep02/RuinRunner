@@ -65,10 +65,14 @@ namespace RuinRunner
             var half = Size * .5f;
             switch (outward)
             {
-                case RoomTravelDirection.Left: return new Vector2(-half.x + 1.8f, 0);
-                case RoomTravelDirection.Up: return new Vector2(0, half.y - 1.4f);
-                case RoomTravelDirection.Down: return new Vector2(0, -half.y + 1.4f);
-                default: return new Vector2(half.x - 1.8f, 0);
+                case RoomTravelDirection.Left:
+                    return new Vector2(-half.x + 1.8f, 0);
+                case RoomTravelDirection.Up:
+                    return new Vector2(0, half.y - 1.4f);
+                case RoomTravelDirection.Down:
+                    return new Vector2(0, -half.y + 1.4f);
+                default:
+                    return new Vector2(half.x - 1.8f, 0);
             }
         }
         public Vector2 ExitPoint(RoomTravelDirection outward)
@@ -76,10 +80,14 @@ namespace RuinRunner
             var half = Size * .5f - Vector2.one * .48f;
             switch (outward)
             {
-                case RoomTravelDirection.Left: return new Vector2(-half.x, 0);
-                case RoomTravelDirection.Up: return new Vector2(0, half.y);
-                case RoomTravelDirection.Down: return new Vector2(0, -half.y);
-                default: return new Vector2(half.x, 0);
+                case RoomTravelDirection.Left:
+                    return new Vector2(-half.x, 0);
+                case RoomTravelDirection.Up:
+                    return new Vector2(0, half.y);
+                case RoomTravelDirection.Down:
+                    return new Vector2(0, -half.y);
+                default:
+                    return new Vector2(half.x, 0);
             }
         }
         [Tooltip("탑다운 XY 평면의 고형 장애물. 기존 저장 호환을 위해 필드명 platforms를 유지합니다.")]
@@ -91,9 +99,11 @@ namespace RuinRunner
         {
             get
             {
-                if (enemies == null) return false;
+                if (enemies == null)
+                    return false;
                 foreach (var enemy in enemies)
-                    if (enemy.wave > 0) return true;
+                    if (enemy.wave > 0)
+                        return true;
                 return false;
             }
         }
@@ -102,11 +112,13 @@ namespace RuinRunner
         {
             get
             {
-                if (enemies == null || enemies.Length == 0) return 0;
+                if (enemies == null || enemies.Length == 0)
+                    return 0;
                 if (UsesExplicitWaves)
                 {
                     var highest = 0;
-                    foreach (var enemy in enemies) highest = Mathf.Max(highest, enemy.wave);
+                    foreach (var enemy in enemies)
+                        highest = Mathf.Max(highest, enemy.wave);
                     return highest + 1;
                 }
                 if (bossRoom)
@@ -118,7 +130,8 @@ namespace RuinRunner
                         hasBoss |= enemy.type == EnemyType.Boss;
                         hasMinion |= enemy.type != EnemyType.Boss;
                     }
-                    if (hasBoss && hasMinion) return 2;
+                    if (hasBoss && hasMinion)
+                        return 2;
                 }
                 return Mathf.CeilToInt(enemies.Length / (float)Mathf.Max(1, automaticWaveSize));
             }
@@ -126,9 +139,12 @@ namespace RuinRunner
 
         public int GetWaveIndex(int enemyIndex)
         {
-            if (enemies == null || enemyIndex < 0 || enemyIndex >= enemies.Length) return -1;
-            if (UsesExplicitWaves) return Mathf.Max(0, enemies[enemyIndex].wave);
-            if (bossRoom && WaveCount > 1) return enemies[enemyIndex].type == EnemyType.Boss ? 1 : 0;
+            if (enemies == null || enemyIndex < 0 || enemyIndex >= enemies.Length)
+                return -1;
+            if (UsesExplicitWaves)
+                return Mathf.Max(0, enemies[enemyIndex].wave);
+            if (bossRoom && WaveCount > 1)
+                return enemies[enemyIndex].type == EnemyType.Boss ? 1 : 0;
             return enemyIndex / Mathf.Max(1, automaticWaveSize);
         }
     }

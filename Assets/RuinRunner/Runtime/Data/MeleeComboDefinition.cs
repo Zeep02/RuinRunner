@@ -49,15 +49,15 @@ namespace RuinRunner
 
     public static class MeleeComboCatalog
     {
-        private static MeleeAttackStep Step(float damage, float delay, float reach, float width, float height, float angle, float knockback,MeleeAttackMotion motion=MeleeAttackMotion.Sweep)
+        private static MeleeAttackStep Step(float damage, float delay, float reach, float width, float height, float angle, float knockback, MeleeAttackMotion motion = MeleeAttackMotion.Sweep)
         {
             // The readable attack silhouette and its damage envelope grow together.
             // Keep the inner edge at the hand; extend outward instead of leaving a
             // dead zone next to the player when increasing the reach.
             var length = width * (motion == MeleeAttackMotion.Cleave ? 1.7f : motion == MeleeAttackMotion.Thrust ? 1.65f : 1.5f);
             var breadth = height * (motion == MeleeAttackMotion.Thrust ? 1.5f : motion == MeleeAttackMotion.CrossCut ? 3f : 2.5f);
-            return new MeleeAttackStep(damage, delay, reach + (length-width)*.5f,
-                new Vector2(length, breadth), angle, knockback,motion);
+            return new MeleeAttackStep(damage, delay, reach + (length - width) * .5f,
+                new Vector2(length, breadth), angle, knockback, motion);
         }
 
         private static readonly MeleeComboProfile[] Profiles =
@@ -74,7 +74,7 @@ namespace RuinRunner
             new MeleeComboProfile("katana", WeaponFamily.Katana, .7f, .4f,
                 new[]
                 {
-                    // Rising cut, falling cut, a full turn, then the driving cross. Damage per second stays what the old three hits gave.
+                    // Rising cut, falling cut, a full turn, then the driving cross.
                     Step(.9f, .72f, .92f, 1.75f, .72f, -16f, 4f),
                     Step(.95f, .68f, .98f, 1.85f, .75f, 14f, 4.5f),
                     Step(1.1f, .85f, 1f, 1.95f, .85f, 0f, 5.5f),
@@ -84,7 +84,7 @@ namespace RuinRunner
             new MeleeComboProfile("spear", WeaponFamily.Spear, .85f, .45f,
                 new[]
                 {
-                    // Thrust, a wide swing of the shaft, a low driving thrust, then a leap down on the point. Damage per second stays close to the old three hits.
+                    // Thrust, a wide swing of the shaft, a low driving thrust, then a leap down on the point.
                     Step(.95f, .9f, 1.1f, 1.7f, .55f, 0f, 5f,MeleeAttackMotion.Thrust),
                     Step(1f, .88f, 1f, 2f, .95f, 0f, 5.5f),
                     Step(.95f, .8f, 1.15f, 1.8f, .55f, 0f, 6f,MeleeAttackMotion.Thrust),
@@ -94,7 +94,7 @@ namespace RuinRunner
             new MeleeComboProfile("greatsword", WeaponFamily.Greatsword, 1f, .62f,
                 new[]
                 {
-                    // A heavy swing, the swing back, then a leap and a crash. Damage per second stays close to the old two hits.
+                    // A heavy swing, the swing back, then a leap and a crash.
                     Step(1.1f, 1.2f, 1f, 2.15f, 1.35f, -14f, 8f),
                     Step(1.2f, 1.15f, 1.05f, 2.2f, 1.4f, 10f, 9f),
                     Step(1.75f, 1.4f, 1.2f, 2.35f, 1.55f, 0f, 13f,MeleeAttackMotion.Cleave)
@@ -110,10 +110,12 @@ namespace RuinRunner
             var requestedId = weapon == null ? string.Empty : weapon.ComboProfileId;
             if (!string.IsNullOrEmpty(requestedId))
                 foreach (var profile in Profiles)
-                    if (profile.Id == requestedId) return profile;
+                    if (profile.Id == requestedId)
+                        return profile;
 
             foreach (var profile in Profiles)
-                if (profile.Family == family && profile.Id == FamilyProfileId(family)) return profile;
+                if (profile.Family == family && profile.Id == FamilyProfileId(family))
+                    return profile;
             return Profiles[0];
         }
 
@@ -121,11 +123,16 @@ namespace RuinRunner
         {
             switch (family)
             {
-                case WeaponFamily.Dagger: return "dagger";
-                case WeaponFamily.Katana: return "katana";
-                case WeaponFamily.Greatsword: return "greatsword";
-                case WeaponFamily.Spear: return "spear";
-                default: return "katana";
+                case WeaponFamily.Dagger:
+                    return "dagger";
+                case WeaponFamily.Katana:
+                    return "katana";
+                case WeaponFamily.Greatsword:
+                    return "greatsword";
+                case WeaponFamily.Spear:
+                    return "spear";
+                default:
+                    return "katana";
             }
         }
     }

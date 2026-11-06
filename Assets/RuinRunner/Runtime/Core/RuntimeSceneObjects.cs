@@ -6,8 +6,10 @@ namespace RuinRunner
     {
         public static void ClearSession()
         {
-            foreach (var effects in FindAll<ItemCombatEffects>()) effects.CancelTransient();
-            foreach (var echoes in FindAll<DashAfterimageEffect>()) echoes.CancelTransient();
+            foreach (var effects in FindAll<ItemCombatEffects>())
+                effects.CancelTransient();
+            foreach (var echoes in FindAll<DashAfterimageEffect>())
+                echoes.CancelTransient();
             DestroyAll<EnemyController>();
             DestroyAll<EnemySpawnTelegraph>();
             DestroyAll<RewardChest>();

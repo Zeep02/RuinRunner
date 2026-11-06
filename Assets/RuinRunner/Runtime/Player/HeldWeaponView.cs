@@ -25,11 +25,13 @@ namespace RuinRunner
         internal SpriteRenderer VisualRenderer => weaponRenderer;
         public Vector2 BladePoint(float distance)
         {
-            if(weaponPivot==null||player.EquippedWeapon==null)return transform.position;
-            var forward=NativeWeaponArt.TryGet(player.EquippedWeapon.Id,out var pose)?pose.ForwardAngle:45f;
-            var axis=new Vector2(Mathf.Cos(forward*Mathf.Deg2Rad),Mathf.Sin(forward*Mathf.Deg2Rad));
-            if(weaponRenderer.flipY)axis.y=-axis.y;
-            return weaponPivot.TransformPoint(axis*distance);
+            if (weaponPivot == null || player.EquippedWeapon == null)
+                return transform.position;
+            var forward = NativeWeaponArt.TryGet(player.EquippedWeapon.Id, out var pose) ? pose.ForwardAngle : 45f;
+            var axis = new Vector2(Mathf.Cos(forward * Mathf.Deg2Rad), Mathf.Sin(forward * Mathf.Deg2Rad));
+            if (weaponRenderer.flipY)
+                axis.y = -axis.y;
+            return weaponPivot.TransformPoint(axis * distance);
         }
 
         public void Initialize(PlayerController owner)
@@ -55,13 +57,20 @@ namespace RuinRunner
 
         private void LateUpdate()
         {
-            if (player == null || weaponPivot == null || weaponRenderer == null) return;
-            if (player.IsDead) { weaponRenderer.enabled=false; return; }
-            if (player.AnimationPaused) return;
+            if (player == null || weaponPivot == null || weaponRenderer == null)
+                return;
+            if (player.IsDead)
+            {
+                weaponRenderer.enabled = false;
+                return;
+            }
+            if (player.AnimationPaused)
+                return;
 
             RefreshWeapon(false);
             weaponRenderer.enabled = weaponRenderer.sprite != null && (bodyRenderer == null || bodyRenderer.enabled);
-            if (!weaponRenderer.enabled) return;
+            if (!weaponRenderer.enabled)
+                return;
             weaponRenderer.color = bodyRenderer == null ? Color.white : bodyRenderer.color;
 
             if (lastAttackSequence != player.AttackAnimationSequence)
@@ -79,15 +88,16 @@ namespace RuinRunner
                 ? player.WeaponAimDirection.normalized
                 : Vector2.right * player.Facing;
             weaponRenderer.sortingOrder = (bodyRenderer == null ? 1000 : bodyRenderer.sortingOrder)
-                + (weapon.AttackType==WeaponAttackType.Ranged || aim.y > .12f || bodyAnimation!=null&&bodyAnimation.HandBehindBody ? -1 : 1);
+                + (weapon.AttackType == WeaponAttackType.Ranged || aim.y > .12f || bodyAnimation != null && bodyAnimation.HandBehindBody ? -1 : 1);
             // Native ranged hands wrap the grip in front. Stocks and bow strings
             // crossing the upper body remain behind the unchanged face/backpack.
             var flipped = aim.x < 0f;
             weaponRenderer.flipY = flipped;
 
-            var sourceForwardAngle = NativeWeaponArt.TryGet(weapon.Id,out var nativePose) ? nativePose.ForwardAngle : RangedWeaponArt.TryGet(weapon.Id, out var landmarks)
+            var sourceForwardAngle = NativeWeaponArt.TryGet(weapon.Id, out var nativePose) ? nativePose.ForwardAngle : RangedWeaponArt.TryGet(weapon.Id, out var landmarks)
                 ? landmarks.ForwardAngle : IsBladeFamily(weapon.Family) ? 45f : 0f;
-            if (flipped) sourceForwardAngle = -sourceForwardAngle;
+            if (flipped)
+                sourceForwardAngle = -sourceForwardAngle;
             var targetAngle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg - sourceForwardAngle;
             // Carry the barrel down during evasion; the native dash arm is raised
             // near the shoulder and a level barrel would cross the face.
@@ -98,13 +108,14 @@ namespace RuinRunner
                 // The raised dash hand overlaps stocks/handles. Keep the same
                 // body occlusion as native armed poses in every dash direction.
                 weaponRenderer.sortingOrder = (bodyRenderer == null ? 1000 : bodyRenderer.sortingOrder)
-                    + (weapon.AttackType==WeaponAttackType.Ranged || player.DashDirection.y>.12f ? -1 : 1);
+                    + (weapon.AttackType == WeaponAttackType.Ranged || player.DashDirection.y > .12f ? -1 : 1);
             }
-            DisplayedActionRotation=GetActionRotation(weapon);
+            DisplayedActionRotation = GetActionRotation(weapon);
             targetAngle += DisplayedActionRotation;
-            if (player.IsMeleeSwingActive) targetAngle += player.MeleeAngleOffset;
+            if (player.IsMeleeSwingActive)
+                targetAngle += player.MeleeAngleOffset;
 
-            if (!angleInitialized || player.IsMeleeSwingActive || player.IsRangedShotActive || dashCarry || bodyAnimation!=null&&bodyAnimation.AuthoredWeaponRotationActive)
+            if (!angleInitialized || player.IsMeleeSwingActive || player.IsRangedShotActive || dashCarry || bodyAnimation != null && bodyAnimation.AuthoredWeaponRotationActive)
             {
                 displayedAngle = targetAngle;
                 angleInitialized = true;
@@ -119,10 +130,10 @@ namespace RuinRunner
             }
 
             weaponPivot.localRotation = Quaternion.Euler(0f, 0f, displayedAngle);
-            if(!dashCarry&&IsBladeFamily(weapon.Family))
+            if (!dashCarry && IsBladeFamily(weapon.Family))
             {
-                weaponRenderer.sortingOrder=(bodyRenderer==null?1000:bodyRenderer.sortingOrder)
-                    -2;
+                weaponRenderer.sortingOrder = (bodyRenderer == null ? 1000 : bodyRenderer.sortingOrder)
+                    - 2;
                 // Native hands already wrap each grip. A hilt or broad guard
                 // reaches back from the socket even with a forward-facing blade,
                 // so direction-based front sorting would cover the face/sleeve
@@ -131,8 +142,8 @@ namespace RuinRunner
                 // Reserve the intervening order for melee light: blade < light
                 // < the original face/hand silhouette, with no sorting ties.
             }
-            if(dashCarry&&IsBladeFamily(weapon.Family))
-                weaponRenderer.sortingOrder=(bodyRenderer==null?1000:bodyRenderer.sortingOrder)-2;
+            if (dashCarry && IsBladeFamily(weapon.Family))
+                weaponRenderer.sortingOrder = (bodyRenderer == null ? 1000 : bodyRenderer.sortingOrder) - 2;
             weaponPivot.localPosition = GetHandPosition(weapon, aim);
             weaponPivot.localScale = Vector3.one * GetDisplayScale(weapon) * (1f + SwapPop * Mathf.Clamp01(1f - (Time.unscaledTime - swappedAt) / SwapPopSeconds));
         }
@@ -143,7 +154,8 @@ namespace RuinRunner
         {
             var weapon = player == null ? null : player.EquippedWeapon;
             var nextId = weapon == null ? null : weapon.Id;
-            if (!force && nextId == currentWeaponId) return;
+            if (!force && nextId == currentWeaponId)
+                return;
 
             // A new weapon arrives in the hand with a flourish, not by being already there.
             if (!force && currentWeaponId != null && weapon != null)
@@ -180,22 +192,27 @@ namespace RuinRunner
         public float DisplayedActionRotation { get; private set; }
         private float GetActionRotation(WeaponDefinition weapon)
         {
-            if(bodyAnimation!=null&&bodyAnimation.AuthoredWeaponRotationActive)return bodyAnimation.AuthoredWeaponRotation;
-            if (weapon.AttackType == WeaponAttackType.Ranged) return 0f;
-            if (player.IsThrustActive) return 0f; // Blade stays aligned with the committed stab, never sweeps.
+            if (bodyAnimation != null && bodyAnimation.AuthoredWeaponRotationActive)
+                return bodyAnimation.AuthoredWeaponRotation;
+            if (weapon.AttackType == WeaponAttackType.Ranged)
+                return 0f;
+            if (player.IsThrustActive)
+                return 0f; // Blade stays aligned with the committed stab, never sweeps.
 
             if (player.IsGuarding || player.IsParrying)
                 return player.IsParrying ? -28f : 58f;
 
             if (player.IsGreatswordCharging)
                 return 120f;
-            if(!player.IsMeleeSwingActive)return 0f;
+            if (!player.IsMeleeSwingActive)
+                return 0f;
 
             var heavy = player.MotionState == PlayerMotionState.HeavyAttack;
             var light = player.MotionState == PlayerMotionState.Attack;
-            if (!heavy && !light) return 0f;
+            if (!heavy && !light)
+                return 0f;
 
-            return MeleeMotionTiming.ActionAngle(player.AttackAnimationProgress, heavy, player.ActiveComboAnimationStep,player.ActiveMeleeMotion);
+            return MeleeMotionTiming.ActionAngle(player.AttackAnimationProgress, heavy, player.ActiveComboAnimationStep, player.ActiveMeleeMotion);
         }
 
         private static bool IsBladeFamily(WeaponFamily family)
@@ -212,38 +229,51 @@ namespace RuinRunner
         {
             // Reviewed greatswords already have a longer, wider native silhouette.
             // Keep their texel density equal to guns and the hero instead of stretching them.
-            if(NativeWeaponArt.Supports(weapon.Id))return weapon.Family==WeaponFamily.Bow?.9f:1f;
+            if (NativeWeaponArt.Supports(weapon.Id))
+                return weapon.Family == WeaponFamily.Bow ? .9f : 1f;
             switch (weapon.Family)
             {
-                case WeaponFamily.Dagger: return .56f;
-                case WeaponFamily.Longsword: return .76f;
-                case WeaponFamily.Mace: return .72f;
-                case WeaponFamily.Katana: return .78f;
-                case WeaponFamily.Greatsword: return .98f;
-                case WeaponFamily.Bow: return .82f;
-                case WeaponFamily.Crossbow: return .72f;
-                case WeaponFamily.Pistol: return .58f;
-                case WeaponFamily.Rifle: return .83f;
-                case WeaponFamily.Shotgun: return .86f;
-                default: return .96f;
+                case WeaponFamily.Dagger:
+                    return .56f;
+                case WeaponFamily.Longsword:
+                    return .76f;
+                case WeaponFamily.Mace:
+                    return .72f;
+                case WeaponFamily.Katana:
+                    return .78f;
+                case WeaponFamily.Greatsword:
+                    return .98f;
+                case WeaponFamily.Bow:
+                    return .82f;
+                case WeaponFamily.Crossbow:
+                    return .72f;
+                case WeaponFamily.Pistol:
+                    return .58f;
+                case WeaponFamily.Rifle:
+                    return .83f;
+                case WeaponFamily.Shotgun:
+                    return .86f;
+                default:
+                    return .96f;
             }
         }
 
         public static Vector2 ShotMuzzlePosition(WeaponDefinition weapon, Transform owner, Vector2 aim)
         {
-            var sprite=PixelArtAtlas.GetHeldWeaponSprite(weapon);
-            if(sprite==null || !RangedWeaponArt.TryGet(weapon.Id,out var landmarks))
-                return (Vector2)owner.position+aim*.75f;
-            var muzzle=(new Vector2(landmarks.Muzzle.x,sprite.rect.height-landmarks.Muzzle.y)-sprite.pivot)/sprite.pixelsPerUnit;
-            var flipped=aim.x<0;
-            if(flipped)muzzle.y=-muzzle.y;
-            var angle=Mathf.Atan2(aim.y,aim.x)*Mathf.Rad2Deg-(flipped?-landmarks.ForwardAngle:landmarks.ForwardAngle);
-            var offset=(Vector2)(Quaternion.Euler(0,0,angle)*muzzle)*GetDisplayScale(weapon);
+            var sprite = PixelArtAtlas.GetHeldWeaponSprite(weapon);
+            if (sprite == null || !RangedWeaponArt.TryGet(weapon.Id, out var landmarks))
+                return (Vector2)owner.position + aim * .75f;
+            var muzzle = (new Vector2(landmarks.Muzzle.x, sprite.rect.height - landmarks.Muzzle.y) - sprite.pivot) / sprite.pixelsPerUnit;
+            var flipped = aim.x < 0;
+            if (flipped)
+                muzzle.y = -muzzle.y;
+            var angle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg - (flipped ? -landmarks.ForwardAngle : landmarks.ForwardAngle);
+            var offset = (Vector2)(Quaternion.Euler(0, 0, angle) * muzzle) * GetDisplayScale(weapon);
             // Emission happens in Update, before LateUpdate selects the shot body.
             // Use that same authored emission socket instead of last frame's pose.
-            var animation=owner.GetComponent<PlayerAnimationController>();
-            var hand=animation==null?PlayerAnimationController.ShootingHandPosition(aim,0):animation.EmissionHandPosition(aim);
-            return owner.TransformPoint(hand+offset);
+            var animation = owner.GetComponent<PlayerAnimationController>();
+            var hand = animation == null ? PlayerAnimationController.ShootingHandPosition(aim, 0) : animation.EmissionHandPosition(aim);
+            return owner.TransformPoint(hand + offset);
         }
     }
 }

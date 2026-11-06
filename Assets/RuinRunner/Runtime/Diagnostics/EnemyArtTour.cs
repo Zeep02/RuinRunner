@@ -17,7 +17,8 @@ namespace RuinRunner
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Boot()
         {
-            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Argument) < 0) return;
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Argument) < 0)
+                return;
             DontDestroyOnLoad(new GameObject("EnemyArtTour").AddComponent<EnemyArtTour>());
         }
 
@@ -25,11 +26,18 @@ namespace RuinRunner
         {
             var args = System.Environment.GetCommandLineArgs();
             var at = System.Array.IndexOf(args, Argument);
-            if (at + 1 >= args.Length) { Debug.LogError(Argument + " needs a folder"); Application.Quit(2); yield break; }
+            if (at + 1 >= args.Length)
+            {
+                Debug.LogError(Argument + " needs a folder");
+                Application.Quit(2);
+                yield break;
+            }
             var folder = args[at + 1];
             var types = new List<EnemyType>();
-            for (var i = at + 2; i < args.Length && System.Enum.TryParse<EnemyType>(args[i], out var named); i++) types.Add(named);
-            if (types.Count == 0) types.AddRange((EnemyType[])System.Enum.GetValues(typeof(EnemyType)));
+            for (var i = at + 2; i < args.Length && System.Enum.TryParse<EnemyType>(args[i], out var named); i++)
+                types.Add(named);
+            if (types.Count == 0)
+                types.AddRange((EnemyType[])System.Enum.GetValues(typeof(EnemyType)));
 
             GameController game = null;
             while (game == null || game.Player == null || !game.IsRunActive)
@@ -64,7 +72,8 @@ namespace RuinRunner
             }
             yield return new WaitForSeconds(1.2f);
             yield return Shot(Path.Combine(folder, "accessories-field.png"));
-            for (var i = 0; i < all.Count && game.Inventory.StoredItemCount < game.Inventory.UnlockedCapacity; i++) game.Inventory.AddAccessory(all[i]);
+            for (var i = 0; i < all.Count && game.Inventory.StoredItemCount < game.Inventory.UnlockedCapacity; i++)
+                game.Inventory.AddAccessory(all[i]);
             typeof(GameController).GetProperty(nameof(GameController.IsInventoryOpen)).SetValue(game, true);
             yield return new WaitForSeconds(.4f);
             yield return Shot(Path.Combine(folder, "accessories-bag.png"));
@@ -88,7 +97,8 @@ namespace RuinRunner
                 var hit = false;
                 var from = (Vector2)enemy.transform.position + new Vector2(-4f, height);
                 foreach (var cast in Physics2D.RaycastAll(from, Vector2.right, 8f, 1 << GameLayers.Enemy))
-                    if (EnemyController.DamageTarget(cast.collider) == enemy) hit = true;
+                    if (EnemyController.DamageTarget(cast.collider) == enemy)
+                        hit = true;
                 text.Append("ray y+").Append(height).Append(hit ? " hit\n" : " miss\n");
             }
             return text.ToString();
@@ -117,7 +127,8 @@ namespace RuinRunner
                 {
                     yield return new WaitForEndOfFrame();
                     shown += Time.unscaledDeltaTime;
-                    if (entranceFrame++ % 6 == 0) ScreenCapture.CaptureScreenshot(Path.Combine(folder, "entrance-" + entranceFrame.ToString("D3") + ".png"));
+                    if (entranceFrame++ % 6 == 0)
+                        ScreenCapture.CaptureScreenshot(Path.Combine(folder, "entrance-" + entranceFrame.ToString("D3") + ".png"));
                 }
             }
             var duration = boss ? 62f : 30f;
@@ -136,7 +147,8 @@ namespace RuinRunner
             {
                 yield return new WaitForEndOfFrame();
                 elapsed += Time.deltaTime;
-                if (enemy == null) break;
+                if (enemy == null)
+                    break;
                 if (renderer.sprite != null)
                 {
                     var name = names.TryGetValue(renderer.sprite, out var known) ? known : "UNKNOWN:" + renderer.sprite.name;
@@ -148,12 +160,15 @@ namespace RuinRunner
                     log.Append(Mathf.RoundToInt(screen.x)).Append(',').Append(Mathf.RoundToInt(screen.y)).Append('\n');
                 }
                 // Every drawn frame around a strike, a sparse record the rest of the time.
-                if (enemy.AttackVisualPhase == 1 && lastPhase != 1) strikeFrames = 14;
+                if (enemy.AttackVisualPhase == 1 && lastPhase != 1)
+                    strikeFrames = 14;
                 lastPhase = enemy.AttackVisualPhase;
-                if (strikeFrames > 0 || frame % 6 == 0) ScreenCapture.CaptureScreenshot(Path.Combine(folder, frame.ToString("D4") + ".png"));
+                if (strikeFrames > 0 || frame % 6 == 0)
+                    ScreenCapture.CaptureScreenshot(Path.Combine(folder, frame.ToString("D4") + ".png"));
                 strikeFrames--;
                 frame++;
-                if (enemy.IsDead) continue;
+                if (enemy.IsDead)
+                    continue;
                 // Keep the hero clear of enemies that chase, and make them turn to face all four ways.
                 if (elapsed >= nextMove && !enemy.IsActing)
                 {
@@ -181,9 +196,11 @@ namespace RuinRunner
             var summary = new StringBuilder();
             var keys = new List<string>(seen.Keys);
             keys.Sort();
-            foreach (var key in keys) summary.Append(key).Append(' ').Append(seen[key]).Append('\n');
+            foreach (var key in keys)
+                summary.Append(key).Append(' ').Append(seen[key]).Append('\n');
             File.WriteAllText(Path.Combine(folder, "clips.txt"), summary.ToString());
-            if (enemy != null) Destroy(enemy.gameObject);
+            if (enemy != null)
+                Destroy(enemy.gameObject);
             yield return null;
         }
 
@@ -192,12 +209,15 @@ namespace RuinRunner
             var names = new Dictionary<Sprite, string>();
             void Add(Sprite[] frames, string label)
             {
-                if (frames == null) return;
+                if (frames == null)
+                    return;
                 for (var i = 0; i < frames.Length; i++)
-                    if (frames[i] != null && !names.ContainsKey(frames[i])) names[frames[i]] = label + "/" + i.ToString("D2");
+                    if (frames[i] != null && !names.ContainsKey(frames[i]))
+                        names[frames[i]] = label + "/" + i.ToString("D2");
             }
             if (type == EnemyType.Boss)
-                for (var row = 0; row < 8; row++) Add(IndividualArt.Frames(BossSpriteAnimator.RowId(row), BossSpriteAnimator.FrameCount), "row" + row);
+                for (var row = 0; row < 8; row++)
+                    Add(IndividualArt.Frames(BossSpriteAnimator.RowId(row), BossSpriteAnimator.FrameCount), "row" + row);
             else if (type == EnemyType.Tidekeeper)
             {
                 Add(TidekeeperArt.Frames(0), "idle");
@@ -212,7 +232,8 @@ namespace RuinRunner
             else
                 for (var d = 0; d < 4; d++)
                 {
-                    for (var state = 0; state < 4; state++) Add(ExternalCreatureArt.Frames(type, state, d), new[] { "idle", "walk", "attack", "death" }[state] + "/" + Directions[d]);
+                    for (var state = 0; state < 4; state++)
+                        Add(ExternalCreatureArt.Frames(type, state, d), new[] { "idle", "walk", "attack", "death" }[state] + "/" + Directions[d]);
                     Add(ExternalCreatureArt.HurtFrames(type, d), "hurt/" + Directions[d]);
                     Add(ExternalCreatureArt.AttackFrames(type, d, 1), "attack1/" + Directions[d]);
                 }

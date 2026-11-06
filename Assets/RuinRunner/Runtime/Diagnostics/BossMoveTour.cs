@@ -13,7 +13,8 @@ namespace RuinRunner
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Boot()
         {
-            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Argument) < 0) return;
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Argument) < 0)
+                return;
             DontDestroyOnLoad(new GameObject("BossMoveTour").AddComponent<BossMoveTour>());
         }
 
@@ -98,7 +99,8 @@ namespace RuinRunner
             typeof(GameController).GetMethod("DropHealthPotion", Private).Invoke(game, new object[] { home + Vector2.right * 1.5f, 0 });
             legacy.SetValue(game, true);
             FieldLootPickup potion = null;
-            foreach (var item in RuntimeSceneObjects.FindAll<FieldLootPickup>()) potion = item;
+            foreach (var item in RuntimeSceneObjects.FindAll<FieldLootPickup>())
+                potion = item;
             yield return new WaitForSeconds(1.5f);
             player.Teleport(potion.LandingPosition + Vector2.left * .3f);
             yield return new WaitForSeconds(.3f);
@@ -129,7 +131,11 @@ namespace RuinRunner
                     boss.ConfigureArena(new Rect(home - new Vector2(9f, 6f), new Vector2(18f, 12f)));
                     boss.enabled = true;
                     yield return null;
-                    if (halved) { boss.TakeDamage(boss.Health - boss.MaxHealth * .45f, Vector2.zero); typeof(EnemyController).GetField("phaseShifted", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(boss, true); }
+                    if (halved)
+                    {
+                        boss.TakeDamage(boss.Health - boss.MaxHealth * .45f, Vector2.zero);
+                        typeof(EnemyController).GetField("phaseShifted", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(boss, true);
+                    }
                     var path = Path.Combine(folder, type + "-" + move + (halved ? "-2" : "-1"));
                     Directory.CreateDirectory(path);
                     Debug.Log("[Boss Move Tour] " + type + " " + move + " phase " + (halved ? 2 : 1));
@@ -141,12 +147,14 @@ namespace RuinRunner
                         // The hero keeps moving around it, so everything aimed at them has something to aim at.
                         var drift = home + new Vector2(Mathf.Sin(frame * .05f) * 3.5f, Mathf.Cos(frame * .037f) * 2.5f);
                         player.Teleport(drift);
-                        if (frame % 5 == 0) ScreenCapture.CaptureScreenshot(Path.Combine(path, frame.ToString("D3") + ".png"));
+                        if (frame % 5 == 0)
+                            ScreenCapture.CaptureScreenshot(Path.Combine(path, frame.ToString("D3") + ".png"));
                         frame++;
                         yield return new WaitForEndOfFrame();
                     }
                     Debug.Log("[Boss Move Tour] done in " + frame + " frames");
-                    if (boss != null) Destroy(boss.gameObject);
+                    if (boss != null)
+                        Destroy(boss.gameObject);
                     yield return null;
                     RuntimeSceneObjects.ClearProjectiles();
                     yield return new WaitForSeconds(.4f);

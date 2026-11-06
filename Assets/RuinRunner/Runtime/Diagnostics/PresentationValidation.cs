@@ -21,21 +21,32 @@ namespace RuinRunner
         }
         private void Update()
         {
-            if (sequence == null) return;
+            if (sequence == null)
+                return;
             StageValidationInput.BeginFrame();
             try
             {
-                if (sequence.MoveNext()) return;
+                if (sequence.MoveNext())
+                    return;
                 Debug.Log("[Presentation QA] PASS " + checks + " checks; isolated camera renders, not a normal stage run or HUD screenshot.");
-                sequence = null; Application.Quit(0);
+                sequence = null;
+                Application.Quit(0);
             }
-            catch (Exception error) { Debug.LogError("[Presentation QA] FAIL " + error); sequence = null; Application.Quit(3); }
+            catch (Exception error)
+            {
+                Debug.LogError("[Presentation QA] FAIL " + error);
+                sequence = null;
+                Application.Quit(3);
+            }
         }
         private IEnumerator Validate()
         {
-            foreach (var item in WeaponLootTable.All) CheckIcon(item.Id, InventoryIconKind.Weapon);
-            foreach (PassiveItemType item in Enum.GetValues(typeof(PassiveItemType))) CheckIcon(item.ToString(), InventoryIconKind.Passive);
-            foreach (var item in AccessoryLootTable.All) CheckIcon(item.IconId, item.IconKind);
+            foreach (var item in WeaponLootTable.All)
+                CheckIcon(item.Id, InventoryIconKind.Weapon);
+            foreach (PassiveItemType item in Enum.GetValues(typeof(PassiveItemType)))
+                CheckIcon(item.ToString(), InventoryIconKind.Passive);
+            foreach (var item in AccessoryLootTable.All)
+                CheckIcon(item.IconId, item.IconKind);
             var follow = CameraFollow.Create();
             follow.enabled = false;
             var camera = follow.GetComponent<Camera>();
@@ -58,8 +69,10 @@ namespace RuinRunner
                 for (var i = 0; i < enemies.Length; i++)
                     enemies[i] = EnemyController.Create((EnemyType)i, center + new Vector2(-2 + i * 2.7f, 0), player, () => false, _ => { }, follow);
                 camera.transform.position = new Vector3(1f, y + 1.2f, -10f);
-                for (var frame = 0; frame < 5; frame++) yield return null;
-                foreach (var enemy in enemies) enemy.enabled = false;
+                for (var frame = 0; frame < 5; frame++)
+                    yield return null;
+                foreach (var enemy in enemies)
+                    enemy.enabled = false;
                 var full = Render(camera);
                 CheckVisible(camera, player.transform.Find("VisualRoot").GetComponent<SpriteRenderer>(), full, "player y=" + y);
                 foreach (var enemy in enemies)
@@ -80,8 +93,10 @@ namespace RuinRunner
                         "health display outside body " + enemy.Type);
                 }
                 File.WriteAllBytes(Path.Combine(directory, "world-y-" + y + ".png"), full.EncodeToPNG());
-                Destroy(full); Destroy(root);
-                foreach (var enemy in enemies) Destroy(enemy.gameObject);
+                Destroy(full);
+                Destroy(root);
+                foreach (var enemy in enemies)
+                    Destroy(enemy.gameObject);
                 yield return null;
             }
         }
@@ -90,7 +105,8 @@ namespace RuinRunner
             var texture = ItemIconLibrary.Get(id, kind);
             // Signature weapon and accessory icons are cut to their art, not to a square; DrawGUI keeps their proportions.
             Require(texture != null && texture.isReadable, "individual PNG " + kind + "/" + id);
-            if (kind != InventoryIconKind.Weapon || SignatureWeaponCatalog.Has(id)) return;
+            if (kind != InventoryIconKind.Weapon || SignatureWeaponCatalog.Has(id))
+                return;
             var bounds = ItemIconLibrary.ContentBounds(texture);
             Require(bounds.width > 0 && bounds.xMin > 2 && bounds.yMin > 2 && bounds.xMax < texture.width - 2 && bounds.yMax < texture.height - 2,
                 "transparent padding / no clipping " + id);
@@ -101,8 +117,12 @@ namespace RuinRunner
             renderer.enabled = false;
             var without = Render(camera);
             renderer.enabled = true;
-            var a = full.GetPixels32(); var b = without.GetPixels32(); var changed = 0;
-            for (var i = 0; i < a.Length; i++) if (!a[i].Equals(b[i])) changed++;
+            var a = full.GetPixels32();
+            var b = without.GetPixels32();
+            var changed = 0;
+            for (var i = 0; i < a.Length; i++)
+                if (!a[i].Equals(b[i]))
+                    changed++;
             Destroy(without);
             Require(changed > 20, "body contributes visible pixels: " + label + " pixels=" + changed);
         }
@@ -110,16 +130,23 @@ namespace RuinRunner
         {
             var rt = RenderTexture.GetTemporary(1280, 720, 24, RenderTextureFormat.ARGB32);
             var previous = RenderTexture.active;
-            camera.targetTexture = rt; camera.Render(); RenderTexture.active = rt;
+            camera.targetTexture = rt;
+            camera.Render();
+            RenderTexture.active = rt;
             var texture = new Texture2D(1280, 720, TextureFormat.RGBA32, false);
-            texture.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0); texture.Apply();
-            camera.targetTexture = null; RenderTexture.active = previous; RenderTexture.ReleaseTemporary(rt);
+            texture.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+            texture.Apply();
+            camera.targetTexture = null;
+            RenderTexture.active = previous;
+            RenderTexture.ReleaseTemporary(rt);
             return texture;
         }
         private void Require(bool condition, string message)
         {
-            if (!condition) throw new InvalidOperationException(message);
-            checks++; Debug.Log("[Presentation QA] OK " + message);
+            if (!condition)
+                throw new InvalidOperationException(message);
+            checks++;
+            Debug.Log("[Presentation QA] OK " + message);
         }
     }
 }

@@ -10,7 +10,8 @@ namespace RuinRunner
         {
             get
             {
-                if (shared == null) shared = new Material(Resources.Load<Shader>("Shaders/PixelFxPremultiplied")) { name = "pixelfx premultiplied" };
+                if (shared == null)
+                    shared = new Material(Resources.Load<Shader>("Shaders/PixelFxPremultiplied")) { name = "pixelfx premultiplied" };
                 return shared;
             }
         }
@@ -21,12 +22,15 @@ namespace RuinRunner
         static readonly string[] PresentationClips = { "Amb", "Break", "Spawn", "DeathPuff", "Ink", "Stain", "Step", "Banner", "BossFall", "Ui", "LootBeam", "LevelUpBurst", "RoomClearRing" };
         static bool IsPresentationClip(string clip)
         {
-            foreach (var prefix in PresentationClips) if (clip.StartsWith(prefix, System.StringComparison.Ordinal)) return true;
+            foreach (var prefix in PresentationClips)
+                if (clip.StartsWith(prefix, System.StringComparison.Ordinal))
+                    return true;
             return false;
         }
         public static void Apply(SpriteRenderer view, string clip)
         {
-            if (IsPixelFxClip(clip) || IsPresentationClip(clip)) view.sharedMaterial = Shared;
+            if (IsPixelFxClip(clip) || IsPresentationClip(clip))
+                view.sharedMaterial = Shared;
         }
     }
 }

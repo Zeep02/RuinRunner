@@ -48,20 +48,34 @@ namespace RuinRunner
         {
             switch (family)
             {
-                case WeaponFamily.Dagger: return "단검";
-                case WeaponFamily.Longsword: return "롱소드";
-                case WeaponFamily.Mace: return "철퇴";
-                case WeaponFamily.Katana: return "도";
-                case WeaponFamily.Greatsword: return "대검";
-                case WeaponFamily.Bow: return "활";
-                case WeaponFamily.Crossbow: return "석궁";
-                case WeaponFamily.Pistol: return "권총";
-                case WeaponFamily.Rifle: return "소총";
-                case WeaponFamily.Shotgun: return "산탄총";
-                case WeaponFamily.Spear: return "창";
-                case WeaponFamily.Staff: return "지팡이";
-                case WeaponFamily.Orb: return "오브";
-                default: return "대포";
+                case WeaponFamily.Dagger:
+                    return "단검";
+                case WeaponFamily.Longsword:
+                    return "롱소드";
+                case WeaponFamily.Mace:
+                    return "철퇴";
+                case WeaponFamily.Katana:
+                    return "도";
+                case WeaponFamily.Greatsword:
+                    return "대검";
+                case WeaponFamily.Bow:
+                    return "활";
+                case WeaponFamily.Crossbow:
+                    return "석궁";
+                case WeaponFamily.Pistol:
+                    return "권총";
+                case WeaponFamily.Rifle:
+                    return "소총";
+                case WeaponFamily.Shotgun:
+                    return "산탄총";
+                case WeaponFamily.Spear:
+                    return "창";
+                case WeaponFamily.Staff:
+                    return "지팡이";
+                case WeaponFamily.Orb:
+                    return "오브";
+                default:
+                    return "대포";
             }
         }
     }
@@ -84,7 +98,7 @@ namespace RuinRunner
         public WeaponSpecialType SpecialType { get; }
         public float SpecialManaCost => WeaponActionCatalog.Get(this).Mana;
         public string SpecialDescription => WeaponActionCatalog.Get(this).Description;
-        internal float CatalogSpecialMana=-1,CatalogSpecialCooldown=-1;
+        internal float CatalogSpecialMana = -1, CatalogSpecialCooldown = -1;
         public WeaponFamily Family { get; }
         public string ComboProfileId { get; }
         public float HeavyDamageMultiplier { get; private set; }

@@ -15,7 +15,11 @@ namespace RuinRunner
         public Vector2 position;
         [Range(.5f, 3f)] public float scale;
         public RoomDecorationData(EnvironmentPropKind type, float x, float y, float size = 1f)
-        { kind = type; position = new Vector2(x, y); scale = size; }
+        {
+            kind = type;
+            position = new Vector2(x, y);
+            scale = size;
+        }
     }
 
     public sealed class EnvironmentProp : MonoBehaviour
@@ -74,7 +78,8 @@ namespace RuinRunner
         {
             var fx = AmbientFx.Create(transform, (Vector2)transform.position + offset, clip);
             fx.GetComponent<SpriteRenderer>().sortingOrder = visual.sortingOrder + 1;
-            if (LivingClip == null) LivingClip = clip;
+            if (LivingClip == null)
+                LivingClip = clip;
         }
 
         // Room dressing. Soft pieces have no body at all. A clip is a piece that is never a still picture, like a burning brazier.
@@ -120,32 +125,43 @@ namespace RuinRunner
         const int PropLayer = 10;
         public static void HitCircle(Vector2 point, float radius)
         {
-            foreach (var found in Physics2D.OverlapCircleAll(point, radius, 1 << PropLayer)) HitBody(found);
+            foreach (var found in Physics2D.OverlapCircleAll(point, radius, 1 << PropLayer))
+                HitBody(found);
         }
         public static void HitSegment(Vector2 from, Vector2 to, float width)
         {
             var path = to - from;
-            if (path.sqrMagnitude < .0001f) { HitCircle(from, width * .5f); return; }
-            foreach (var found in Physics2D.CircleCastAll(from, width * .5f, path.normalized, path.magnitude, 1 << PropLayer)) HitBody(found.collider);
+            if (path.sqrMagnitude < .0001f)
+            {
+                HitCircle(from, width * .5f);
+                return;
+            }
+            foreach (var found in Physics2D.CircleCastAll(from, width * .5f, path.normalized, path.magnitude, 1 << PropLayer))
+                HitBody(found.collider);
         }
         public static void HitBody(Collider2D found)
         {
-            if (found == null) return;
+            if (found == null)
+                return;
             var prop = found.GetComponentInParent<EnvironmentProp>();
-            if (prop != null) prop.Hit();
+            if (prop != null)
+                prop.Hit();
         }
 
         void Shatter(string clip, float scale)
         {
-            if (broken) return;
+            if (broken)
+                return;
             broken = true;
-            if (StageValidationInput.Enabled) Debug.Log("[Prop] broke " + dressingKind + " with " + clip);
+            if (StageValidationInput.Enabled)
+                Debug.Log("[Prop] broke " + dressingKind + " with " + clip);
             var point = restingPlace;
             SigFx.Play(clip, point, 0, -1, true, false, scale);
             if (dressingKind != DressingKind.Soft)
                 WeaponSecondaryParticles.Fan("StoneChip", point + Vector2.up * .25f, Vector2.up, 6, 300, 3.6f, .42f, .6f, visual.sortingOrder, Color.white, 6);
-            PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Ambience, dressingKind == DressingKind.Soft ? .12f : .35f);
-            if (body != null) Destroy(body);
+            GameAudio.Play(GameSound.Hit, AudioChannel.Ambience, dressingKind == DressingKind.Soft ? .12f : .35f);
+            if (body != null)
+                Destroy(body);
             Destroy(gameObject);
         }
 
@@ -165,64 +181,106 @@ namespace RuinRunner
 
         void GiveManaFromPot()
         {
-            if (Random.value >= PotManaChance) return;
-            foreach (var hero in PlayerController.ActiveCombatants) if (hero != null) hero.Stats.RestoreMana(PotMana);
+            if (Random.value >= PotManaChance)
+                return;
+            foreach (var hero in PlayerController.ActiveCombatants)
+                if (hero != null)
+                    hero.Stats.RestoreMana(PotMana);
             NativeCombatEffect.Create("RewardSpark", restingPlace + Vector2.up * .4f, 0, .5f, .5f, new Color(.45f, .7f, 1f), visual.sortingOrder + 1);
         }
 
         public void Hit()
         {
-            if (broken) return;
+            if (broken)
+                return;
             if (dressing)
             {
                 switch (dressingKind)
                 {
-                    case DressingKind.Soft: Shatter("BreakPlant", .5f); break;
-                    case DressingKind.Fragile: GiveManaFromPot(); Shatter(clipFrames != null ? "BreakBarrel" : "BreakPot", clipFrames != null ? .3f : .34f); break;
-                    case DressingKind.Volatile: if (fuseEndsAt < 0f) { fuseEndsAt = Time.time + FuseSeconds; flinchUntil = fuseEndsAt; } break;
+                    case DressingKind.Soft:
+                        Shatter("BreakPlant", .5f);
+                        break;
+                    case DressingKind.Fragile:
+                        GiveManaFromPot();
+                        Shatter(clipFrames != null ? "BreakBarrel" : "BreakPot", clipFrames != null ? .3f : .34f);
+                        break;
+                    case DressingKind.Volatile:
+                        if (fuseEndsAt < 0f)
+                        {
+                            fuseEndsAt = Time.time + FuseSeconds;
+                            flinchUntil = fuseEndsAt;
+                        }
+                        break;
                     default:
                         // A sweep that touches it for several frames is still one blow.
-                        if (Time.time < nextHitAt) break;
+                        if (Time.time < nextHitAt)
+                            break;
                         nextHitAt = Time.time + SturdyHitGap;
                         flinchUntil = Time.time + FlinchSeconds;
-                        if (++hits >= HitsToBreakSturdy) { Shatter("BreakStone", .4f); break; }
+                        if (++hits >= HitsToBreakSturdy)
+                        {
+                            Shatter("BreakStone", .4f);
+                            break;
+                        }
                         WeaponSecondaryParticles.Fan("StoneChip", restingPlace + Vector2.up * .25f, Vector2.up, 3, 300, 3f, .3f, .5f, visual.sortingOrder, Color.white, 6);
-                        PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Ambience, .2f);
+                        GameAudio.Play(GameSound.Hit, AudioChannel.Ambience, .2f);
                         break;
                 }
                 return;
             }
-            if (kind == EnvironmentPropKind.Grass) { rustleUntil = Time.time + .6f; return; }
-            if (kind != EnvironmentPropKind.Urn) return;
+            if (kind == EnvironmentPropKind.Grass)
+            {
+                rustleUntil = Time.time + .6f;
+                return;
+            }
+            if (kind != EnvironmentPropKind.Urn)
+                return;
             broken = true;
             visual.sprite = EnvironmentArt.Prop(6);
             var trigger = GetComponent<Collider2D>();
-            if (trigger != null) trigger.enabled = false;
+            if (trigger != null)
+                trigger.enabled = false;
             WeaponSecondaryParticles.Fan("StoneChip", (Vector2)transform.position + Vector2.up * .3f, Vector2.up, 6, 300, 3.6f, .42f, .6f, visual.sortingOrder, Color.white, 6);
-            PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Ambience, .35f);
+            GameAudio.Play(GameSound.Hit, AudioChannel.Ambience, .35f);
         }
 
         void UpdateDressing()
         {
             PlayerController hero = null;
-            foreach (var combatant in PlayerController.ActiveCombatants) { hero = combatant; break; }
-            if (hero == null || (hero.transform.position - transform.position).sqrMagnitude > LookAfterWithin * LookAfterWithin) return;
-            if (clipFrames != null) visual.sprite = clipFrames[Mathf.FloorToInt((Time.unscaledTime + phase) * clipRate) % clipFrames.Length];
+            foreach (var combatant in PlayerController.ActiveCombatants)
+            {
+                hero = combatant;
+                break;
+            }
+            if (hero == null || (hero.transform.position - transform.position).sqrMagnitude > LookAfterWithin * LookAfterWithin)
+                return;
+            if (clipFrames != null)
+                visual.sprite = clipFrames[Mathf.FloorToInt((Time.unscaledTime + phase) * clipRate) % clipFrames.Length];
             if (fuseEndsAt >= 0f)
             {
                 visual.color = Mathf.Sin(Time.time * 42f) > 0f ? new Color(1f, .45f, .3f) : Color.white;
-                if (Time.time >= fuseEndsAt) { Explode(); return; }
+                if (Time.time >= fuseEndsAt)
+                {
+                    Explode();
+                    return;
+                }
             }
             if (Time.time < flinchUntil)
                 transform.position = restingPlace + Vector2.right * (Mathf.Sin(Time.time * 70f) > 0f ? FlinchPixels : -FlinchPixels);
-            else if ((Vector2)transform.position != restingPlace) transform.position = restingPlace;
-            if (dressingKind != DressingKind.Soft) return;
+            else if ((Vector2)transform.position != restingPlace)
+                transform.position = restingPlace;
+            if (dressingKind != DressingKind.Soft)
+                return;
             // Plants lean away as the hero pushes through, spring back, and otherwise just stir.
             var away = (Vector2)transform.position - (Vector2)hero.transform.position;
             if (away.sqrMagnitude < RustleReach * RustleReach && hero.MovementInput.sqrMagnitude > .1f)
             {
                 swayVelocity += (away.x >= 0f ? -1f : 1f) * RustleKick * Time.deltaTime;
-                if (Time.time >= nextLeafAt) { nextLeafAt = Time.time + RustleLeafGap; SigFx.Play("BreakPlant", restingPlace, 0, -1, true, false, .22f); }
+                if (Time.time >= nextLeafAt)
+                {
+                    nextLeafAt = Time.time + RustleLeafGap;
+                    SigFx.Play("BreakPlant", restingPlace, 0, -1, true, false, .22f);
+                }
             }
             swayVelocity += (-swayAngle * SwaySpring - swayVelocity * SwayDamping) * Time.deltaTime;
             swayAngle += swayVelocity * Time.deltaTime;
@@ -231,8 +289,14 @@ namespace RuinRunner
 
         private void Update()
         {
-            if (dressing) { if (!broken) UpdateDressing(); return; }
-            if (broken || !animated) return;
+            if (dressing)
+            {
+                if (!broken)
+                    UpdateDressing();
+                return;
+            }
+            if (broken || !animated)
+                return;
             if (player == null && Time.time >= nextPlayerSearch)
             {
                 nextPlayerSearch = Time.time + 1f;

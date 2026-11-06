@@ -8,12 +8,18 @@ namespace RuinRunner
     {
         public readonly struct Skill
         {
-            public readonly float Mana,Cooldown;public readonly string Description;
-            public Skill(float mana,float cooldown,string description){Mana=mana;Cooldown=cooldown;Description=description;}
+            public readonly float Mana, Cooldown;
+            public readonly string Description;
+            public Skill(float mana, float cooldown, string description)
+            {
+                Mana = mana;
+                Cooldown = cooldown;
+                Description = description;
+            }
         }
-        static readonly Dictionary<string,Skill> skills=new Dictionary<string,Skill>();
-        static readonly Dictionary<string,WeaponDefinition> byId=new Dictionary<string,WeaponDefinition>();
-        public static readonly WeaponDefinition[] All=
+        static readonly Dictionary<string, Skill> skills = new Dictionary<string, Skill>();
+        static readonly Dictionary<string, WeaponDefinition> byId = new Dictionary<string, WeaponDefinition>();
+        public static readonly WeaponDefinition[] All =
         {
             Make("alley_awl","골목 송곳",WeaponRarity.Common,WeaponFamily.Dagger,44.8f,1.6f,new Color(.75f,.75f,.75f),WeaponAttackType.Melee,0,0f,1f,12f,2.5f,"사각 찌르기: 조준 방향으로 적을 꿰뚫고 지나가며 찌른다. 적의 뒤에서 맞히면 피해가 증가한다."),
             Make("saw_fang","톱니 이빨",WeaponRarity.Common,WeaponFamily.Dagger,44.8f,1.6f,new Color(.75f,.75f,.75f),WeaponAttackType.Melee,0,0f,1f,12f,2.5f,"찢고 빠지기: 전방을 세 번 할퀴어 출혈을 남기고 뒤로 물러난다."),
@@ -86,7 +92,7 @@ namespace RuinRunner
             Make("last_bell","마지막 종소리",WeaponRarity.Legendary,WeaponFamily.Rifle,129.6f,2.4f,new Color(1f,.62f,.12f),WeaponAttackType.Ranged,1,1.5f,22f,24f,5.5f,"조종: 한 적을 오래 조준해 표시한다. 준비를 마친 탄이 표식 적에게 맞으면 적을 뚫고 뒤쪽으로 강한 직선 충격을 보낸다."),
             Make("meteor_waybill","유성 운송장",WeaponRarity.Legendary,WeaponFamily.Cannon,113.4f,2.1f,new Color(1f,.62f,.12f),WeaponAttackType.Ranged,4,2f,11f,24f,5.5f,"좌표 포격: 최근 유탄이 떨어진 위치 세 곳을 기록한다. 스킬을 쓰면 그곳들과 조준 지점에 차례로 유성이 떨어진다."),
         };
-        public static readonly Dictionary<string,NativeWeaponArt.Pose> Poses=new Dictionary<string,NativeWeaponArt.Pose>
+        public static readonly Dictionary<string, NativeWeaponArt.Pose> Poses = new Dictionary<string, NativeWeaponArt.Pose>
         {
             {"alley_awl",new NativeWeaponArt.Pose(4.0f,27f,4.0f,1.0f,90f)},
             {"saw_fang",new NativeWeaponArt.Pose(5.0f,27f,5.5f,1.0f,90f)},
@@ -159,14 +165,15 @@ namespace RuinRunner
             {"last_bell",new NativeWeaponArt.Pose(6.0f,4f,30.0f,2.0f,0f)},
             {"meteor_waybill",new NativeWeaponArt.Pose(4.0f,18f,24.0f,5.5f,30f)},
         };
-        static WeaponDefinition Make(string id,string name,WeaponRarity rarity,WeaponFamily family,float power,float delay,Color color,WeaponAttackType type,int magazine,float reload,float speed,float mana,float cooldown,string description)
+        static WeaponDefinition Make(string id, string name, WeaponRarity rarity, WeaponFamily family, float power, float delay, Color color, WeaponAttackType type, int magazine, float reload, float speed, float mana, float cooldown, string description)
         {
-            skills[id]=new Skill(mana,cooldown,description);
-            var weapon=new WeaponDefinition(id,name,rarity,power,delay,color,type,magazine,reload,speed,new Vector2(.3f,.2f),1,WeaponSpecialType.ArcWave,mana,description,ItemSetType.None,family,"",1.4f,.4f);
-            byId[id]=weapon;return weapon;
+            skills[id] = new Skill(mana, cooldown, description);
+            var weapon = new WeaponDefinition(id, name, rarity, power, delay, color, type, magazine, reload, speed, new Vector2(.3f, .2f), 1, WeaponSpecialType.ArcWave, mana, description, ItemSetType.None, family, "", 1.4f, .4f);
+            byId[id] = weapon;
+            return weapon;
         }
-        public static bool Has(string id)=>id!=null&&skills.ContainsKey(id);
-        public static bool TryGet(string id,out Skill skill)=>skills.TryGetValue(id,out skill);
-        public static WeaponDefinition Find(string id)=>byId[id];
+        public static bool Has(string id) => id != null && skills.ContainsKey(id);
+        public static bool TryGet(string id, out Skill skill) => skills.TryGetValue(id, out skill);
+        public static WeaponDefinition Find(string id) => byId[id];
     }
 }

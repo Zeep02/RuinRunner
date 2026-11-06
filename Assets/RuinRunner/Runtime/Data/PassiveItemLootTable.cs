@@ -11,7 +11,8 @@ namespace RuinRunner
             var rarity = WeaponLootTable.RollRarity(luck);
             var candidates = new List<AccessoryDefinition>();
             foreach (var item in AccessoryLootTable.All)
-                if (item.UsesLegacyPassiveIcon && item.Rarity == rarity) candidates.Add(item);
+                if (item.UsesLegacyPassiveIcon && item.Rarity == rarity)
+                    candidates.Add(item);
             var chosen = candidates.Count == 0 ? AccessoryLootTable.Find(AccessoryType.RubyHeart)
                 : candidates[Random.Range(0, candidates.Count)];
             return new PassiveItemDefinition((PassiveItemType)((int)chosen.Type - 8), chosen.Name,

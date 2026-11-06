@@ -13,12 +13,15 @@ namespace RuinRunner
         {
             stopped = false;
             var gap = Physics2D.Distance(mover, other);
-            if (!gap.isValid || gap.distance < -DeepOverlap) return velocity;
+            if (!gap.isValid || gap.distance < -DeepOverlap)
+                return velocity;
             var toward = (Vector2)(other.bounds.center - mover.bounds.center);
-            if (toward.sqrMagnitude < .0001f) return velocity;
+            if (toward.sqrMagnitude < .0001f)
+                return velocity;
             toward.Normalize();
             var excess = Vector2.Dot(velocity, toward) - Mathf.Max(0f, gap.distance) / step;
-            if (excess <= 0f) return velocity;
+            if (excess <= 0f)
+                return velocity;
             stopped = true;
             return velocity - toward * excess;
         }

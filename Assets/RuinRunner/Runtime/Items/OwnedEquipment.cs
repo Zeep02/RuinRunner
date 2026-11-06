@@ -47,28 +47,49 @@ namespace RuinRunner
         }
         public bool TryConsumeAmmo()
         {
-            if (Weapon.AttackType == WeaponAttackType.Melee) return true;
-            if (IsReloading && chamberedDuringReload && Ammo > 0) { chamberedDuringReload=false; Ammo--; return true; }
-            if (IsReloading || Ammo <= 0) { StartReload(); return false; }
-            Ammo--; if (Ammo == 0) StartReload(); return true;
+            if (Weapon.AttackType == WeaponAttackType.Melee)
+                return true;
+            if (IsReloading && chamberedDuringReload && Ammo > 0)
+            {
+                chamberedDuringReload = false;
+                Ammo--;
+                return true;
+            }
+            if (IsReloading || Ammo <= 0)
+            {
+                StartReload();
+                return false;
+            }
+            Ammo--;
+            if (Ammo == 0)
+                StartReload();
+            return true;
         }
         public bool StartReload()
         {
-            if (Weapon.AttackType != WeaponAttackType.Ranged || IsReloading || Ammo >= Weapon.MagazineSize) return false;
+            if (Weapon.AttackType != WeaponAttackType.Ranged || IsReloading || Ammo >= Weapon.MagazineSize)
+                return false;
             ReloadStartedFromEmpty = Ammo == 0;
-            chamberedDuringReload=false;
+            chamberedDuringReload = false;
             ReloadSequence++;
-            ReloadRemaining = Weapon.ReloadSeconds; return true;
+            ReloadRemaining = Weapon.ReloadSeconds;
+            return true;
         }
         public void Tick(float delta)
         {
-            if (!IsReloading) return;
+            if (!IsReloading)
+                return;
             ReloadRemaining = Mathf.Max(0, ReloadRemaining - Mathf.Max(0, delta));
-            if (ReloadRemaining <= 0) { Ammo = Weapon.MagazineSize; chamberedDuringReload=false; }
+            if (ReloadRemaining <= 0)
+            {
+                Ammo = Weapon.MagazineSize;
+                chamberedDuringReload = false;
+            }
         }
         public void RefreshBalance()
         {
-            if (Weapon.AttackType != WeaponAttackType.Ranged) return;
+            if (Weapon.AttackType != WeaponAttackType.Ranged)
+                return;
             Ammo = Mathf.Clamp(Ammo, 0, Weapon.MagazineSize);
             ReloadRemaining = Mathf.Clamp(ReloadRemaining, 0, Weapon.ReloadSeconds);
         }
@@ -81,6 +102,9 @@ namespace RuinRunner
         public override WeaponRarity Rarity => Definition.Rarity;
         public override string Name => Definition.Name;
         public float Strength => 1;
-        public OwnedAccessory(AccessoryDefinition definition) { Definition = definition ?? throw new System.ArgumentNullException(nameof(definition)); }
+        public OwnedAccessory(AccessoryDefinition definition)
+        {
+            Definition = definition ?? throw new System.ArgumentNullException(nameof(definition));
+        }
     }
 }

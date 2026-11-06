@@ -27,7 +27,8 @@ namespace RuinRunner
 
         static InkTransition Get()
         {
-            if (instance != null) return instance;
+            if (instance != null)
+                return instance;
             var root = new GameObject("InkTransition");
             DontDestroyOnLoad(root);
             return instance = root.AddComponent<InkTransition>();
@@ -35,7 +36,9 @@ namespace RuinRunner
 
         void Begin(Phase next, string clip, Vector2 point)
         {
-            phase = next; age = 0f; feet = point;
+            phase = next;
+            age = 0f;
+            feet = point;
             frames = clip == null ? null : NativeCombatEffect.Frames(clip);
         }
 
@@ -43,17 +46,25 @@ namespace RuinRunner
         public static IEnumerator Cover(Vector2 point, string titleAfter = "")
         {
             var ink = Get();
-            ink.behindHud = false; ink.keepWhile = null; ink.title = titleAfter; ink.titleLeaving = -1f;
+            ink.behindHud = false;
+            ink.keepWhile = null;
+            ink.title = titleAfter;
+            ink.titleLeaving = -1f;
             ink.Begin(Phase.Cover, "InkCover", point);
-            while (ink != null && ink.phase == Phase.Cover) yield return null;
+            while (ink != null && ink.phase == Phase.Cover)
+                yield return null;
         }
 
         /// <summary>Black right now, for when there was nothing on screen worth covering.</summary>
         public static void Hold(string titleText = "")
         {
             var ink = Get();
-            ink.behindHud = false; ink.keepWhile = null; ink.title = titleText; ink.titleLeaving = -1f;
-            if (ink.phase != Phase.Hold) ink.titleSince = Time.unscaledTime;
+            ink.behindHud = false;
+            ink.keepWhile = null;
+            ink.title = titleText;
+            ink.titleLeaving = -1f;
+            if (ink.phase != Phase.Hold)
+                ink.titleSince = Time.unscaledTime;
             ink.Begin(Phase.Hold, null, ink.feet);
         }
 
@@ -80,35 +91,55 @@ namespace RuinRunner
             var ink = Get();
             if (ink.phase == Phase.Clear)
             {
-                ink.title = ""; ink.titleLeaving = -1f; ink.keepWhile = whileTrue; ink.behindHud = false;
+                ink.title = "";
+                ink.titleLeaving = -1f;
+                ink.keepWhile = whileTrue;
+                ink.behindHud = false;
                 ink.Begin(Phase.Cover, "InkCover", point);
             }
-            if (ink.phase != Phase.Hold) return false;
+            if (ink.phase != Phase.Hold)
+                return false;
             ink.behindHud = true;
             return true;
         }
 
         public static void Clear()
         {
-            if (instance == null) return;
-            instance.phase = Phase.Clear; instance.behindHud = false; instance.keepWhile = null;
+            if (instance == null)
+                return;
+            instance.phase = Phase.Clear;
+            instance.behindHud = false;
+            instance.keepWhile = null;
         }
 
         void Update()
         {
-            if (phase == Phase.Clear) return;
-            if (keepWhile != null && !keepWhile()) { Clear(); return; }
+            if (phase == Phase.Clear)
+                return;
+            if (keepWhile != null && !keepWhile())
+            {
+                Clear();
+                return;
+            }
             age += Time.unscaledDeltaTime;
-            if (frames == null || age * FramesPerSecond < frames.Length) return;
-            if (phase == Phase.Cover) { phase = Phase.Hold; frames = null; titleSince = Time.unscaledTime; }
-            else if (phase == Phase.Recede) Clear();
+            if (frames == null || age * FramesPerSecond < frames.Length)
+                return;
+            if (phase == Phase.Cover)
+            {
+                phase = Phase.Hold;
+                frames = null;
+                titleSince = Time.unscaledTime;
+            }
+            else if (phase == Phase.Recede)
+                Clear();
         }
 
         void OnGUI()
         {
             // Depth is read from every GUI event, not only the one that draws.
             GUI.depth = behindHud ? BehindHudDepth : OverHudDepth;
-            if (phase == Phase.Clear || Event.current.type != EventType.Repaint) return;
+            if (phase == Phase.Clear || Event.current.type != EventType.Repaint)
+                return;
             var screen = new Rect(0, 0, Screen.width, Screen.height);
             if (frames == null)
             {
@@ -142,11 +173,14 @@ namespace RuinRunner
 
         void DrawTitle()
         {
-            if (title.Length == 0) return;
-            if (titleStyle == null) titleStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, font = GameTypography.Regular };
+            if (title.Length == 0)
+                return;
+            if (titleStyle == null)
+                titleStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, font = GameTypography.Regular };
             titleStyle.fontSize = Mathf.RoundToInt(26f * GameTypography.LayoutScale);
             var alpha = Mathf.Clamp01((Time.unscaledTime - titleSince) / TitleFadeIn);
-            if (titleLeaving >= 0f) alpha = Mathf.Min(alpha, 1f - Mathf.Clamp01((Time.unscaledTime - titleLeaving) / TitleFadeOut));
+            if (titleLeaving >= 0f)
+                alpha = Mathf.Min(alpha, 1f - Mathf.Clamp01((Time.unscaledTime - titleLeaving) / TitleFadeOut));
             var old = GUI.color;
             GUI.color = new Color(.74f, .76f, .8f, alpha * TitleAlpha);
             GUI.Label(new Rect(0, Screen.height * TitleHeight - 30f, Screen.width, 60f), title, titleStyle);
@@ -168,9 +202,11 @@ namespace RuinRunner
         {
             Play(feet);
             yield return new WaitForSecondsRealtime(DrainStartsAfter);
-            if (hero != null) hero.HideForInk(false, true);
+            if (hero != null)
+                hero.HideForInk(false, true);
             yield return new WaitForSecondsRealtime(DrainedAfter - DrainStartsAfter);
-            if (hero != null) hero.HideForInk(false, false);
+            if (hero != null)
+                hero.HideForInk(false, false);
         }
 
         /// <summary>Death put off: the same ink closes over the hero where they fell and stands them back up.</summary>
@@ -179,7 +215,8 @@ namespace RuinRunner
             hero.SetEntranceLock(true);
             hero.HideForInk(true, true);
             yield return Lift(hero, hero.FeetPoint);
-            if (hero != null) hero.SetEntranceLock(false);
+            if (hero != null)
+                hero.SetEntranceLock(false);
         }
 
         public static void Play(Vector2 feet, float scale = 1f)
@@ -191,7 +228,8 @@ namespace RuinRunner
             rise.puddleFrames = NativeCombatEffect.Frames("InkPuddle");
             rise.moundFrames = NativeCombatEffect.Frames("InkMound");
             rise.puddle = rise.Layer(root, "InkPuddle", rise.puddleFrames);
-            rise.puddle.sortingLayerName = "WorldFloor"; rise.puddle.sortingOrder = 13;
+            rise.puddle.sortingLayerName = "WorldFloor";
+            rise.puddle.sortingOrder = 13;
             rise.mound = rise.Layer(root, "InkMound", rise.moundFrames);
             rise.mound.sortingOrder = 2003;
         }
@@ -210,10 +248,16 @@ namespace RuinRunner
         {
             age += Time.unscaledDeltaTime;
             var index = Mathf.FloorToInt(age * FramesPerSecond);
-            if (index >= puddleFrames.Length) { Destroy(gameObject); return; }
+            if (index >= puddleFrames.Length)
+            {
+                Destroy(gameObject);
+                return;
+            }
             puddle.sprite = puddleFrames[index];
-            if (index < moundFrames.Length) mound.sprite = moundFrames[index];
-            else mound.enabled = false;
+            if (index < moundFrames.Length)
+                mound.sprite = moundFrames[index];
+            else
+                mound.enabled = false;
         }
     }
 }

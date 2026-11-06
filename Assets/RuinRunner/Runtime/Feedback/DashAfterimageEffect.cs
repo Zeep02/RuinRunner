@@ -23,25 +23,32 @@ namespace RuinRunner
 
         public void Initialize(PlayerController owner, SpriteRenderer source)
         {
-            player = owner; body = source; weapon = owner.GetComponent<HeldWeaponView>();
+            player = owner;
+            body = source;
+            weapon = owner.GetComponent<HeldWeaponView>();
             root = new GameObject("DashAfterimages");
             for (var i = 0; i < Capacity; i++)
-            for (var part = 0; part < 2; part++)
-            {
-                var visual = new GameObject(part == 0 ? "BodyEcho" : "WeaponEcho");
-                visual.transform.SetParent(root.transform, false);
-                var renderer = visual.AddComponent<SpriteRenderer>();
-                renderer.enabled = false;
-                images[i, part] = renderer;
-            }
+                for (var part = 0; part < 2; part++)
+                {
+                    var visual = new GameObject(part == 0 ? "BodyEcho" : "WeaponEcho");
+                    visual.transform.SetParent(root.transform, false);
+                    var renderer = visual.AddComponent<SpriteRenderer>();
+                    renderer.enabled = false;
+                    images[i, part] = renderer;
+                }
         }
 
         private void LateUpdate()
         {
-            if (player == null || body == null || root == null) return;
+            if (player == null || body == null || root == null)
+                return;
             if (player.IsDead || (player.ItemEffectsSuspended && !player.AnimationPaused))
-            { Clear(); return; }
-            if (player.AnimationPaused) return;
+            {
+                Clear();
+                return;
+            }
+            if (player.AnimationPaused)
+                return;
 
             for (var i = 0; i < Capacity; i++)
             {
@@ -59,7 +66,11 @@ namespace RuinRunner
 
             if (player.IsDashing)
             {
-                if (!wasDashing) { nextSample = 0f; lastPosition = body.transform.position; }
+                if (!wasDashing)
+                {
+                    nextSample = 0f;
+                    lastPosition = body.transform.position;
+                }
                 nextSample -= Time.deltaTime;
                 if (nextSample <= 0f && (!wasDashing || Vector3.Distance(lastPosition, body.transform.position) >= .2f))
                 {
@@ -78,7 +89,9 @@ namespace RuinRunner
             // Keep the captured hand/weapon occlusion within each silhouette.
             if (weapon != null && weapon.VisualRenderer != null && weapon.VisualRenderer.sortingOrder < body.sortingOrder)
             {
-                var swap = images[next, 0]; images[next, 0] = images[next, 1]; images[next, 1] = swap;
+                var swap = images[next, 0];
+                images[next, 0] = images[next, 1];
+                images[next, 1] = swap;
             }
             remaining[next] = Lifetime;
             lastPosition = body.transform.position;
@@ -89,11 +102,13 @@ namespace RuinRunner
         {
             target.sprite = source != null && source.enabled ? source.sprite : null;
             target.enabled = target.sprite != null;
-            if (!target.enabled) return;
+            if (!target.enabled)
+                return;
             target.sharedMaterial = source.sharedMaterial;
             target.transform.SetPositionAndRotation(source.transform.position, source.transform.rotation);
             target.transform.localScale = source.transform.lossyScale;
-            target.flipX = source.flipX; target.flipY = source.flipY;
+            target.flipX = source.flipX;
+            target.flipY = source.flipY;
             target.sortingLayerID = source.sortingLayerID;
             target.sortingOrder = source.sortingOrder - 8;
             target.color = new Color(.55f, .85f, 1f, Opacity);
@@ -106,11 +121,19 @@ namespace RuinRunner
             {
                 remaining[i] = 0f;
                 for (var part = 0; part < 2; part++)
-                    if (images[i, part] != null) { images[i, part].enabled = false; images[i, part].sprite = null; }
+                    if (images[i, part] != null)
+                    {
+                        images[i, part].enabled = false;
+                        images[i, part].sprite = null;
+                    }
             }
         }
         internal void CancelTransient() => Clear();
         private void OnDisable() => Clear();
-        private void OnDestroy() { if (root != null) Destroy(root); }
+        private void OnDestroy()
+        {
+            if (root != null)
+                Destroy(root);
+        }
     }
 }

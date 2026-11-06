@@ -8,7 +8,7 @@ namespace RuinRunner
     [DefaultExecutionOrder(500)] // After the player has read this frame's scripted presses.
     public sealed class CombatSandbox : MonoBehaviour
     {
-        public const string CommandLineArgument = "--combat-sandbox";
+        public const string CommandLineArgument = DiagnosticsHooks.CombatSandboxArgument;
         // Plays every signature weapon through the real input path and writes frames for review: --sandbox-tour <folder> [first] [count]
         public const string TourArgument = "--sandbox-tour";
         // Sets off every passive accessory and writes frames for review: --sandbox-passives <folder>
@@ -27,22 +27,26 @@ namespace RuinRunner
 
         private IEnumerator Start()
         {
-            while (game == null || game.Player == null || !game.IsRunActive) yield return null;
+            while (game == null || game.Player == null || !game.IsRunActive)
+                yield return null;
             ready = true;
             game.Player.SandboxInvulnerable = god;
             var args = System.Environment.GetCommandLineArgs();
             var tour = System.Array.IndexOf(args, TourArgument);
             var passives = System.Array.IndexOf(args, PassiveTourArgument);
             var skills = System.Array.IndexOf(args, SkillTourArgument);
-            if (skills >= 0 && skills + 2 < args.Length) StartCoroutine(SkillTour(args[skills + 1], args[skills + 2].Split(',')));
-            else if (passives >= 0 && passives + 1 < args.Length) StartCoroutine(PassiveTour(args[passives + 1]));
+            if (skills >= 0 && skills + 2 < args.Length)
+                StartCoroutine(SkillTour(args[skills + 1], args[skills + 2].Split(',')));
+            else if (passives >= 0 && passives + 1 < args.Length)
+                StartCoroutine(PassiveTour(args[passives + 1]));
             else if (tour >= 0 && tour + 1 < args.Length)
             {
                 var first = tour + 2 < args.Length && int.TryParse(args[tour + 2], out var a) ? a : 0;
                 var count = tour + 3 < args.Length && int.TryParse(args[tour + 3], out var b) ? b : SignatureWeaponCatalog.All.Length;
                 StartCoroutine(Tour(args[tour + 1], first, count));
             }
-            else Equip(SignatureWeaponCatalog.All[weaponIndex]);
+            else
+                Equip(SignatureWeaponCatalog.All[weaponIndex]);
         }
 
         private void Equip(WeaponDefinition weapon)
@@ -70,12 +74,24 @@ namespace RuinRunner
             }
             void Foes()
             {
-                if (spawned.Count >= 3) return;
-                Foe(2.2f, .5f); Foe(2.6f, -.6f); Foe(3.6f, 0f);
+                if (spawned.Count >= 3)
+                    return;
+                Foe(2.2f, .5f);
+                Foe(2.6f, -.6f);
+                Foe(3.6f, 0f);
             }
-            IEnumerator Tap() { StageValidationInput.SetHeld(GameAction.Guard, true); yield return new WaitForSeconds(.08f); StageValidationInput.SetHeld(GameAction.Guard, false); }
+            IEnumerator Tap()
+            {
+                StageValidationInput.SetHeld(GameAction.Guard, true);
+                yield return new WaitForSeconds(.08f);
+                StageValidationInput.SetHeld(GameAction.Guard, false);
+            }
             // Each effect's distance from the hero when it appears, to catch anything still starting at the body.
-            SigFx.Created = (clip, point, ground) => { if (game.Player != null) Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00")); };
+            SigFx.Created = (clip, point, ground) =>
+            {
+                if (game.Player != null)
+                    Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00"));
+            };
             var end = Mathf.Min(SignatureWeaponCatalog.All.Length, first + count);
             for (var w = first; w < end; w++)
             {
@@ -125,14 +141,41 @@ namespace RuinRunner
                 foe.MakeTrainingDummy();
                 spawned.Add(foe);
             }
-            IEnumerator Tap() { StageValidationInput.SetHeld(GameAction.Guard, true); yield return new WaitForSeconds(.08f); StageValidationInput.SetHeld(GameAction.Guard, false); }
-            IEnumerator Attack(float seconds) { StageValidationInput.SetHeld(GameAction.Attack, true); yield return new WaitForSeconds(seconds); StageValidationInput.SetHeld(GameAction.Attack, false); }
-            IEnumerator Walk(GameAction way, float seconds) { StageValidationInput.SetHeld(way, true); yield return new WaitForSeconds(seconds); StageValidationInput.SetHeld(way, false); }
+            IEnumerator Tap()
+            {
+                StageValidationInput.SetHeld(GameAction.Guard, true);
+                yield return new WaitForSeconds(.08f);
+                StageValidationInput.SetHeld(GameAction.Guard, false);
+            }
+            IEnumerator Attack(float seconds)
+            {
+                StageValidationInput.SetHeld(GameAction.Attack, true);
+                yield return new WaitForSeconds(seconds);
+                StageValidationInput.SetHeld(GameAction.Attack, false);
+            }
+            IEnumerator Walk(GameAction way, float seconds)
+            {
+                StageValidationInput.SetHeld(way, true);
+                yield return new WaitForSeconds(seconds);
+                StageValidationInput.SetHeld(way, false);
+            }
             void Aim(float degrees) => StageValidationInput.SetAim(new Vector2(Mathf.Cos(degrees * Mathf.Deg2Rad), Mathf.Sin(degrees * Mathf.Deg2Rad)));
-            IEnumerator Sweep(float from, float to, float seconds) { for (var t = 0f; t < seconds; t += Time.deltaTime) { Aim(Mathf.Lerp(from, to, t / seconds)); yield return null; } }
-            SigFx.Created = (clip, point, ground) => { if (game.Player != null) Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00") + " frame " + capturedFrame); };
+            IEnumerator Sweep(float from, float to, float seconds)
+            {
+                for (var t = 0f; t < seconds; t += Time.deltaTime)
+                {
+                    Aim(Mathf.Lerp(from, to, t / seconds));
+                    yield return null;
+                }
+            }
+            SigFx.Created = (clip, point, ground) =>
+            {
+                if (game.Player != null)
+                    Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00") + " frame " + capturedFrame);
+            };
             // The ink entrance holds the hero still at first, on its own clock.
-            for (var t = 0f; t < 12f; t += Time.unscaledDeltaTime) yield return null;
+            for (var t = 0f; t < 12f; t += Time.unscaledDeltaTime)
+                yield return null;
             foreach (var id in ids)
             {
                 var weapon = SignatureWeaponCatalog.Find(id);
@@ -141,7 +184,9 @@ namespace RuinRunner
                 Equip(weapon);
                 player.SandboxRefresh();
                 Aim(0);
-                Foe(2.6f, .7f); Foe(3.4f, -.8f); Foe(4.8f, .1f);
+                Foe(2.6f, .7f);
+                Foe(3.4f, -.8f);
+                Foe(4.8f, .1f);
                 yield return new WaitForSeconds(.25f);
                 var capture = StartCoroutine(CaptureFrames(System.IO.Path.Combine(folder, id)));
                 var before = player.Mana;
@@ -149,20 +194,33 @@ namespace RuinRunner
                 {
                     case "hour_minute":
                         yield return Tap();
-                        yield return Walk(GameAction.MoveUp, .45f); yield return Walk(GameAction.MoveRight, .6f); yield return Attack(.3f);
+                        yield return Walk(GameAction.MoveUp, .45f);
+                        yield return Walk(GameAction.MoveRight, .6f);
+                        yield return Attack(.3f);
                         yield return Tap();
                         yield return new WaitForSeconds(1.2f);
                         break;
                     case "falling_blossom":
-                        yield return Tap(); yield return new WaitForSeconds(.3f); yield return Tap(); yield return new WaitForSeconds(.3f); yield return Tap();
+                        yield return Tap();
+                        yield return new WaitForSeconds(.3f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.3f);
+                        yield return Tap();
                         yield return new WaitForSeconds(1.4f);
                         break;
                     case "instant_king":
-                        yield return Tap(); yield return new WaitForSeconds(.22f); Aim(50); yield return Tap(); yield return new WaitForSeconds(.22f); Aim(-40); yield return Tap();
+                        yield return Tap();
+                        yield return new WaitForSeconds(.22f);
+                        Aim(50);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.22f);
+                        Aim(-40);
+                        yield return Tap();
                         yield return new WaitForSeconds(1.2f);
                         break;
                     case "thousand_returns":
-                        yield return Attack(1.3f); player.SandboxRefresh();
+                        yield return Attack(1.3f);
+                        player.SandboxRefresh();
                         yield return Tap();
                         yield return new WaitForSeconds(1.7f);
                         break;
@@ -182,68 +240,105 @@ namespace RuinRunner
                         yield return new WaitForSeconds(.7f);
                         break;
                     case "lantern_orb":
-                        yield return Tap(); yield return new WaitForSeconds(.4f); yield return Attack(1.3f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.4f);
+                        yield return Attack(1.3f);
                         yield return new WaitForSeconds(.5f);
                         break;
                     case "season_end":
-                        for (var i = 0; i < 4; i++) { player.SandboxRefresh(); yield return Tap(); yield return new WaitForSeconds(1.3f); }
+                        for (var i = 0; i < 4; i++)
+                        {
+                            player.SandboxRefresh();
+                            yield return Tap();
+                            yield return new WaitForSeconds(1.3f);
+                        }
                         break;
                     case "world_pendulum":
-                    {
-                        EnemyController shooter = null;
-                        shooter = EnemyController.Create(EnemyType.Shooter, home + new Vector2(-3.6f, 1.2f), player, () => false, _ => { }, game.CameraFollow);
-                        spawned.Add(shooter);
-                        yield return Tap(); yield return new WaitForSeconds(3f);
-                        Aim(100); yield return Tap();
-                        yield return new WaitForSeconds(1.3f);
-                        break;
-                    }
+                        {
+                            EnemyController shooter = null;
+                            shooter = EnemyController.Create(EnemyType.Shooter, home + new Vector2(-3.6f, 1.2f), player, () => false, _ => { }, game.CameraFollow);
+                            spawned.Add(shooter);
+                            yield return Tap();
+                            yield return new WaitForSeconds(3f);
+                            Aim(100);
+                            yield return Tap();
+                            yield return new WaitForSeconds(1.3f);
+                            break;
+                        }
                     case "small_eclipse":
                         yield return Tap();
-                        yield return Walk(GameAction.MoveUp, .5f); yield return Walk(GameAction.MoveLeft, .7f); yield return Walk(GameAction.MoveDown, .7f); yield return Walk(GameAction.MoveRight, .7f);
+                        yield return Walk(GameAction.MoveUp, .5f);
+                        yield return Walk(GameAction.MoveLeft, .7f);
+                        yield return Walk(GameAction.MoveDown, .7f);
+                        yield return Walk(GameAction.MoveRight, .7f);
                         yield return Tap();
                         yield return new WaitForSeconds(1.4f);
                         break;
                     case "siege_engineer":
-                        yield return Tap(); yield return new WaitForSeconds(.5f); yield return Attack(1.3f); yield return new WaitForSeconds(.2f);
-                        yield return Tap(); yield return Walk(GameAction.MoveLeft, .4f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.5f);
+                        yield return Attack(1.3f);
+                        yield return new WaitForSeconds(.2f);
+                        yield return Tap();
+                        yield return Walk(GameAction.MoveLeft, .4f);
                         yield return new WaitForSeconds(.4f);
                         break;
                     case "mirror_eye":
-                        yield return Tap(); yield return new WaitForSeconds(.5f); yield return Attack(.9f); yield return new WaitForSeconds(.2f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.5f);
+                        yield return Attack(.9f);
+                        yield return new WaitForSeconds(.2f);
                         yield return Tap();
                         yield return new WaitForSeconds(1f);
                         break;
                     case "dragon_spine":
-                        yield return Tap(); yield return new WaitForSeconds(.7f);
-                        Aim(70); yield return new WaitForSeconds(.1f); yield return Tap();
+                        yield return Tap();
+                        yield return new WaitForSeconds(.7f);
+                        Aim(70);
+                        yield return new WaitForSeconds(.1f);
+                        yield return Tap();
                         yield return new WaitForSeconds(1.1f);
                         break;
                     case "warden_door":
-                    {
-                        EnemyController shooter = null;
-                        shooter = EnemyController.Create(EnemyType.Shooter, home + new Vector2(4.5f, .3f), player, () => false, _ => { }, game.CameraFollow);
-                        spawned.Add(shooter);
-                        for (var i = 0; i < 4; i++) { player.SandboxRefresh(); yield return Tap(); yield return new WaitForSeconds(.9f); }
-                        break;
-                    }
-                    case "blood_bank": case "ember_heart": case "night_thread": case "meteor_waybill":
-                        yield return Attack(1.2f); player.SandboxRefresh();
+                        {
+                            EnemyController shooter = null;
+                            shooter = EnemyController.Create(EnemyType.Shooter, home + new Vector2(4.5f, .3f), player, () => false, _ => { }, game.CameraFollow);
+                            spawned.Add(shooter);
+                            for (var i = 0; i < 4; i++)
+                            {
+                                player.SandboxRefresh();
+                                yield return Tap();
+                                yield return new WaitForSeconds(.9f);
+                            }
+                            break;
+                        }
+                    case "blood_bank":
+                    case "ember_heart":
+                    case "night_thread":
+                    case "meteor_waybill":
+                        yield return Attack(1.2f);
+                        player.SandboxRefresh();
                         yield return Tap();
                         yield return new WaitForSeconds(1.8f);
                         break;
                     case "lightning_carbine":
-                        yield return Tap(); yield return new WaitForSeconds(.7f);
-                        yield return Tap(); yield return new WaitForSeconds(1.2f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.7f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(1.2f);
                         break;
                     case "polaris":
-                        yield return Tap(); yield return new WaitForSeconds(.8f); yield return Attack(.6f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(.8f);
+                        yield return Attack(.6f);
                         yield return new WaitForSeconds(.5f);
                         break;
                     default:
-                        yield return Tap(); yield return new WaitForSeconds(1.3f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(1.3f);
                         player.SandboxRefresh();
-                        yield return Tap(); yield return new WaitForSeconds(1.3f);
+                        yield return Tap();
+                        yield return new WaitForSeconds(1.3f);
                         break;
                 }
                 StopCoroutine(capture);
@@ -280,17 +375,29 @@ namespace RuinRunner
                 StageValidationInput.SetHeld(GameAction.Attack, true);
                 for (var t = 0f; t < seconds; t += Time.deltaTime)
                 {
-                    foreach (var spot in spots) if (spot.Key != null && !spot.Key.IsDead) spot.Key.transform.position = (Vector2)player.transform.position + spot.Value;
+                    foreach (var spot in spots)
+                        if (spot.Key != null && !spot.Key.IsDead)
+                            spot.Key.transform.position = (Vector2)player.transform.position + spot.Value;
                     yield return null;
                 }
                 StageValidationInput.SetHeld(GameAction.Attack, false);
             }
-            IEnumerator Tap(GameAction action) { StageValidationInput.SetHeld(action, true); yield return new WaitForSeconds(.08f); StageValidationInput.SetHeld(action, false); }
-            SigFx.Created = (clip, point, ground) => { if (game.Player != null) Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00") + " frame " + capturedFrame); };
+            IEnumerator Tap(GameAction action)
+            {
+                StageValidationInput.SetHeld(action, true);
+                yield return new WaitForSeconds(.08f);
+                StageValidationInput.SetHeld(action, false);
+            }
+            SigFx.Created = (clip, point, ground) =>
+            {
+                if (game.Player != null)
+                    Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00") + " frame " + capturedFrame);
+            };
             var row = 0;
             foreach (var accessory in AccessoryLootTable.All)
             {
-                if ((int)accessory.Type < (int)AccessoryType.RetributionThorn) continue;
+                if ((int)accessory.Type < (int)AccessoryType.RetributionThorn)
+                    continue;
                 ClearAll();
                 player.Teleport(home);
                 Equip(starter);
@@ -299,7 +406,9 @@ namespace RuinRunner
                 player.Stats.Heal(player.MaxHealth);
                 StageValidationInput.SetAim(Vector2.right);
                 spots.Clear();
-                Foe(1.1f, .2f, 1000000f); Foe(2.3f, -.7f, 1000000f); Foe(3f, .6f, 1000000f);
+                Foe(1.1f, .2f, 1000000f);
+                Foe(2.3f, -.7f, 1000000f);
+                Foe(3f, .6f, 1000000f);
                 var before = player.ItemEffects.PassiveProcs;
                 yield return new WaitForSeconds(.1f);
                 var capture = StartCoroutine(CaptureFrames(System.IO.Path.Combine(folder, (row++).ToString("D2") + "_" + accessory.Id)));
@@ -307,20 +416,26 @@ namespace RuinRunner
                 game.Inventory.AddAccessory(accessory);
                 switch (accessory.Type)
                 {
-                    case AccessoryType.CinderSeed: case AccessoryType.SoulLantern:
+                    case AccessoryType.CinderSeed:
+                    case AccessoryType.SoulLantern:
                         Foe(1f, -.3f, 1f);
                         yield return Attack(1.2f);
                         yield return new WaitForSeconds(1.2f);
                         break;
                     case AccessoryType.HolyTithe:
-                        for (var i = 0; i < 12 && player.ItemEffects.PassiveProcs == before; i++) { Foe(1f, -.3f, 1f); yield return Attack(.9f); }
+                        for (var i = 0; i < 12 && player.ItemEffects.PassiveProcs == before; i++)
+                        {
+                            Foe(1f, -.3f, 1f);
+                            yield return Attack(.9f);
+                        }
                         yield return new WaitForSeconds(1.2f);
                         break;
                     case AccessoryType.FrostWaveNecklace:
                         yield return Tap(GameAction.Dash);
                         yield return new WaitForSeconds(1.6f);
                         break;
-                    case AccessoryType.MeteorCompass: case AccessoryType.TimeHourglass:
+                    case AccessoryType.MeteorCompass:
+                    case AccessoryType.TimeHourglass:
                         yield return Tap(GameAction.Guard);
                         yield return new WaitForSeconds(2f);
                         break;
@@ -381,20 +496,40 @@ namespace RuinRunner
 
         private void Update()
         {
-            if (!ready || game.Player == null) return;
-            if (touring) { StageValidationInput.BeginFrame(); spawned.RemoveAll(enemy => enemy == null); return; }
-            if (Input.GetKeyDown(KeyCode.F1)) typeIndex = (typeIndex + Types.Length - 1) % Types.Length;
-            if (Input.GetKeyDown(KeyCode.F2)) typeIndex = (typeIndex + 1) % Types.Length;
-            if (Input.GetKeyDown(KeyCode.F3)) Spawn();
-            if (Input.GetKeyDown(KeyCode.F4)) ClearAll();
-            if (Input.GetKeyDown(KeyCode.F5)) Step(Input.GetKey(KeyCode.LeftShift) ? -1 : 1);
-            if (Input.GetKeyDown(KeyCode.F8)) StepFamily();
-            if (Input.GetKeyDown(KeyCode.F6)) { god = !god; game.Player.SandboxInvulnerable = god; }
-            if (Input.GetKeyDown(KeyCode.F7)) speedIndex = (speedIndex + 1) % Speeds.Length;
-            if (Input.GetKeyDown(KeyCode.F9)) game.Player.SandboxRefresh();
+            if (!ready || game.Player == null)
+                return;
+            if (touring)
+            {
+                StageValidationInput.BeginFrame();
+                spawned.RemoveAll(enemy => enemy == null);
+                return;
+            }
+            if (Input.GetKeyDown(KeyCode.F1))
+                typeIndex = (typeIndex + Types.Length - 1) % Types.Length;
+            if (Input.GetKeyDown(KeyCode.F2))
+                typeIndex = (typeIndex + 1) % Types.Length;
+            if (Input.GetKeyDown(KeyCode.F3))
+                Spawn();
+            if (Input.GetKeyDown(KeyCode.F4))
+                ClearAll();
+            if (Input.GetKeyDown(KeyCode.F5))
+                Step(Input.GetKey(KeyCode.LeftShift) ? -1 : 1);
+            if (Input.GetKeyDown(KeyCode.F8))
+                StepFamily();
+            if (Input.GetKeyDown(KeyCode.F6))
+            {
+                god = !god;
+                game.Player.SandboxInvulnerable = god;
+            }
+            if (Input.GetKeyDown(KeyCode.F7))
+                speedIndex = (speedIndex + 1) % Speeds.Length;
+            if (Input.GetKeyDown(KeyCode.F9))
+                game.Player.SandboxRefresh();
             // Hit stop and pauses keep their own clock at normal speed.
-            if (speedIndex != 0 && !game.IsPaused) Time.timeScale = Speeds[speedIndex];
-            else if (speedIndex == 0 && Mathf.Approximately(Time.timeScale, .5f) || speedIndex == 0 && Mathf.Approximately(Time.timeScale, .25f)) Time.timeScale = 1f;
+            if (speedIndex != 0 && !game.IsPaused)
+                Time.timeScale = Speeds[speedIndex];
+            else if (speedIndex == 0 && Mathf.Approximately(Time.timeScale, .5f) || speedIndex == 0 && Mathf.Approximately(Time.timeScale, .25f))
+                Time.timeScale = 1f;
             spawned.RemoveAll(enemy => enemy == null);
         }
 
@@ -407,7 +542,9 @@ namespace RuinRunner
 
         private void ClearAll()
         {
-            foreach (var enemy in spawned) if (enemy != null) Destroy(enemy.gameObject);
+            foreach (var enemy in spawned)
+                if (enemy != null)
+                    Destroy(enemy.gameObject);
             spawned.Clear();
         }
 
@@ -426,7 +563,8 @@ namespace RuinRunner
             for (var i = 1; i <= all.Length; i++)
             {
                 var next = (weaponIndex + i) % all.Length;
-                if (all[next].Family == current) continue;
+                if (all[next].Family == current)
+                    continue;
                 weaponIndex = next;
                 Equip(all[next]);
                 game.Player.SandboxRefresh();
@@ -436,8 +574,10 @@ namespace RuinRunner
 
         private void OnGUI()
         {
-            if (!ready || touring) return;
-            if (style == null) style = new GUIStyle(GUI.skin.label) { fontSize = 18, wordWrap = true, normal = { textColor = Color.white } };
+            if (!ready || touring)
+                return;
+            if (style == null)
+                style = new GUIStyle(GUI.skin.label) { fontSize = 18, wordWrap = true, normal = { textColor = Color.white } };
             var boss = spawned.Find(enemy => enemy != null && enemy.IsBoss);
             var weapon = game.Player.EquippedWeapon;
             var text = "[전투 샌드박스] 무기 " + (weaponIndex + 1) + "/" + SignatureWeaponCatalog.All.Length +

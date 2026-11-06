@@ -13,7 +13,8 @@ namespace RuinRunner
 
         public static Color32 ChromaCutout(Color32 pixel)
         {
-            if (pixel.a < 128 || IsMagentaMatte(pixel)) return new Color32(0, 0, 0, 0);
+            if (pixel.a < 128 || IsMagentaMatte(pixel))
+                return new Color32(0, 0, 0, 0);
             pixel.a = 255;
             return pixel;
         }
@@ -22,7 +23,8 @@ namespace RuinRunner
         {
             // Solid pixel sprites: discard extraction residue and retain the actual
             // source colors. Do not erase white pixels by RGB (weapons/eyes use them).
-            if (pixel.a < 128) return new Color32(0, 0, 0, 0);
+            if (pixel.a < 128)
+                return new Color32(0, 0, 0, 0);
             pixel.a = 255;
             return pixel;
         }

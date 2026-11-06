@@ -26,8 +26,16 @@ namespace RuinRunner
         private bool presentationFocus;
         private Vector2 presentationPoint;
         public void FocusPresentation(Vector2 point)
-        { presentationPoint=point;presentationFocus=true;shakeTime=0;shakeOffset=Vector3.zero; }
-        public void ReleasePresentation() { presentationFocus=false; }
+        {
+            presentationPoint = point;
+            presentationFocus = true;
+            shakeTime = 0;
+            shakeOffset = Vector3.zero;
+        }
+        public void ReleasePresentation()
+        {
+            presentationFocus = false;
+        }
         private float nextImpactAt;
         private float nextFinisherImpactAt;
         private Action<bool, bool> hitImpactCallback;
@@ -80,7 +88,8 @@ namespace RuinRunner
         {
             // A cleave can contact several colliders. Emphasize that one landed
             // action without multiplying time effects for each target or pellet.
-            if (Time.unscaledTime < nextFinisherImpactAt) return;
+            if (Time.unscaledTime < nextFinisherImpactAt)
+                return;
             nextFinisherImpactAt = Time.unscaledTime + .16f;
             Shake(.055f);
             finisherImpactCallback?.Invoke();
@@ -88,10 +97,12 @@ namespace RuinRunner
 
         public void Impact(bool critical, bool boss)
         {
-            if (Time.unscaledTime < nextImpactAt) return;
+            if (Time.unscaledTime < nextImpactAt)
+                return;
             nextImpactAt = Time.unscaledTime + .12f;
             Shake(critical ? .13f : .07f, critical ? .2f : .09f);
-            if (hitImpactCallback != null) hitImpactCallback(critical, boss);
+            if (hitImpactCallback != null)
+                hitImpactCallback(critical, boss);
         }
 
         public void KillImpact()
@@ -103,14 +114,16 @@ namespace RuinRunner
         public void BossDefeated()
         {
             Shake(.8f, .4f);
-            if (bossDefeatCallback != null) bossDefeatCallback();
+            if (bossDefeatCallback != null)
+                bossDefeatCallback();
         }
 
         public void Shake(float duration = .12f) => Shake(duration, .1f + duration * .55f);
 
         public void Shake(float duration, float strength)
         {
-            if (duration < shakeTime && strength < shakeStrength) return;
+            if (duration < shakeTime && strength < shakeStrength)
+                return;
             shakeTime = Mathf.Max(shakeTime, duration);
             shakeDuration = Mathf.Max(.001f, shakeTime);
             shakeStrength = Mathf.Max(shakeTime > 0 ? shakeStrength : 0, strength);
@@ -126,14 +139,22 @@ namespace RuinRunner
         public void FocusRoom(Vector2 center, bool snap = false)
         {
             roomCenter = center;
-            if (snap) { transform.position = new Vector3(center.x, center.y, -10f); hasFollowPosition = false; }
+            if (snap)
+            {
+                transform.position = new Vector3(center.x, center.y, -10f);
+                hasFollowPosition = false;
+            }
         }
 
         public void FocusRoom(Vector2 center, Vector2 size, bool snap = false)
         {
             roomSize = size;
             FocusRoom(center, false);
-            if (snap) { transform.position = DesiredPosition(); hasFollowPosition = false; }
+            if (snap)
+            {
+                transform.position = DesiredPosition();
+                hasFollowPosition = false;
+            }
         }
 
         private Vector3 DesiredPosition()

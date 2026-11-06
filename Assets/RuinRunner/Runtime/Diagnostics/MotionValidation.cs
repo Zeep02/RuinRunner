@@ -41,21 +41,25 @@ namespace RuinRunner
             {
                 captureDirectory = args[captureIndex + 1];
                 Directory.CreateDirectory(captureDirectory);
-                if (File.Exists(Path.Combine(captureDirectory, "motion.csv"))) throw new InvalidOperationException("Capture directory must be new; preserve earlier evidence.");
+                if (File.Exists(Path.Combine(captureDirectory, "motion.csv")))
+                    throw new InvalidOperationException("Capture directory must be new; preserve earlier evidence.");
                 screenshot = Type.GetType("UnityEngine.ScreenCapture, UnityEngine.ScreenCaptureModule")?
                     .GetMethod("CaptureScreenshot", new[] { typeof(string), typeof(int) });
             }
-            if (fourWeapons) StartCoroutine(RecordWorldFrames());
+            if (fourWeapons)
+                StartCoroutine(RecordWorldFrames());
             sequence = Validate();
         }
 
         private void Update()
         {
-            if (sequence == null) return;
+            if (sequence == null)
+                return;
             StageValidationInput.BeginFrame();
             try
             {
-                if (sequence.MoveNext()) return;
+                if (sequence.MoveNext())
+                    return;
                 Debug.Log("[Motion Validation] PASS " + checks + " assertions; isolated scene, not a full-stage run.");
                 sequence = null;
                 Application.Quit(0);
@@ -74,19 +78,22 @@ namespace RuinRunner
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--thrust-options-validation") >= 0)
             {
                 var update = ValidateThrustOptions();
-                while (update.MoveNext()) yield return null;
+                while (update.MoveNext())
+                    yield return null;
                 yield break;
             }
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--demo-polish-validation") >= 0)
             {
                 var polish = ValidateDemoPolish();
-                while (polish.MoveNext()) yield return null;
+                while (polish.MoveNext())
+                    yield return null;
                 yield break;
             }
             if (Array.IndexOf(Environment.GetCommandLineArgs(), "--combo-probe") >= 0)
             {
                 var probe = ProbeComboInputs();
-                while (probe.MoveNext()) yield return null;
+                while (probe.MoveNext())
+                    yield return null;
                 yield break;
             }
             var enemy = EnemyController.Create(EnemyType.Boss, new Vector2(1.1f, .15f), player, () => true, _ => { }, null);
@@ -96,16 +103,19 @@ namespace RuinRunner
             Tap(GameAction.Attack);
             yield return null;
             Require(enemy.Health == health, "no damage on attack input / anticipation");
-            for (var i = 0; i < 12; i++) yield return null;
+            for (var i = 0; i < 12; i++)
+                yield return null;
             Require(enemy.Health < health && player.MeleeContactsResolved == 1, "one damage contact at strike phase");
             health = enemy.Health;
-            for (var i = 0; i < 20; i++) yield return null;
+            for (var i = 0; i < 20; i++)
+                yield return null;
             Require(enemy.Health == health && player.MeleeContactsResolved == 1, "no duplicate hit in recovery");
 
             Tap(GameAction.Attack);
             yield return null;
             Tap(GameAction.Dash);
-            for (var i = 0; i < 24; i++) yield return null;
+            for (var i = 0; i < 24; i++)
+                yield return null;
             Require(player.MeleeContactsResolved == 1, "dash cancels pending contact");
             player.Teleport(Vector2.zero);
             Tap(GameAction.Attack);
@@ -114,44 +124,54 @@ namespace RuinRunner
             Tap(GameAction.Attack);
             yield return null;
             Require(!player.IsMeleeSwingActive, "weapon switch does not reset attack cooldown");
-            for (var i = 0; i < 30; i++) yield return null;
+            for (var i = 0; i < 30; i++)
+                yield return null;
             Require(player.MeleeContactsResolved == 1, "weapon switch cancels pending contact and stale buffer");
 
             Tap(GameAction.Attack);
             yield return null;
             paused = true;
-            for (var i = 0; i < 20; i++) yield return null;
+            for (var i = 0; i < 20; i++)
+                yield return null;
             Require(player.MeleeContactsResolved == 1 && !player.IsMeleeSwingActive, "a pause cancels the swing in progress");
             paused = false;
-            for (var i = 0; i < 27; i++) yield return null;
+            for (var i = 0; i < 27; i++)
+                yield return null;
             Require(player.MeleeContactsResolved == 1, "a cancelled swing does not land after the pause");
 
             var attackSequence = player.AttackAnimationSequence;
             Tap(GameAction.Attack);
-            for (var i = 0; i < 17; i++) yield return null;
+            for (var i = 0; i < 17; i++)
+                yield return null;
             Tap(GameAction.Attack);
-            for (var i = 0; i < 30; i++) yield return null;
+            for (var i = 0; i < 30; i++)
+                yield return null;
             Require(player.AttackAnimationSequence == attackSequence + 2, "early combo input is buffered once");
             Destroy(enemy.gameObject);
             player.Teleport(Vector2.zero);
-            for (var i = 0; i < 70; i++) yield return null;
+            for (var i = 0; i < 70; i++)
+                yield return null;
 
             StageValidationInput.SetHeld(GameAction.MoveRight, true);
-            for (var i = 0; i < 20; i++) yield return null;
+            for (var i = 0; i < 20; i++)
+                yield return null;
             var body = player.GetComponent<Rigidbody2D>();
             var cardinalSpeed = body.linearVelocity.magnitude;
             StageValidationInput.SetHeld(GameAction.MoveUp, true);
-            for (var i = 0; i < 20; i++) yield return null;
+            for (var i = 0; i < 20; i++)
+                yield return null;
             Require(Mathf.Abs(cardinalSpeed - body.linearVelocity.magnitude) < .05f, "diagonal movement speed is normalized");
             StageValidationInput.ReleaseAll();
             player.Teleport(Vector2.zero);
-            for (var i = 0; i < 10; i++) yield return null;
+            for (var i = 0; i < 10; i++)
+                yield return null;
             var wall = new GameObject("ValidationWall");
             wall.layer = GameLayers.Ground;
             wall.transform.position = new Vector3(1f, 0f, 0f);
             wall.AddComponent<BoxCollider2D>().size = new Vector2(.2f, 4f);
             Tap(GameAction.Dash);
-            for (var i = 0; i < 20; i++) yield return null;
+            for (var i = 0; i < 20; i++)
+                yield return null;
             Require(player.transform.position.x < .6f, "dash stops before wall footprint");
             Destroy(wall);
 
@@ -163,14 +183,17 @@ namespace RuinRunner
             var cornerCollider = corner.AddComponent<BoxCollider2D>();
             cornerCollider.size = Vector2.one;
             player.Teleport(new Vector2(.24f, .58f));
-            for (var i = 0; i < 3; i++) yield return null;
+            for (var i = 0; i < 3; i++)
+                yield return null;
             var foot = player.GetComponent<Collider2D>();
             Require(!foot.Distance(cornerCollider).isOverlapped && foot.bounds.Intersects(cornerCollider.bounds),
                 "rounded foot can legally occupy a corner intersecting its bounding box");
-            while (player.DashCharges == 0) yield return null;
+            while (player.DashCharges == 0)
+                yield return null;
             StageValidationInput.SetAim(Vector2.left);
             Tap(GameAction.Dash);
-            for (var i = 0; i < 20; i++) yield return null;
+            for (var i = 0; i < 20; i++)
+                yield return null;
             Require(player.transform.position.x < -1.5f, "dash can leave a legal rounded corner without false box overlap");
             Destroy(corner);
             StageValidationInput.SetAim(Vector2.right);
@@ -214,7 +237,8 @@ namespace RuinRunner
             if (fourWeapons)
             {
                 var four = ValidateFourWeapons();
-                while (four.MoveNext()) yield return null;
+                while (four.MoveNext())
+                    yield return null;
                 yield break;
             }
 
@@ -236,21 +260,27 @@ namespace RuinRunner
                 for (var i = 0; i < 36; i++)
                 {
                     yield return null;
-                    if (player.MotionState == PlayerMotionState.Run) shownFrames.Add(walkingBody.sprite);
+                    if (player.MotionState == PlayerMotionState.Run)
+                        shownFrames.Add(walkingBody.sprite);
                 }
                 Require(shownFrames.Count >= 3,
                     "live walking direction=" + directionIndex + " animated frames=" + shownFrames.Count);
                 Tap(GameAction.Attack);
-                for (var i = 0; i < 26; i++) yield return null;
+                for (var i = 0; i < 26; i++)
+                    yield return null;
                 Tap(GameAction.Attack);
-                for (var i = 0; i < 26; i++) yield return null;
+                for (var i = 0; i < 26; i++)
+                    yield return null;
                 SetMovement(Vector2.zero);
-                for (var i = 0; i < 12; i++) yield return null;
+                for (var i = 0; i < 12; i++)
+                    yield return null;
                 StageValidationInput.SetHeld(GameAction.Guard, true);
-                for (var i = 0; i < 14; i++) yield return null;
+                for (var i = 0; i < 14; i++)
+                    yield return null;
                 StageValidationInput.SetHeld(GameAction.Guard, false);
                 Tap(GameAction.Dash);
-                for (var i = 0; i < 22; i++) yield return null;
+                for (var i = 0; i < 22; i++)
+                    yield return null;
             }
             recording = false;
             yield return null;
@@ -258,9 +288,12 @@ namespace RuinRunner
 
         private void LateUpdate()
         {
-            if (fourWeapons) return;
-            if (!recording || screenshot == null || string.IsNullOrEmpty(captureDirectory)) return;
-            if ((renderFrames++ & 1) != 0) return;
+            if (fourWeapons)
+                return;
+            if (!recording || screenshot == null || string.IsNullOrEmpty(captureDirectory))
+                return;
+            if ((renderFrames++ & 1) != 0)
+                return;
             var frame = recordedFrames++;
             screenshot.Invoke(null, new object[] { Path.Combine(captureDirectory, "motion-" + frame.ToString("D4") + ".png"), 1 });
             var visual = player.transform.Find("VisualRoot").GetComponent<SpriteRenderer>();
@@ -282,49 +315,59 @@ namespace RuinRunner
             follow.FocusRoom(Vector2.zero, room.Size, true);
             var families = new[] { WeaponFamily.Longsword, WeaponFamily.Katana, WeaponFamily.Dagger, WeaponFamily.Greatsword };
             foreach (var family in families)
-            for (var directionIndex = 0; directionIndex < 8; directionIndex++)
-            {
-                recording = false;
-                StageValidationInput.ReleaseAll();
-                player.EquipWeapon(WeaponLootTable.FindFirst(family));
-                var angle = directionIndex * Mathf.PI / 4f;
-                var direction = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-                player.Teleport(-direction * 2.4f); // Between clips only; no teleport within an action chain.
-                StageValidationInput.SetAim(direction);
-                for (var i = 0; i < 80; i++) yield return null; // Fresh cooldowns for the next independent direction fixture.
-                follow.FocusRoom(Vector2.zero, room.Size, true);
-                Debug.Log("[Four Weapons] BEGIN " + family + " direction=" + directionIndex + " frame=" + recordedFrames);
-                recording = true;
-                SetMovement(direction);
-                for (var i = 0; i < 24; i++) yield return null;
-                var before = player.MeleeContactsResolved;
-                Tap(GameAction.Attack);
-                var wait = family == WeaponFamily.Greatsword
-                    ? Mathf.CeilToInt(player.AttackDelay * MeleeComboCatalog.Get(player.EquippedWeapon).LightSteps[0].DelayMultiplier * 60f) + 2 : 22;
-                for (var i = 0; i < wait; i++) yield return null;
-                Require(player.MeleeContactsResolved > before, family + " basic strike resolves while moving direction=" + directionIndex);
-                SetMovement(Vector2.zero);
-                StageValidationInput.SetHeld(GameAction.Guard, true);
-                for (var i = 0; i < 3; i++) yield return null;
-                Require(player.IsWeaponActionActive, family + " right-click action starts direction=" + directionIndex);
-                for (var i = 0; i < (family == WeaponFamily.Greatsword ? 42 : 13); i++) yield return null;
-                StageValidationInput.SetHeld(GameAction.Guard, false);
-                for (var i = 0; i < (family == WeaponFamily.Greatsword ? 38 : 20); i++) yield return null;
-                var charges = player.DashCharges;
-                Tap(GameAction.Dash);
-                for (var i = 0; i < 4; i++) yield return null;
-                Require(player.DashCharges < charges, family + " dash follows weapon action direction=" + directionIndex);
-                for (var i = 0; i < 14; i++) yield return null;
-                before = player.MeleeContactsResolved;
-                Tap(GameAction.Attack);
-                for (var i = 0; i < 45; i++) yield return null;
-                Require(player.MeleeContactsResolved > before, family + " attack resumes after dash direction=" + directionIndex);
-                var switched = WeaponLootTable.FindFirst(family == WeaponFamily.Longsword ? WeaponFamily.Dagger : WeaponFamily.Longsword);
-                player.EquipWeapon(switched); // The same event used by the game's equipment handler; not a UI drag test.
-                for (var i = 0; i < 20; i++) yield return null;
-                Require(player.GetComponent<HeldWeaponView>().CurrentWeaponId == switched.Id, family + " held art follows equipment change direction=" + directionIndex);
-                Debug.Log("[Four Weapons] END " + family + " direction=" + directionIndex + " frame=" + recordedFrames);
-            }
+                for (var directionIndex = 0; directionIndex < 8; directionIndex++)
+                {
+                    recording = false;
+                    StageValidationInput.ReleaseAll();
+                    player.EquipWeapon(WeaponLootTable.FindFirst(family));
+                    var angle = directionIndex * Mathf.PI / 4f;
+                    var direction = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
+                    player.Teleport(-direction * 2.4f); // Between clips only; no teleport within an action chain.
+                    StageValidationInput.SetAim(direction);
+                    for (var i = 0; i < 80; i++)
+                        yield return null; // Fresh cooldowns for the next independent direction fixture.
+                    follow.FocusRoom(Vector2.zero, room.Size, true);
+                    Debug.Log("[Four Weapons] BEGIN " + family + " direction=" + directionIndex + " frame=" + recordedFrames);
+                    recording = true;
+                    SetMovement(direction);
+                    for (var i = 0; i < 24; i++)
+                        yield return null;
+                    var before = player.MeleeContactsResolved;
+                    Tap(GameAction.Attack);
+                    var wait = family == WeaponFamily.Greatsword
+                        ? Mathf.CeilToInt(player.AttackDelay * MeleeComboCatalog.Get(player.EquippedWeapon).LightSteps[0].DelayMultiplier * 60f) + 2 : 22;
+                    for (var i = 0; i < wait; i++)
+                        yield return null;
+                    Require(player.MeleeContactsResolved > before, family + " basic strike resolves while moving direction=" + directionIndex);
+                    SetMovement(Vector2.zero);
+                    StageValidationInput.SetHeld(GameAction.Guard, true);
+                    for (var i = 0; i < 3; i++)
+                        yield return null;
+                    Require(player.IsWeaponActionActive, family + " right-click action starts direction=" + directionIndex);
+                    for (var i = 0; i < (family == WeaponFamily.Greatsword ? 42 : 13); i++)
+                        yield return null;
+                    StageValidationInput.SetHeld(GameAction.Guard, false);
+                    for (var i = 0; i < (family == WeaponFamily.Greatsword ? 38 : 20); i++)
+                        yield return null;
+                    var charges = player.DashCharges;
+                    Tap(GameAction.Dash);
+                    for (var i = 0; i < 4; i++)
+                        yield return null;
+                    Require(player.DashCharges < charges, family + " dash follows weapon action direction=" + directionIndex);
+                    for (var i = 0; i < 14; i++)
+                        yield return null;
+                    before = player.MeleeContactsResolved;
+                    Tap(GameAction.Attack);
+                    for (var i = 0; i < 45; i++)
+                        yield return null;
+                    Require(player.MeleeContactsResolved > before, family + " attack resumes after dash direction=" + directionIndex);
+                    var switched = WeaponLootTable.FindFirst(family == WeaponFamily.Longsword ? WeaponFamily.Dagger : WeaponFamily.Longsword);
+                    player.EquipWeapon(switched); // The same event used by the game's equipment handler; not a UI drag test.
+                    for (var i = 0; i < 20; i++)
+                        yield return null;
+                    Require(player.GetComponent<HeldWeaponView>().CurrentWeaponId == switched.Id, family + " held art follows equipment change direction=" + directionIndex);
+                    Debug.Log("[Four Weapons] END " + family + " direction=" + directionIndex + " frame=" + recordedFrames);
+                }
             recording = false;
             StageValidationInput.ReleaseAll();
             yield return null;
@@ -335,15 +378,18 @@ namespace RuinRunner
             while (true)
             {
                 yield return new WaitForEndOfFrame();
-                if (!recording || string.IsNullOrEmpty(captureDirectory) || (renderFrames++ & 1) != 0) continue;
+                if (!recording || string.IsNullOrEmpty(captureDirectory) || (renderFrames++ & 1) != 0)
+                    continue;
                 // Capture the actually presented PixelPerfect frame. A second
                 // Camera.Render into 1280x720 retained a 640x360 internal viewport.
-                if(screenshot==null)screenshot=Type.GetType("UnityEngine.ScreenCapture, UnityEngine.ScreenCaptureModule")?
-                    .GetMethod("CaptureScreenshot",new[]{typeof(string),typeof(int)});
-                if(screenshot==null)throw new InvalidOperationException("ScreenCapture module unavailable");
+                if (screenshot == null)
+                    screenshot = Type.GetType("UnityEngine.ScreenCapture, UnityEngine.ScreenCaptureModule")?
+                    .GetMethod("CaptureScreenshot", new[] { typeof(string), typeof(int) });
+                if (screenshot == null)
+                    throw new InvalidOperationException("ScreenCapture module unavailable");
                 var camera = follow.GetComponent<Camera>();
                 var frame = recordedFrames++;
-                screenshot.Invoke(null,new object[]{Path.Combine(captureDirectory,"motion-"+frame.ToString("D4")+".png"),1});
+                screenshot.Invoke(null, new object[] { Path.Combine(captureDirectory, "motion-" + frame.ToString("D4") + ".png"), 1 });
                 var visual = player.transform.Find("VisualRoot").GetComponent<SpriteRenderer>();
                 var line = string.Format(System.Globalization.CultureInfo.InvariantCulture,
                     "{0},{1},{2:F3},{3:F3},{4:F3},{5:F3},{6:F3},{7},{8},{9},{10},{11:F3},{12:F3}\n", frame,
@@ -363,16 +409,20 @@ namespace RuinRunner
             {
                 StageValidationInput.ReleaseAll();
                 player.EquipWeapon(DemoContent.Weapon("trainee_blade"));
-                for (var wait = 0; wait < 70; wait++) yield return null;
-                var before = player.AttackAnimationSequence; var previous = before;
+                for (var wait = 0; wait < 70; wait++)
+                    yield return null;
+                var before = player.AttackAnimationSequence;
+                var previous = before;
                 var steps = new System.Collections.Generic.List<int>();
                 var attacksAtRelease = -1;
                 for (var tick = 0; tick < (test == 2 ? 195 : 100); tick++)
                 {
                     if (Array.IndexOf(schedules[test], tick) >= 0)
                     {
-                        if (test == 2) StageValidationInput.SetHeld(GameAction.Attack, true);
-                        else Tap(GameAction.Attack);
+                        if (test == 2)
+                            StageValidationInput.SetHeld(GameAction.Attack, true);
+                        else
+                            Tap(GameAction.Attack);
                     }
                     if (test == 2 && tick == 132)
                     {
@@ -387,11 +437,13 @@ namespace RuinRunner
                     }
                 }
                 Debug.Log("[Combo Probe] " + names[test] + " attacks=" + (player.AttackAnimationSequence - before) + " steps=" + string.Join(",", steps));
-                if (test == 1) Require(steps.Count == 3 && steps[0] == 1 && steps[1] == 2 && steps[2] == 3, "three combo steps execute with timed clicks");
+                if (test == 1)
+                    Require(steps.Count == 3 && steps[0] == 1 && steps[1] == 2 && steps[2] == 3, "three combo steps execute with timed clicks");
                 if (test == 2)
                 {
                     Require(steps.Count >= 4, "holding primary attack repeats beyond one combo");
-                    for (var i = 0; i < steps.Count; i++) Require(steps[i] == i % 3 + 1, "held combo repeats 1-2-3, swing=" + i);
+                    for (var i = 0; i < steps.Count; i++)
+                        Require(steps[i] == i % 3 + 1, "held combo repeats 1-2-3, swing=" + i);
                     Require(player.AttackAnimationSequence == attacksAtRelease, "release prevents any new automatic swing");
                 }
             }
@@ -413,7 +465,8 @@ namespace RuinRunner
 
         private void Require(bool condition, string description)
         {
-            if (!condition) throw new InvalidOperationException(description);
+            if (!condition)
+                throw new InvalidOperationException(description);
             checks++;
             Debug.Log("[Motion Validation] OK " + description);
         }

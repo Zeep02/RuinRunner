@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace RuinRunner
@@ -24,7 +23,10 @@ namespace RuinRunner
         public static AccessoryDefinition[] Choices(int seed, int offer, float luck)
             => RunRandom.Sample(seed, 29, offer, () => AccessoryLootTable.CreateChoices(6, luck));
 
-        sealed class Squad { public EnemyType[] Front, Back, Mobile, Flank, Support; }
+        sealed class Squad
+        {
+            public EnemyType[] Front, Back, Mobile, Flank, Support;
+        }
         static readonly Squad[] Squads =
         {
             new Squad { Front = new[] { EnemyType.Grunt, EnemyType.BoneShield }, Back = new[] { EnemyType.Shooter, EnemyType.MossArcher, EnemyType.RuneTotem },
@@ -37,7 +39,8 @@ namespace RuinRunner
 
         public static EnemyPlacementData[] Encounters(int seed, int region, bool boss, int stageIndex = 0)
         {
-            if (boss) return new[] { new EnemyPlacementData(CampaignStage.Get(stageIndex).BossType, 0, 0) };
+            if (boss)
+                return new[] { new EnemyPlacementData(CampaignStage.Get(stageIndex).BossType, 0, 0) };
             return RunRandom.Sample(seed, 7, stageIndex * 16 + region, () =>
             {
                 // Small mixed groups create different approach decisions without long filler waves.

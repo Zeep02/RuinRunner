@@ -34,7 +34,8 @@ public static class RunSeedSelection
             var signatures = Signatures(seed);
             var repeats = Repeats(signatures);
             selected = new(seed, new(signatures, attempt, repeats, "ordinary"));
-            if (!repeats) return selected;
+            if (!repeats)
+                return selected;
         }
         // Bounded work: keep the final validated candidate and disclose the repeated structure.
         return selected!;
@@ -47,14 +48,16 @@ public static class RunSeedSelection
             "SELECT r.id,r.seed,g.stage_signatures::text FROM runs r LEFT JOIN run_generation g ON g.run_id=r.id WHERE r.profile_id=$1 AND r.generator_version=$2 ORDER BY r.started_utc DESC,r.id DESC LIMIT 16",
             profile, ProceduralStageGenerator.Version))
         await using (var reader = await cmd.ExecuteReaderAsync())
-            while (await reader.ReadAsync()) rows.Add((reader.GetGuid(0), reader.GetInt32(1),
+            while (await reader.ReadAsync())
+                rows.Add((reader.GetGuid(0), reader.GetInt32(1),
                 reader.IsDBNull(2) ? null : Wire.Decode<string[]>(reader.GetString(2))));
         var recent = new List<string[]>();
         foreach (var row in rows)
         {
             var signatures = row.Signatures ?? Signatures(row.Seed);
             // Existing supported-version runs are incorporated without changing their seed or receipt.
-            if (row.Signatures == null) await Persist(c, row.Id, new(signatures, 1, false, "historical"));
+            if (row.Signatures == null)
+                await Persist(c, row.Id, new(signatures, 1, false, "historical"));
             recent.Add(signatures);
         }
         return recent.ToArray();

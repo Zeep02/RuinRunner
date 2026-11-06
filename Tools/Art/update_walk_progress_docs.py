@@ -1,7 +1,0 @@
-"""Keep in-progress documentation tied to the current runtime, not old builds."""
-from pathlib import Path
-root=Path(__file__).resolve().parents[2]
-p=root/'README.md';s=p.read_text(encoding='utf-8');s=s.replace('232활성 포즈','248활성 포즈').replace('남쪽 이동은12포즈로 교정했으며','북쪽·동쪽·남쪽 이동은각12포즈로 연결했으며');p.write_text(s,encoding='utf-8')
-p=root/'ARCHITECTURE.md';s=p.read_text(encoding='utf-8');s=s.replace('남쪽 이동 수정본 `HeroWalk/move/04`의232개','북/동/남 이동 수정본 `HeroWalk/move/{00,02,04}`의248개').replace('남쪽 이동12포즈는','세 방향의 이동12포즈는').replace('다른7방향 이동은 아직4포즈','다른5방향 이동은 아직4포즈');p.write_text(s,encoding='utf-8')
-p=root/'Docs/ArtMotionQuality-20260921.md';s=p.read_text(encoding='utf-8');s=s.replace('활성232포즈: 남쪽 이동12, 나머지7방향','활성248포즈: 북/동/남 이동12, 나머지5방향');s=s.replace('남쪽 이동 첫 묶음:', '남쪽 이동 첫 묶음(당시 기록):');s=s.replace('## 전체 계열 재검수 결과와 남은 작업','## 전체 계열 재검수 결과와 남은 작업\n\n후속 북쪽 묶음: `043112` 실제 입력에서 북/남 각12포즈, 검·권총 손 소켓과 일시정지를 재확인했다. 263원본/14.510초 영상 `north-south-transitions-1x.mp4`. 동쪽은 옆 방향 몸통·팔다리 앞뒤 정렬·관절 보폭을 별도로 제작해12포즈를 연결했으며 새 실화면 검증 중이다. 다른5방향은4포즈이며 전체248활성 포즈 계약으로 갱신했다. 각 방향 기준 머리는 옛 프레임 하나를 고정해 동일 픽셀을 유지한다.');p.write_text(s,encoding='utf-8')
-p=root/'WORK_STATUS.md';s=p.read_text(encoding='utf-8');s=s.replace('## 2026-09-21 얼굴 일관성 재교정 — 최신 목표 진행 중','## 2026-09-21 얼굴 일관성 재교정 — 최신 목표 진행 중\n\n- 후속 북쪽12포즈도043112 실제 입력에서 검·권총·방향 전환·손 소켓·일시정지 통과.263화면/14.510초 실제 시간 영상. 동쪽12포즈는 옆 몸통과 관절 보폭을 따로 제작해 연결하고 실화면 재검사 중. 현재248활성 포즈이며 나머지5방향 이동·공격·대시 확장과 기존 상태 연결은 미완료다.');p.write_text(s,encoding='utf-8')

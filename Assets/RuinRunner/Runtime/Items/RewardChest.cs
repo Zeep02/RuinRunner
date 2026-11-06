@@ -29,7 +29,7 @@ namespace RuinRunner
             chest.useGUILayout = false;
             chest.Rarity = rarity;
             chest.frames = IndividualArt.Frames("RewardChest/" + rarity, 6);
-            chest.chestRenderer = PrototypeVisuals.AddSprite(root, Color.white, 1000 - Mathf.RoundToInt(position.y * 100f));
+            chest.chestRenderer = GameVisuals.AddSprite(root, Color.white, 1000 - Mathf.RoundToInt(position.y * 100f));
             chest.chestRenderer.sprite = chest.frames[0];
             chest.onOpened = openedCallback;
             chest.settings = gameSettings;
@@ -44,35 +44,43 @@ namespace RuinRunner
 
         private void Update()
         {
-            if (Time.timeScale <= 0 || canInteract != null && !canInteract()) return;
-            if (!IsOpened) RefreshRarity();
-            if (!IsOpened && PlayerInRange && settings.GetKeyDown(GameAction.Interact)) Open();
+            if (Time.timeScale <= 0 || canInteract != null && !canInteract())
+                return;
+            if (!IsOpened)
+                RefreshRarity();
+            if (!IsOpened && PlayerInRange && settings.GetKeyDown(GameAction.Interact))
+                Open();
         }
 
         private void OnGUI()
         {
-            if (!CanOpen || !PlayerInRange || Time.timeScale <= 0 || Camera.main == null) return;
+            if (!CanOpen || !PlayerInRange || Time.timeScale <= 0 || Camera.main == null)
+                return;
             var point = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 1.05f);
-            if (point.z <= 0) return;
+            if (point.z <= 0)
+                return;
             var style = promptStyle ?? (promptStyle = PixelUiSkin.CreateWorldPromptStyle(RewardPresentation.Color(Rarity), 12, false));
             var binding = settings.GetBinding(GameAction.Interact);
             var key = binding.primary != KeyCode.None ? binding.primary : binding.alternate;
             var text = GameSettingsService.GetKeyName(key) + " 열기";
-            var width = style.CalcSize(new GUIContent(text)).x+8;
-            GUI.Box(new Rect(Mathf.Clamp(point.x-width/2,8,Screen.width-width-8),Screen.height-point.y-13,width,26),text,style);
+            var width = style.CalcSize(new GUIContent(text)).x + 8;
+            GUI.Box(new Rect(Mathf.Clamp(point.x - width / 2, 8, Screen.width - width - 8), Screen.height - point.y - 13, width, 26), text, style);
         }
         private void Open()
         {
-            if (!CanOpen) return;
+            if (!CanOpen)
+                return;
             RefreshRarity();
             IsOpened = true;
             StartCoroutine(OpenSequence());
         }
         private void RefreshRarity()
         {
-            if (rarityQuery == null) return;
+            if (rarityQuery == null)
+                return;
             var grade = rarityQuery();
-            if (grade == Rarity) return;
+            if (grade == Rarity)
+                return;
             Rarity = grade;
             frames = IndividualArt.Frames("RewardChest/" + grade, 6);
             chestRenderer.sprite = frames[0];
@@ -90,7 +98,8 @@ namespace RuinRunner
                 if (frame == 3)
                 {
                     RewardPresentation.Reveal(transform.position + Vector3.up * .42f, Rarity, chestRenderer.sortingOrder + 1, true);
-                    var callback = onOpened; onOpened = null;
+                    var callback = onOpened;
+                    onOpened = null;
                     callback?.Invoke();
                 }
             }
@@ -98,12 +107,14 @@ namespace RuinRunner
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.GetComponent<PlayerController>() != null) PlayerInRange = true;
+            if (other.GetComponent<PlayerController>() != null)
+                PlayerInRange = true;
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
-            if (other.GetComponent<PlayerController>() != null) PlayerInRange = false;
+            if (other.GetComponent<PlayerController>() != null)
+                PlayerInRange = false;
         }
     }
 }

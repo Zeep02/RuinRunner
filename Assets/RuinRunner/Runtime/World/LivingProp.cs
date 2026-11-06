@@ -35,7 +35,8 @@ namespace RuinRunner
         void Update()
         {
             var frame = Mathf.FloorToInt((Time.time + phase) * FramesPerSecond) % frames.Length;
-            if (frame == shown) return;
+            if (frame == shown)
+                return;
             shown = frame;
             view.sprite = frames[frame];
         }

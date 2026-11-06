@@ -14,7 +14,7 @@ namespace RuinRunner.EditorTools
         private Vector2 scroll;
         private Texture2D preview;
 
-        [MenuItem("Prototype/Room Designer", priority = 4)]
+        [MenuItem("RuinRunner/Room Designer", priority = 4)]
         public static void Open()
         {
             GetWindow<RoomTemplateEditorWindow>("Room Designer");
@@ -174,7 +174,11 @@ namespace RuinRunner.EditorTools
         }
 
         private void OnDisable() => ClearPreview();
-        private void ClearPreview() { if (preview != null) DestroyImmediate(preview); preview = null; }
+        private void ClearPreview() 
+{ 
+if (preview != null) DestroyImmediate(preview); 
+preview = null; 
+}
 
         private static void EnsureRoomFolder()
         {

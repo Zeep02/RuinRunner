@@ -23,8 +23,8 @@ namespace RuinRunner
             var shot = new GameObject("EnemyProjectile");
             shot.layer = GameLayers.Projectile;
             shot.transform.position = position;
-            var renderer = PrototypeVisuals.AddSprite(shot, Color.white, 2000);
-            renderer.sprite=IndividualArt.Sprite("Campaign/Projectiles/EnemyOrb");
+            var renderer = GameVisuals.AddSprite(shot, Color.white, 2000);
+            renderer.sprite = IndividualArt.Sprite("Campaign/Projectiles/EnemyOrb");
 
             var collider = shot.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
@@ -41,7 +41,8 @@ namespace RuinRunner
             if (clip != null)
             {
                 projectile.frames = NativeCombatEffect.Frames(clip);
-                if (NativeCombatEffect.TryTiming(clip, out var drawnRate, out _)) projectile.frameRate = drawnRate;
+                if (NativeCombatEffect.TryTiming(clip, out var drawnRate, out _))
+                    projectile.frameRate = drawnRate;
                 PixelFxMaterial.Apply(renderer, clip);
                 projectile.impactClip = clip + "Hit";
                 renderer.sprite = projectile.frames[0];
@@ -52,7 +53,8 @@ namespace RuinRunner
 
         private void Update()
         {
-            if (frames == null) return;
+            if (frames == null)
+                return;
             animationTime += Time.deltaTime;
             FrameIndex = Mathf.FloorToInt(animationTime * frameRate) % frames.Length;
             visual.sprite = frames[FrameIndex];
@@ -60,7 +62,8 @@ namespace RuinRunner
 
         private void FixedUpdate()
         {
-            if(consumed)return;
+            if (consumed)
+                return;
             var step = velocity * Time.fixedDeltaTime;
             var wall = Physics2D.Raycast(transform.position, step.normalized, step.magnitude, 1 << GameLayers.Ground);
             if (wall.collider != null)
@@ -70,33 +73,48 @@ namespace RuinRunner
                 return;
             }
             transform.position += (Vector3)step;
-            foreach(var actor in PlayerController.ActiveCombatants)
-                if(actor!=null&&actor.TryCatchHostileProjectile(transform.position,velocity.normalized,damage))
-                {consumed=true;Destroy(gameObject);return;}
+            foreach (var actor in PlayerController.ActiveCombatants)
+                if (actor != null && actor.TryCatchHostileProjectile(transform.position, velocity.normalized, damage))
+                {
+                    consumed = true;
+                    Destroy(gameObject);
+                    return;
+                }
             lifetime -= Time.fixedDeltaTime;
-            if (lifetime <= 0f) Destroy(gameObject);
+            if (lifetime <= 0f)
+                Destroy(gameObject);
         }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            if(consumed)return;
+            if (consumed)
+                return;
             var player = other.GetComponent<PlayerController>();
             if (player != null)
             {
-                consumed=true;
-                if(player.TryCatchHostileProjectile(transform.position,velocity.normalized,damage)){Destroy(gameObject);return;}
+                consumed = true;
+                if (player.TryCatchHostileProjectile(transform.position, velocity.normalized, damage))
+                {
+                    Destroy(gameObject);
+                    return;
+                }
                 player.TakeDamage(damage, velocity.normalized);
                 Impact(transform.position);
                 Destroy(gameObject);
                 return;
             }
 
-            if (other.gameObject.layer == GameLayers.Ground) { Impact(transform.position); Destroy(gameObject); }
+            if (other.gameObject.layer == GameLayers.Ground)
+            {
+                Impact(transform.position);
+                Destroy(gameObject);
+            }
         }
 
         private void Impact(Vector2 point)
         {
-            if (impactClip != null) BossNativeEffect.CreateOverActors(null, impactClip, point, .24f, Mathf.Atan2(-velocity.y, -velocity.x) * Mathf.Rad2Deg);
+            if (impactClip != null)
+                BossNativeEffect.CreateOverActors(null, impactClip, point, .24f, Mathf.Atan2(-velocity.y, -velocity.x) * Mathf.Rad2Deg);
         }
     }
 }

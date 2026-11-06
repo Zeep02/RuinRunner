@@ -64,7 +64,8 @@ namespace RuinRunner
                 platforms[i].position = Vector2.Scale(platforms[i].position, factor);
                 platforms[i].size = Vector2.Scale(platforms[i].size, factor);
             }
-            for (var i = 0; i < enemies.Length; i++) enemies[i].position = Vector2.Scale(enemies[i].position, factor);
+            for (var i = 0; i < enemies.Length; i++)
+                enemies[i].position = Vector2.Scale(enemies[i].position, factor);
             template.decorations = CreateDefaultDecorations();
             for (var i = 0; i < template.decorations.Length; i++)
                 template.decorations[i].position = Vector2.Scale(template.decorations[i].position, factor);
@@ -85,21 +86,31 @@ namespace RuinRunner
         {
             switch (id)
             {
-                case "hall_broken": return new Vector2(20f, 12f);
-                case "cross_bridge": return new Vector2(30f, 20f);
-                case "low_pit": return new Vector2(24f, 16f);
-                case "twin_towers": return new Vector2(26f, 22f);
-                case "charge_lane": return new Vector2(38f, 14f);
-                case "green_steps": return new Vector2(38f, 26f);
-                default: return new Vector2(30f, 20f);
+                case "hall_broken":
+                    return new Vector2(20f, 12f);
+                case "cross_bridge":
+                    return new Vector2(30f, 20f);
+                case "low_pit":
+                    return new Vector2(24f, 16f);
+                case "twin_towers":
+                    return new Vector2(26f, 22f);
+                case "charge_lane":
+                    return new Vector2(38f, 14f);
+                case "green_steps":
+                    return new Vector2(38f, 26f);
+                default:
+                    return new Vector2(30f, 20f);
             }
         }
 
         private static RoomTravelDirection DirectionFor(string id)
         {
-            if (id == "cross_bridge" || id == "green_steps") return RoomTravelDirection.Up;
-            if (id == "low_pit" || id == "warden_throne") return RoomTravelDirection.Left;
-            if (id == "twin_towers") return RoomTravelDirection.Down;
+            if (id == "cross_bridge" || id == "green_steps")
+                return RoomTravelDirection.Up;
+            if (id == "low_pit" || id == "warden_throne")
+                return RoomTravelDirection.Left;
+            if (id == "twin_towers")
+                return RoomTravelDirection.Down;
             return RoomTravelDirection.Right;
         }
 

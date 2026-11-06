@@ -10,7 +10,6 @@ namespace RuinRunner
     [DefaultExecutionOrder(100)]
     public sealed class BossSpriteAnimator : MonoBehaviour
     {
-        // The retired baked frames stay on disk; only the old art migration tool still writes there.
         public const string FrameRoot = "Campaign/WardenV3/";
         public const int FrameCount = 16;
         private const int FramesPerSlice = FrameCount / 8;
@@ -31,22 +30,32 @@ namespace RuinRunner
 
         public void Initialize(EnemyController enemy, SpriteRenderer renderer)
         {
-            owner = enemy; target = renderer;
-            for (var row = 0; row < frames.Length; row++) frames[row] = IndividualArt.Frames(RowId(row), FrameCount);
+            owner = enemy;
+            target = renderer;
+            for (var row = 0; row < frames.Length; row++)
+                frames[row] = IndividualArt.Frames(RowId(row), FrameCount);
             Show(BossPose.Idle, 0);
         }
 
         public void Play(BossPose pose, int fromSlice, int toSlice, float seconds)
         {
-            action = pose; first = fromSlice * FramesPerSlice; last = toSlice * FramesPerSlice + FramesPerSlice - 1;
-            duration = Mathf.Max(.001f, seconds); elapsed = 0;
-            hitElapsed = 1; Show(action, first);
+            action = pose;
+            first = fromSlice * FramesPerSlice;
+            last = toSlice * FramesPerSlice + FramesPerSlice - 1;
+            duration = Mathf.Max(.001f, seconds);
+            elapsed = 0;
+            hitElapsed = 1;
+            Show(action, first);
         }
 
         public void Hit()
         {
             // Never cover up a live attack tell/contact with an unrelated hit pose.
-            if (!owner.IsActing && !owner.IsDead) { hitElapsed = 0; Show(BossPose.Hit, 0); }
+            if (!owner.IsActing && !owner.IsDead)
+            {
+                hitElapsed = 0;
+                Show(BossPose.Hit, 0);
+            }
         }
 
         public void Death(float progress) => Show(BossPose.Death, Mathf.Min(FrameCount - 1, Mathf.FloorToInt(progress * FrameCount)));
@@ -54,7 +63,11 @@ namespace RuinRunner
         public void Entrance(float time)
         {
             // The entrance owner samples this only while IntroLocked suspends regular animation.
-            if (time >= EntranceDuration) { Show(BossPose.Idle, 0); return; }
+            if (time >= EntranceDuration)
+            {
+                Show(BossPose.Idle, 0);
+                return;
+            }
             var entrance = IndividualArt.Frames(EntranceId, FrameCount);
             target.sprite = entrance[Mathf.Clamp(Mathf.FloorToInt(time / EntranceDuration * FrameCount), 0, FrameCount - 1)];
             target.flipX = owner.FacingDirection < 0;
@@ -62,7 +75,8 @@ namespace RuinRunner
 
         private void LateUpdate()
         {
-            if (owner == null || target == null || owner.IsDead || owner.AnimationPaused) return;
+            if (owner == null || target == null || owner.IsDead || owner.AnimationPaused)
+                return;
             if (owner.IsActing)
             {
                 elapsed += Time.deltaTime;
@@ -79,14 +93,21 @@ namespace RuinRunner
             else
             {
                 var loop = owner.Velocity.sqrMagnitude > .0225f ? BossPose.Walk : BossPose.Idle;
-                if (loop != lastLoop) { loopTime = 0; lastLoop = loop; } else loopTime += Time.deltaTime;
+                if (loop != lastLoop)
+                {
+                    loopTime = 0;
+                    lastLoop = loop;
+                }
+                else
+                    loopTime += Time.deltaTime;
                 Show(loop, Mathf.FloorToInt(loopTime * 15f) % FrameCount);
             }
         }
 
         private void Show(BossPose pose, int frame)
         {
-            Pose = pose; FrameIndex = Mathf.Clamp(frame, 0, FrameCount - 1);
+            Pose = pose;
+            FrameIndex = Mathf.Clamp(frame, 0, FrameCount - 1);
             target.sprite = frames[(int)pose][FrameIndex];
             target.flipX = owner.FacingDirection < 0;
         }

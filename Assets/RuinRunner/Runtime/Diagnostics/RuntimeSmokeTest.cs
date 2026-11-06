@@ -47,7 +47,7 @@ namespace RuinRunner
             passed &= Probe("game.SaveSlots.ActiveData != null", () => game.SaveSlots.ActiveData != null);
             passed &= Probe("game.Settings != null", () => game.Settings != null);
             passed &= Probe("ValidateSettings(game.Settings)", () => ValidateSettings(game.Settings));
-            passed &= Probe("RuntimeSceneObjects.FindAll<PrototypeAudioController>().Length == 1", () => RuntimeSceneObjects.FindAll<PrototypeAudioController>().Length == 1);
+            passed &= Probe("RuntimeSceneObjects.FindAll<GameAudioController>().Length == 1", () => RuntimeSceneObjects.FindAll<GameAudioController>().Length == 1);
             passed &= Probe("game.IsRunActive", () => game.IsRunActive);
             passed &= Probe("game.CameraFollow != null", () => game.CameraFollow != null);
             passed &= Probe("startup role and enemies agree", () => game.DungeonMap.RequiresCombat(game.CurrentRoom)?game.EnemiesAlive>0:game.EnemiesAlive==0);
@@ -118,9 +118,9 @@ namespace RuinRunner
             }
 
             if (passed)
-                Debug.Log("[Prototype Smoke Test] PASS — campaign startup, three stage data, authored hero poses, collision, equipment, queued growth and persistence services. Isolated startup fixture, not normal completion.");
+                Debug.Log("[Smoke Test] PASS — campaign startup, three stage data, authored hero poses, collision, equipment, queued growth and persistence services. Isolated startup fixture, not normal completion.");
             else
-                Debug.LogError("[Prototype Smoke Test] FAIL — a random-run, progression, inventory, or runtime object was not created.");
+                Debug.LogError("[Smoke Test] FAIL — a random-run, progression, inventory, or runtime object was not created.");
 
             Application.Quit(passed ? 0 : 2);
         }

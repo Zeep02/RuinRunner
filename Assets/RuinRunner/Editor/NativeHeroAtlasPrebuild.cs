@@ -19,9 +19,11 @@ namespace RuinRunner.EditorTools
 
         public static string Generate()
         {
-            if (Application.isPlaying) throw new InvalidOperationException("Stop Play Mode before catalog authoring.");
+            if (Application.isPlaying)
+                throw new InvalidOperationException("Stop Play Mode before catalog authoring.");
             EditorSettings.spritePackerMode = SpritePackerMode.SpriteAtlasV2;
-            if (EditorSettings.spritePackerMode != SpritePackerMode.SpriteAtlasV2) throw new Exception("SpriteAtlas V2 did not enable.");
+            if (EditorSettings.spritePackerMode != SpritePackerMode.SpriteAtlasV2)
+                throw new Exception("SpriteAtlas V2 did not enable.");
             EnsureFolder("Assets/RuinRunner/Resources/Art/NativeHero");
             EnsureFolder("Assets/RuinRunner/ArtAtlases");
             int total = 0;
@@ -29,11 +31,13 @@ namespace RuinRunner.EditorTools
             {
                 string name = NativeHeroFrameCatalog.CurrentVersions[version];
                 string sourceRoot = NativeHeroFrameCatalog.SourceRoot + name;
-                if (!AssetDatabase.IsValidFolder(sourceRoot)) throw new Exception("Missing current native sources: " + sourceRoot);
+                if (!AssetDatabase.IsValidFolder(sourceRoot))
+                    throw new Exception("Missing current native sources: " + sourceRoot);
                 string[] paths = AssetDatabase.FindAssets("t:Texture2D", new[] { sourceRoot })
                     .Select(AssetDatabase.GUIDToAssetPath).OrderBy(path => path, StringComparer.Ordinal).ToArray();
                 int expected = NativeHeroFrameCatalog.ExpectedFrames(version);
-                if (paths.Length != expected) throw new Exception("Incomplete native frame set: " + name);
+                if (paths.Length != expected)
+                    throw new Exception("Incomplete native frame set: " + name);
                 string catalogPath = "Assets/RuinRunner/Resources/" + NativeHeroFrameCatalog.CatalogRoot + name + ".asset";
                 var catalog = AssetDatabase.LoadAssetAtPath<NativeHeroFrameCatalog>(catalogPath);
                 if (catalog == null)
@@ -51,10 +55,12 @@ namespace RuinRunner.EditorTools
                     for (int i = 0; i < paths.Length; i++)
                     {
                         string path = paths[i];
-                        if (Path.GetFileName(path) != i.ToString("D5") + ".png") throw new Exception("Non-contiguous native frame: " + path);
+                        if (Path.GetFileName(path) != i.ToString("D5") + ".png")
+                            throw new Exception("Non-contiguous native frame: " + path);
                         var sprites = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>().ToArray();
                         var importer = (TextureImporter)AssetImporter.GetAtPath(path);
-                        var settings = new TextureImporterSettings(); importer.ReadTextureSettings(settings);
+                        var settings = new TextureImporterSettings();
+                        importer.ReadTextureSettings(settings);
                         if (sprites.Length != 1 || sprites[0].rect != new Rect(0, 0, 48, 64) ||
                             sprites[0].pivot != new Vector2(24, 22) || sprites[0].pixelsPerUnit != 32 ||
                             importer.filterMode != FilterMode.Point || importer.mipmapEnabled ||
@@ -62,14 +68,18 @@ namespace RuinRunner.EditorTools
                             settings.spriteMeshType != SpriteMeshType.FullRect)
                             throw new Exception("Invalid native sprite geometry/import: " + path);
                         byte[] png = File.ReadAllBytes(path);
-                        if (!decoded.LoadImage(png) || decoded.width != 48 || decoded.height != 64) throw new Exception("Invalid PNG: " + path);
+                        if (!decoded.LoadImage(png) || decoded.width != 48 || decoded.height != 64)
+                            throw new Exception("Invalid PNG: " + path);
                         catalog.frames[i] = sprites[0];
                         using (var hash = SHA256.Create())
                             catalog.pngSha256[i] = BitConverter.ToString(hash.ComputeHash(png)).Replace("-", "").ToLowerInvariant();
                         catalog.visiblePixelSha256[i] = NativeHeroFrameCatalog.VisiblePixelHash(decoded.GetPixels32(), 48, new RectInt(0, 0, 48, 64));
                     }
                 }
-                finally { UnityEngine.Object.DestroyImmediate(decoded); }
+                finally
+                {
+                    UnityEngine.Object.DestroyImmediate(decoded);
+                }
                 EditorUtility.SetDirty(catalog);
 
                 string atlasPath = "Assets/RuinRunner/ArtAtlases/NativeHero" + name + ".spriteatlasv2";
@@ -80,16 +90,32 @@ namespace RuinRunner.EditorTools
                 var atlasImporter = (SpriteAtlasImporter)AssetImporter.GetAtPath(atlasPath);
                 atlasImporter.includeInBuild = true;
                 var packing = atlasImporter.packingSettings;
-                packing.padding = 4; packing.enableRotation = false; packing.enableTightPacking = false; packing.enableAlphaDilation = true;
+                packing.padding = 4;
+                packing.enableRotation = false;
+                packing.enableTightPacking = false;
+                packing.enableAlphaDilation = true;
                 atlasImporter.packingSettings = packing;
                 var texture = atlasImporter.textureSettings;
-                texture.filterMode = FilterMode.Point; texture.generateMipMaps = false;
+                texture.filterMode = FilterMode.Point;
+                texture.generateMipMaps = false;
                 // Full packed-pixel verification runs in the actual Windows build.
-                texture.readable = true; atlasImporter.textureSettings = texture;
-                atlasImporter.SetPlatformSettings(new TextureImporterPlatformSettings { name = "DefaultTexturePlatform", maxTextureSize = 2048,
-                    format = TextureImporterFormat.RGBA32, textureCompression = TextureImporterCompression.Uncompressed });
-                atlasImporter.SetPlatformSettings(new TextureImporterPlatformSettings { name = "Standalone", overridden = true, maxTextureSize = 2048,
-                    format = TextureImporterFormat.RGBA32, textureCompression = TextureImporterCompression.Uncompressed });
+                texture.readable = true;
+                atlasImporter.textureSettings = texture;
+                atlasImporter.SetPlatformSettings(new TextureImporterPlatformSettings
+                {
+                    name = "DefaultTexturePlatform",
+                    maxTextureSize = 2048,
+                    format = TextureImporterFormat.RGBA32,
+                    textureCompression = TextureImporterCompression.Uncompressed
+                });
+                atlasImporter.SetPlatformSettings(new TextureImporterPlatformSettings
+                {
+                    name = "Standalone",
+                    overridden = true,
+                    maxTextureSize = 2048,
+                    format = TextureImporterFormat.RGBA32,
+                    textureCompression = TextureImporterCompression.Uncompressed
+                });
                 atlasImporter.SaveAndReimport();
                 total += expected;
             }
@@ -99,11 +125,13 @@ namespace RuinRunner.EditorTools
 
         public static void EnsureFolder(string folder)
         {
-            if (AssetDatabase.IsValidFolder(folder)) return;
+            if (AssetDatabase.IsValidFolder(folder))
+                return;
             string parent = Path.GetDirectoryName(folder).Replace('\\', '/');
             EnsureFolder(parent);
             string guid = AssetDatabase.CreateFolder(parent, Path.GetFileName(folder));
-            if (string.IsNullOrEmpty(guid)) throw new Exception("Could not create asset folder: " + folder);
+            if (string.IsNullOrEmpty(guid))
+                throw new Exception("Could not create asset folder: " + folder);
         }
     }
 }

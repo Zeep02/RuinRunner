@@ -104,42 +104,96 @@ namespace RuinRunner
         // Older authored configs retain all overrides; only absent campaign roles are appended.
         public bool EnsureCampaignEnemies()
         {
-            var changed=false;
-            if(enemies==null)enemies=Array.Empty<EnemyBalanceData>();
-            for(var id=(int)EnemyType.Tidekeeper;id<=(int)EnemyType.SealPriest;id++)
+            var changed = false;
+            if (enemies == null)
+                enemies = Array.Empty<EnemyBalanceData>();
+            for (var id = (int)EnemyType.Tidekeeper; id <= (int)EnemyType.SealPriest; id++)
             {
-                var type=(EnemyType)id;
-                if(GetEnemy(type)!=null)continue;
+                var type = (EnemyType)id;
+                if (GetEnemy(type) != null)
+                    continue;
                 EnemyBalanceData missing;
-                switch(type)
+                switch (type)
                 {
-                    case EnemyType.Tidekeeper: missing=new EnemyBalanceData(type,1800,10,0,2,65);break;
-                    case EnemyType.SealHeart: missing=new EnemyBalanceData(type,2800,12,0,3.2f,90);break;
-                    case EnemyType.Tidecaller: missing=new EnemyBalanceData(type,104,7,0,2.5f,14);break;
-                    case EnemyType.Sporeling: missing=new EnemyBalanceData(type,45,8,0,4.3f,7);break;
-                    case EnemyType.RuneTotem: missing=new EnemyBalanceData(type,136,6,3,.1f,13);break;
-                    case EnemyType.TideCrab: missing=new EnemyBalanceData(type,141,8,6,2.7f,15);break;
-                    case EnemyType.Wisp: missing=new EnemyBalanceData(type,83,7,0,3f,14);break;
-                    case EnemyType.SealKnight: missing=new EnemyBalanceData(type,248,11,6,2.3f,22);break;
-                    case EnemyType.Hexer: missing=new EnemyBalanceData(type,99,8,0,2.4f,18);break;
-                    case EnemyType.BoneShield: missing=new EnemyBalanceData(type,95,6,0,2.6f,12);break;
-                    case EnemyType.VineLasher: missing=new EnemyBalanceData(type,80,7,0,2.2f,12);break;
-                    case EnemyType.RuinRat: missing=new EnemyBalanceData(type,40,6,0,4.6f,9);break;
-                    case EnemyType.MossArcher: missing=new EnemyBalanceData(type,50,7,0,2.4f,12);break;
-                    case EnemyType.PowderBeetle: missing=new EnemyBalanceData(type,60,9,0,3.2f,12);break;
-                    case EnemyType.Drowned: missing=new EnemyBalanceData(type,150,8,0,2f,14);break;
-                    case EnemyType.EelSpitter: missing=new EnemyBalanceData(type,85,8,0,2.6f,14);break;
-                    case EnemyType.CoralGuard: missing=new EnemyBalanceData(type,190,9,6,2.2f,18);break;
-                    case EnemyType.JellyLamp: missing=new EnemyBalanceData(type,95,7,0,2f,14);break;
-                    case EnemyType.TideSiren: missing=new EnemyBalanceData(type,90,5,0,2.4f,18);break;
-                    case EnemyType.InkShade: missing=new EnemyBalanceData(type,110,10,0,4f,18);break;
-                    case EnemyType.SealGolem: missing=new EnemyBalanceData(type,320,13,6,1.9f,26);break;
-                    case EnemyType.GildedBolter: missing=new EnemyBalanceData(type,120,10,0,2.4f,20);break;
-                    case EnemyType.ChainWarden: missing=new EnemyBalanceData(type,170,10,0,2.2f,22);break;
-                    case EnemyType.SealPriest: missing=new EnemyBalanceData(type,135,7,0,2.3f,24);break;
-                    default: missing=new EnemyBalanceData(type,144,9,0,3.3f,16);break;
+                    case EnemyType.Tidekeeper:
+                        missing = new EnemyBalanceData(type, 1800, 10, 0, 2, 65);
+                        break;
+                    case EnemyType.SealHeart:
+                        missing = new EnemyBalanceData(type, 2800, 12, 0, 3.2f, 90);
+                        break;
+                    case EnemyType.Tidecaller:
+                        missing = new EnemyBalanceData(type, 104, 7, 0, 2.5f, 14);
+                        break;
+                    case EnemyType.Sporeling:
+                        missing = new EnemyBalanceData(type, 45, 8, 0, 4.3f, 7);
+                        break;
+                    case EnemyType.RuneTotem:
+                        missing = new EnemyBalanceData(type, 136, 6, 3, .1f, 13);
+                        break;
+                    case EnemyType.TideCrab:
+                        missing = new EnemyBalanceData(type, 141, 8, 6, 2.7f, 15);
+                        break;
+                    case EnemyType.Wisp:
+                        missing = new EnemyBalanceData(type, 83, 7, 0, 3f, 14);
+                        break;
+                    case EnemyType.SealKnight:
+                        missing = new EnemyBalanceData(type, 248, 11, 6, 2.3f, 22);
+                        break;
+                    case EnemyType.Hexer:
+                        missing = new EnemyBalanceData(type, 99, 8, 0, 2.4f, 18);
+                        break;
+                    case EnemyType.BoneShield:
+                        missing = new EnemyBalanceData(type, 95, 6, 0, 2.6f, 12);
+                        break;
+                    case EnemyType.VineLasher:
+                        missing = new EnemyBalanceData(type, 80, 7, 0, 2.2f, 12);
+                        break;
+                    case EnemyType.RuinRat:
+                        missing = new EnemyBalanceData(type, 40, 6, 0, 4.6f, 9);
+                        break;
+                    case EnemyType.MossArcher:
+                        missing = new EnemyBalanceData(type, 50, 7, 0, 2.4f, 12);
+                        break;
+                    case EnemyType.PowderBeetle:
+                        missing = new EnemyBalanceData(type, 60, 9, 0, 3.2f, 12);
+                        break;
+                    case EnemyType.Drowned:
+                        missing = new EnemyBalanceData(type, 150, 8, 0, 2f, 14);
+                        break;
+                    case EnemyType.EelSpitter:
+                        missing = new EnemyBalanceData(type, 85, 8, 0, 2.6f, 14);
+                        break;
+                    case EnemyType.CoralGuard:
+                        missing = new EnemyBalanceData(type, 190, 9, 6, 2.2f, 18);
+                        break;
+                    case EnemyType.JellyLamp:
+                        missing = new EnemyBalanceData(type, 95, 7, 0, 2f, 14);
+                        break;
+                    case EnemyType.TideSiren:
+                        missing = new EnemyBalanceData(type, 90, 5, 0, 2.4f, 18);
+                        break;
+                    case EnemyType.InkShade:
+                        missing = new EnemyBalanceData(type, 110, 10, 0, 4f, 18);
+                        break;
+                    case EnemyType.SealGolem:
+                        missing = new EnemyBalanceData(type, 320, 13, 6, 1.9f, 26);
+                        break;
+                    case EnemyType.GildedBolter:
+                        missing = new EnemyBalanceData(type, 120, 10, 0, 2.4f, 20);
+                        break;
+                    case EnemyType.ChainWarden:
+                        missing = new EnemyBalanceData(type, 170, 10, 0, 2.2f, 22);
+                        break;
+                    case EnemyType.SealPriest:
+                        missing = new EnemyBalanceData(type, 135, 7, 0, 2.3f, 24);
+                        break;
+                    default:
+                        missing = new EnemyBalanceData(type, 144, 9, 0, 3.3f, 16);
+                        break;
                 }
-                Array.Resize(ref enemies,enemies.Length+1);enemies[enemies.Length-1]=missing;changed=true;
+                Array.Resize(ref enemies, enemies.Length + 1);
+                enemies[enemies.Length - 1] = missing;
+                changed = true;
             }
             return changed;
         }
@@ -147,7 +201,8 @@ namespace RuinRunner
         // Preserve older authored weapon overrides once, not on every equipment switch.
         public bool MigrateWeaponDamage()
         {
-            if (weaponDamageVersion >= 1) return false;
+            if (weaponDamageVersion >= 1)
+                return false;
             if (weapons != null)
                 foreach (var entry in weapons)
                     if (entry != null && entry.attackPower <= 0f)
@@ -160,7 +215,8 @@ namespace RuinRunner
         {
             if (enemies != null)
                 foreach (var entry in enemies)
-                    if (entry != null && entry.type == type) return entry;
+                    if (entry != null && entry.type == type)
+                        return entry;
             return null;
         }
 
@@ -168,7 +224,8 @@ namespace RuinRunner
         {
             if (weapons != null)
                 foreach (var entry in weapons)
-                    if (entry != null && entry.id == id) return entry;
+                    if (entry != null && entry.id == id)
+                        return entry;
             return null;
         }
     }

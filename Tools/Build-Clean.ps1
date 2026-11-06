@@ -101,7 +101,7 @@ $unityArguments = @(
     '-accept-apiupdate',
     '-projectPath', ('"{0}"' -f $projectRoot),
     '-buildTarget', 'StandaloneWindows64',
-    '-executeMethod', 'RuinRunner.EditorTools.PrototypeBuildMenu.BuildWindowsDemo',
+    '-executeMethod', 'RuinRunner.EditorTools.BuildMenu.BuildWindowsDemo',
     '-buildOutput', ('"{0}"' -f $stagingWindows),
     '-logFile', ('"{0}"' -f $buildLog)
 )
@@ -130,7 +130,7 @@ if (-not (Test-Path -LiteralPath $stagingExe -PathType Leaf)) {
     throw "Unity reported success but the staged executable is missing. Log: $buildLog"
 }
 
-if ($null -eq (Select-String -LiteralPath $buildLog -SimpleMatch '[Prototype Build] Success:' -ErrorAction SilentlyContinue)) {
+if ($null -eq (Select-String -LiteralPath $buildLog -SimpleMatch '[Build] Success:' -ErrorAction SilentlyContinue)) {
     throw "The expected prototype success marker is missing. Log: $buildLog"
 }
 
@@ -142,7 +142,7 @@ if ($smokeExitCode -ne 0) {
     throw "The staged executable smoke test exited with code $smokeExitCode. Log: $smokeLog"
 }
 
-if ($null -eq (Select-String -LiteralPath $smokeLog -SimpleMatch '[Prototype Smoke Test] PASS' -ErrorAction SilentlyContinue)) {
+if ($null -eq (Select-String -LiteralPath $smokeLog -SimpleMatch '[Smoke Test] PASS' -ErrorAction SilentlyContinue)) {
     throw "The staged executable did not emit the PASS marker. The current build was preserved. Log: $smokeLog"
 }
 

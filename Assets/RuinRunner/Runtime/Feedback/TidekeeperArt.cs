@@ -11,7 +11,8 @@ namespace RuinRunner
         private const int HurtFrames = 8;
         public static void Preload()
         {
-            Frames(0); Frames(3);
+            Frames(0);
+            Frames(3);
             IndividualArt.Frames(Root + "lanes", CastFrames);
             IndividualArt.Frames(Root + "pools", CastFrames);
             IndividualArt.Frames(Root + "hurt", HurtFrames);
@@ -23,7 +24,8 @@ namespace RuinRunner
         public static Sprite Entrance(float time)
         {
             // The collapse played backward is the guardian pulling itself together.
-            if (time >= EntranceDuration) return Idle(time - EntranceDuration);
+            if (time >= EntranceDuration)
+                return Idle(time - EntranceDuration);
             var appearance = Frames(3);
             int step = Mathf.Clamp(Mathf.FloorToInt(time / EntranceDuration * appearance.Length), 0, appearance.Length - 1);
             return appearance[appearance.Length - 1 - step];
@@ -35,10 +37,13 @@ namespace RuinRunner
             var cast = IndividualArt.Frames(Root + (lanes ? "lanes" : "pools"), CastFrames);
             // Wind up across the warning so the release pose lands on hazard activation.
             // Fan and surge share these clips, and their shorter clocks still reach every pose.
-            if (phase == 0) return cast[Mathf.Clamp((int)(time / Mathf.Max(.01f, phaseDuration) * 12), 0, 11)];
-            if (phase == 1) return cast[12 + Mathf.Clamp((int)(time / Mathf.Max(.01f, phaseDuration) * 4), 0, 3)];
+            if (phase == 0)
+                return cast[Mathf.Clamp((int)(time / Mathf.Max(.01f, phaseDuration) * 12), 0, 11)];
+            if (phase == 1)
+                return cast[12 + Mathf.Clamp((int)(time / Mathf.Max(.01f, phaseDuration) * 4), 0, 3)];
             float recovery = lanes ? .3f : .42f;
-            if (time < recovery) return cast[16 + Mathf.Clamp((int)(time / recovery * 8), 0, 7)];
+            if (time < recovery)
+                return cast[16 + Mathf.Clamp((int)(time / recovery * 8), 0, 7)];
             return Idle(time - recovery);
         }
 

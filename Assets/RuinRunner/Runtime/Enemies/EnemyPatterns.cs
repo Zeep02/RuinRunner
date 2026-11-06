@@ -29,7 +29,8 @@ namespace RuinRunner
         private IEnumerator EndMove(float recovery, float cooldown)
         {
             collisionAttackActive = false;
-            if (director != null) cooldown *= director.CooldownScale;
+            if (director != null)
+                cooldown *= director.CooldownScale;
             // A move that lands and ends on one frame would skip its contact drawings.
             if (AttackVisualPhase == 1)
             {
@@ -77,12 +78,14 @@ namespace RuinRunner
         private void Muzzle(Vector2 direction)
         {
             var clip = EnemyAttackLook.Flash(Type);
-            if (clip != null) Fx(clip, ShotOrigin + direction * .35f, .2f, AngleOf(direction));
+            if (clip != null)
+                Fx(clip, ShotOrigin + direction * .35f, .2f, AngleOf(direction));
         }
         private void Cast(float duration)
         {
             var clip = EnemyAttackLook.Cast(Type);
-            if (clip != null) Fx(clip, (Vector2)transform.position + Vector2.up * .35f, duration);
+            if (clip != null)
+                Fx(clip, (Vector2)transform.position + Vector2.up * .35f, duration);
         }
         private ArenaHazard Circle(Vector2 point, float radius, float warning, float active, float damageScale = 1) =>
             ArenaHazard.Create(this, player, point, Vector2.one * (radius * 2), 0, true, warning, active, contactDamage * damageScale, DangerTint);
@@ -145,7 +148,7 @@ namespace RuinRunner
             {
                 Shoot(ShotOrigin, direction, 8.4f, contactDamage);
                 Muzzle(direction);
-                PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .32f);
+                GameAudio.Play(GameSound.Shoot, AudioChannel.Monster, .32f);
                 yield return new WaitForSeconds(.12f);
             }
             yield return EndMove(.42f, Enraged ? 1f : 1.4f);
@@ -153,13 +156,14 @@ namespace RuinRunner
         private IEnumerator ShooterFan(Vector2 direction)
         {
             BeginMove(direction, new Color(1f, .7f, .4f));
-            foreach (var angle in new[] { -32f, -16f, 0f, 16f, 32f }) AimLine(ShotOrigin, Rotate(direction, angle), .62f);
+            foreach (var angle in new[] { -32f, -16f, 0f, 16f, 32f })
+                AimLine(ShotOrigin, Rotate(direction, angle), .62f);
             yield return new WaitForSeconds(.62f);
             AttackVisualPhase = 1;
             foreach (var angle in new[] { -32f, -16f, 0f, 16f, 32f })
                 Shoot(ShotOrigin, Rotate(direction, angle), 6.4f, contactDamage);
             Muzzle(direction);
-            PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .5f);
+            GameAudio.Play(GameSound.Shoot, AudioChannel.Monster, .5f);
             yield return EndMove(.55f, 1.6f);
         }
 
@@ -179,8 +183,10 @@ namespace RuinRunner
                 yield return Rush(direction, travel, .36f);
                 collisionAttackActive = false;
                 GroundSlam(transform.position, 1f);
-                if (cameraFollow != null) cameraFollow.Shake(.14f);
-                if (ram + 1 < rams) yield return new WaitForSeconds(.16f);
+                if (cameraFollow != null)
+                    cameraFollow.Shake(.14f);
+                if (ram + 1 < rams)
+                    yield return new WaitForSeconds(.16f);
             }
             // Spent: the safe window to punish a heavy enemy.
             yield return EndMove(1f, 1.5f);
@@ -279,7 +285,8 @@ namespace RuinRunner
             AttackVisualPhase = 1;
             BossNativeEffect.CreateOnFloor("ERingSpore", transform.position, .34f).Fit(3.8f);
             BossNativeEffect.CreateOverActors(null, "EBurstSpore", transform.position, .6f).Fit(3.8f);
-            if (cameraFollow != null) cameraFollow.Shake(.12f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.12f);
             yield return new WaitForSeconds(.14f);
             Health = 0;
             Die();
@@ -299,7 +306,7 @@ namespace RuinRunner
                     var angle = (spin + arm * 90f + step * 13f) * Mathf.Deg2Rad;
                     Shoot(ShotOrigin, new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)), 4.4f, contactDamage);
                 }
-                PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .16f);
+                GameAudio.Play(GameSound.Shoot, AudioChannel.Monster, .16f);
                 yield return new WaitForSeconds(.17f);
             }
             yield return EndMove(.5f, 1.8f);
@@ -314,7 +321,8 @@ namespace RuinRunner
             AttackVisualPhase = 1;
             foreach (var turn in new[] { 0f, 90f })
                 CutAlong("ETotemBeam", transform.position, 18f, angle + turn, .3f);
-            if (cameraFollow != null) cameraFollow.Shake(.1f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.1f);
             yield return EndMove(.6f, 1.9f);
         }
 
@@ -354,7 +362,8 @@ namespace RuinRunner
             SetPresentationTint(new Color(1f, 1f, 1f, .5f));
             Fx("FxBlinkIn", transform.position, .4f);
             var aim = ToPlayer;
-            foreach (var angle in new[] { -18f, 0f, 18f }) AimLine(ShotOrigin, Rotate(aim, angle), .46f);
+            foreach (var angle in new[] { -18f, 0f, 18f })
+                AimLine(ShotOrigin, Rotate(aim, angle), .46f);
             yield return new WaitForSeconds(.46f);
             AttackVisualPhase = 1;
             SetPresentationTint(Color.white);
@@ -379,9 +388,12 @@ namespace RuinRunner
                 yield return new WaitForSeconds(windups[hit]);
                 AttackVisualPhase = 1;
                 CutAlong(heavy ? "EKnightHeavy" : "EKnightCut", center, size.x, angle, heavy ? .3f : .24f);
-                if (heavy) BossNativeEffect.CreateOnFloor("EBurstStone", (Vector2)transform.position + direction * size.x, 0f);
-                if (heavy) HitFreeze(.1f);
-                if (heavy && cameraFollow != null) cameraFollow.Shake(.2f);
+                if (heavy)
+                    BossNativeEffect.CreateOnFloor("EBurstStone", (Vector2)transform.position + direction * size.x, 0f);
+                if (heavy)
+                    HitFreeze(.1f);
+                if (heavy && cameraFollow != null)
+                    cameraFollow.Shake(.2f);
                 yield return Rush(direction, heavy ? .3f : .7f, .14f);
             }
             // The long recovery is what makes a three-hit combo fair.

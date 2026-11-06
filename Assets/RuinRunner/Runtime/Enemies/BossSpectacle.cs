@@ -13,7 +13,8 @@ namespace RuinRunner
         // damage during the roar, so a burst of hits cannot skip the moment.
         private bool TryBeginPhaseShift()
         {
-            if (phaseShifted || Health >= MaxHealth * .5f) return false;
+            if (phaseShifted || Health >= MaxHealth * .5f)
+                return false;
             phaseShifted = true;
             StartCoroutine(PhaseShift());
             return true;
@@ -23,7 +24,8 @@ namespace RuinRunner
             BeginMove(ToPlayer, new Color(1f, .75f, .55f));
             collisionAttackActive = false;
             roarInvulnerable = true;
-            if (bossAnimator != null) bossAnimator.Play(BossPose.Radial, 0, 2, .7f);
+            if (bossAnimator != null)
+                bossAnimator.Play(BossPose.Radial, 0, 2, .7f);
             CameraFollow.DramaticSlow?.Invoke(.55f, .25f);
             if (cameraFollow != null)
             {
@@ -36,29 +38,46 @@ namespace RuinRunner
             yield return new WaitForSeconds(.8f);
 
             AttackVisualPhase = 1;
-            if (bossAnimator != null) bossAnimator.Play(BossPose.Radial, 3, 4, .3f);
+            if (bossAnimator != null)
+                bossAnimator.Play(BossPose.Radial, 3, 4, .3f);
             HitFreeze(.14f);
-            PrototypeAudio.Play(PrototypeSound.HeavyAttack, AudioChannel.Monster, .6f);
-            if (cameraFollow != null) cameraFollow.Shake(.7f, .42f);
+            GameAudio.Play(GameSound.HeavyAttack, AudioChannel.Monster, .6f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.7f, .42f);
             // Knock the player's space open; a shock ring that must be dashed through.
             RingBurst(14, 5.4f, .9f, 0f);
             // Each changes gear in its own element.
-            if (Type == EnemyType.Boss) { BossNativeEffect.CreateOnFloor("WardenCrater", transform.position, 2.4f); FloorStrike("ERingStone", transform.position, 7f, .36f); }
-            else if (Type == EnemyType.Tidekeeper) { Strike("EGeyserBlast", transform.position, 5f, 0f); FloorStrike("ERingSpore", transform.position, 7f, .36f); BossNativeEffect.Create(this, "EWhirlpool", transform.position, 2f).Fit(7f); }
-            else if (Type == EnemyType.SealHeart) { Strike("EManaBurst", transform.position, 7f, 0f); Strike("ESealCircle", transform.position, 7f, 0f); }
+            if (Type == EnemyType.Boss)
+            {
+                BossNativeEffect.CreateOnFloor("WardenCrater", transform.position, 2.4f);
+                FloorStrike("ERingStone", transform.position, 7f, .36f);
+            }
+            else if (Type == EnemyType.Tidekeeper)
+            {
+                Strike("EGeyserBlast", transform.position, 5f, 0f);
+                FloorStrike("ERingSpore", transform.position, 7f, .36f);
+                BossNativeEffect.Create(this, "EWhirlpool", transform.position, 2f).Fit(7f);
+            }
+            else if (Type == EnemyType.SealHeart)
+            {
+                Strike("EManaBurst", transform.position, 7f, 0f);
+                Strike("ESealCircle", transform.position, 7f, 0f);
+            }
             yield return new WaitForSeconds(.3f);
             RingBurst(14, 4.2f, .9f, 12f);
             yield return new WaitForSeconds(.35f);
 
             ReleaseCameraFocus();
             roarInvulnerable = false;
-            if (bossAnimator != null) bossAnimator.Play(BossPose.Radial, 5, 7, .4f);
+            if (bossAnimator != null)
+                bossAnimator.Play(BossPose.Radial, 5, 7, .4f);
             yield return EndMove(.4f, .5f);
         }
         private bool holdingCameraFocus;
         private void ReleaseCameraFocus()
         {
-            if (holdingCameraFocus && cameraFollow != null) cameraFollow.ReleasePresentation();
+            if (holdingCameraFocus && cameraFollow != null)
+                cameraFollow.ReleasePresentation();
             holdingCameraFocus = false;
         }
         // A stage change can remove the boss mid-roar; the camera must not stay parked on it.
@@ -75,9 +94,11 @@ namespace RuinRunner
         private static void HitFreeze(float seconds) => CameraFollow.DramaticSlow?.Invoke(seconds, .03f);
         private void HeavyImpact(Vector2 point, float strength, Vector2 kick = default)
         {
-            if (cameraFollow == null) return;
+            if (cameraFollow == null)
+                return;
             cameraFollow.Shake(.22f + strength * .4f, .14f + strength * .3f);
-            if (kick != default) cameraFollow.Kick(kick, strength * .5f);
+            if (kick != default)
+                cameraFollow.Kick(kick, strength * .5f);
         }
 
         // ---- Warden: never the same move twice; reads the player's distance.
@@ -107,25 +128,50 @@ namespace RuinRunner
             do
             {
                 var roll = Random.value;
-                if (distance < 3.4f) move = roll < .55f ? 0 : roll < .8f ? 2 : 3;
-                else if (distance > 7f) move = roll < .45f ? 1 : roll < .8f ? 3 : 4;
-                else move = roll < .3f ? 1 : roll < .55f ? 2 : roll < .8f ? 4 : 3;
-                if (phaseShifted && Random.value < .3f) move = 5;
-                if (Random.value < .45f) move = Random.Range(6, 10);
+                if (distance < 3.4f)
+                    move = roll < .55f ? 0 : roll < .8f ? 2 : 3;
+                else if (distance > 7f)
+                    move = roll < .45f ? 1 : roll < .8f ? 3 : 4;
+                else
+                    move = roll < .3f ? 1 : roll < .55f ? 2 : roll < .8f ? 4 : 3;
+                if (phaseShifted && Random.value < .3f)
+                    move = 5;
+                if (Random.value < .45f)
+                    move = Random.Range(6, 10);
             } while (move == lastWardenMove);
             lastWardenMove = move;
             switch (move)
             {
-                case 0: StartCoroutine(WardenFistCombo()); break;
-                case 1: StartCoroutine(WardenRam(direction)); break;
-                case 2: StartCoroutine(WardenCrater(direction)); break;
-                case 3: StartCoroutine(WardenRockRain()); break;
-                case 4: StartCoroutine(WardenFissure(direction)); break;
-                case 5: StartCoroutine(WardenCataclysm()); break;
-                case 6: StartCoroutine(WardenTripleLeap()); break;
-                case 7: StartCoroutine(WardenRifts()); break;
-                case 8: StartCoroutine(WardenCage()); break;
-                default: StartCoroutine(WardenRockFan()); break;
+                case 0:
+                    StartCoroutine(WardenFistCombo());
+                    break;
+                case 1:
+                    StartCoroutine(WardenRam(direction));
+                    break;
+                case 2:
+                    StartCoroutine(WardenCrater(direction));
+                    break;
+                case 3:
+                    StartCoroutine(WardenRockRain());
+                    break;
+                case 4:
+                    StartCoroutine(WardenFissure(direction));
+                    break;
+                case 5:
+                    StartCoroutine(WardenCataclysm());
+                    break;
+                case 6:
+                    StartCoroutine(WardenTripleLeap());
+                    break;
+                case 7:
+                    StartCoroutine(WardenRifts());
+                    break;
+                case 8:
+                    StartCoroutine(WardenCage());
+                    break;
+                default:
+                    StartCoroutine(WardenRockFan());
+                    break;
             }
         }
         // Three heavier and heavier punches that step toward the player.
@@ -145,11 +191,16 @@ namespace RuinRunner
                 AttackVisualPhase = 1;
                 bossAnimator.Play(BossPose.Volley, 3, 5, .2f);
                 var point = (Vector2)transform.position + direction * (last ? 0f : 1.5f);
-                if (last) { BossNativeEffect.CreateOnFloor("WardenCrater", point, 2.2f); FloorStrike("ERingStone", point, radius * 2f, .34f); }
-                else Fx("EWardenSwipe", transform.position, .28f, angle);
+                if (last)
+                {
+                    BossNativeEffect.CreateOnFloor("WardenCrater", point, 2.2f);
+                    FloorStrike("ERingStone", point, radius * 2f, .34f);
+                }
+                else
+                    Fx("EWardenSwipe", transform.position, .28f, angle);
                 HitFreeze(last ? .12f : .05f);
                 HeavyImpact(point, last ? .7f : .3f, direction);
-                PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Monster, last ? .55f : .45f);
+                GameAudio.Play(GameSound.Hit, AudioChannel.Monster, last ? .55f : .45f);
                 yield return Rush(direction, last ? .2f : 1f, .16f);
             }
             bossAnimator.Play(BossPose.Volley, 6, 7, .9f);
@@ -170,16 +221,20 @@ namespace RuinRunner
                 crashed = travel < 10.5f;
                 ArenaHazard.CreateChargeRoute(this, player, transform.position, direction, travel, windup, .46f, DangerTint, ContactRadius);
                 Fx("ERushDust", transform.position, windup).Fit(1.8f);
-                if (cameraFollow != null) cameraFollow.Shake(windup, .05f);
+                if (cameraFollow != null)
+                    cameraFollow.Shake(windup, .05f);
                 yield return new WaitForSeconds(windup);
                 collisionAttackActive = true;
                 AttackVisualPhase = 1;
                 bossAnimator.Play(BossPose.Charge, 2, 4, .46f);
                 yield return CampaignRush(direction, travel, .46f, false);
                 collisionAttackActive = false;
-                if (crashed) BossNativeEffect.CreateOnFloor("WardenCrater", (Vector2)transform.position + direction * .8f, 2f);
-                else GroundSlam(transform.position, 1.6f);
-                if (crashed) HitFreeze(.16f);
+                if (crashed)
+                    BossNativeEffect.CreateOnFloor("WardenCrater", (Vector2)transform.position + direction * .8f, 2f);
+                else
+                    GroundSlam(transform.position, 1.6f);
+                if (crashed)
+                    HitFreeze(.16f);
                 HeavyImpact(transform.position, crashed ? .9f : .4f, direction);
             }
             if (crashed)
@@ -236,7 +291,8 @@ namespace RuinRunner
         private IEnumerator RockImpact(float delay)
         {
             yield return new WaitForSeconds(delay);
-            if (cameraFollow != null) cameraFollow.Shake(.1f, .1f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.1f, .1f);
         }
         // Spikes tear along the floor in three directions.
         private IEnumerator WardenFissure(Vector2 direction)
@@ -250,7 +306,8 @@ namespace RuinRunner
                 foreach (var angle in angles)
                 {
                     var point = (Vector2)transform.position + Rotate(direction, angle) * (spike * 1.55f);
-                    if (arenaBounds.HasValue && !arenaBounds.Value.Contains(point)) continue;
+                    if (arenaBounds.HasValue && !arenaBounds.Value.Contains(point))
+                        continue;
                     Circle(point, .85f, delay, .15f);
                     StartCoroutine(DelayedFx("WardenSpike", point, delay, 1.05f));
                 }
@@ -267,7 +324,8 @@ namespace RuinRunner
         {
             BeginMove(ToPlayer, new Color(1f, .75f, .5f));
             bossAnimator.Play(BossPose.Radial, 0, 2, 1.3f);
-            if (cameraFollow != null) cameraFollow.Shake(1.3f, .08f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(1.3f, .08f);
             BossNativeEffect.CreateOverActors(this, "WardenRoar", transform.position, 3.7f);
             ArenaHazard.Create(this, player, transform.position, Vector2.one * 7f, 0, true, 1.3f, .18f, contactDamage * 1.5f, DangerTint);
             yield return new WaitForSeconds(1.3f);

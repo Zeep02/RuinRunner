@@ -16,7 +16,14 @@ namespace RuinRunner
         public bool IsFinal => Index == Count - 1;
         public const float ClearHealingFraction = .30f;
         private CampaignStage(int index, string name, string resource, string bossName, EnemyType boss, Color floor)
-        { Index = index; Name = name; Resource = resource; BossName = bossName; BossType = boss; FloorTint = floor; }
+        {
+            Index = index;
+            Name = name;
+            Resource = resource;
+            BossName = bossName;
+            BossType = boss;
+            FloorTint = floor;
+        }
         private static readonly CampaignStage[] Stages =
         {
             new CampaignStage(0, "외곽 유적", "outer_ruins", "유적의 파수꾼", EnemyType.Boss, new Color(.95f, .88f, .68f)),
@@ -25,7 +32,8 @@ namespace RuinRunner
         };
         public static CampaignStage Get(int index)
         {
-            if (index < 0 || index >= Count) throw new ArgumentOutOfRangeException(nameof(index));
+            if (index < 0 || index >= Count)
+                throw new ArgumentOutOfRangeException(nameof(index));
             return Stages[index];
         }
     }

@@ -2,7 +2,10 @@
   "name": "RuinRunner.Editor",
   "rootNamespace": "RuinRunner.EditorTools",
   "references": [
-    "RuinRunner.Runtime"
+    "RuinRunner.Runtime",
+    "RuinRunner.Generation",
+    "RuinRunner.Backend",
+    "RuinRunner.Diagnostics"
   ],
   "includePlatforms": [
     "Editor"

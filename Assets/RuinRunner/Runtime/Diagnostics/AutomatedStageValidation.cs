@@ -21,11 +21,11 @@ namespace RuinRunner
         private float attackReleaseAt;
         private bool attackHeld;
         private bool completionLogged;
-        public bool Complete=>completionLogged;
+        public bool Complete => completionLogged;
         private int lastRoom = -1;
         private int lastStage = -1;
-        private readonly HashSet<string> visitedRegions=new HashSet<string>();
-        private int branchVisits,clearedRevisits;
+        private readonly HashSet<string> visitedRegions = new HashSet<string>();
+        private int branchVisits, clearedRevisits;
         private bool leavingEquipment;
         private bool preferRanged;
         private bool preferSkills;
@@ -61,35 +61,43 @@ namespace RuinRunner
             nextStatusAt = startedAt + 4f;
             preferRanged = rangedBuild || GetCommandLineValue("--validation-build") == "ranged";
             preferSkills = GetCommandLineValue("--validation-build") == "skill";
-            backendJourney=!game.UsesLegacyFixture;
-            preferMobility=GetCommandLineValue("--validation-build")=="mobility";
+            backendJourney = !game.UsesLegacyFixture;
+            preferMobility = GetCommandLineValue("--validation-build") == "mobility";
             captureDirectory = outputDirectory ?? GetCommandLineValue("--validation-capture-dir");
-            captureScreenshots = System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"--validation-no-screenshots") < 0;
+            captureScreenshots = System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--validation-no-screenshots") < 0;
             if (!string.IsNullOrWhiteSpace(captureDirectory))
             {
                 System.IO.Directory.CreateDirectory(captureDirectory);
-                if(System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"--combat-pressure-trace")>=0)
-                    game.gameObject.AddComponent<BossCombatObservation>().Initialize(game,captureDirectory);
+                if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--combat-pressure-trace") >= 0)
+                    game.gameObject.AddComponent<BossCombatObservation>().Initialize(game, captureDirectory);
                 nextCaptureAt = startedAt + 1.5f;
-                if(captureScreenshots && (record || System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"--validation-record")>=0))
-                    game.gameObject.AddComponent<RunEvidenceRecorder>().Initialize(game,captureDirectory);
+                if (captureScreenshots && (record || System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--validation-record") >= 0))
+                    game.gameObject.AddComponent<RunEvidenceRecorder>().Initialize(game, captureDirectory);
             }
-            if (InitializeRecoveryMode()) return;
-            Debug.Log("[Stage E2E] START — "+(backendJourney?"server profile/town journey":"LEGACY SUPPLIED FIXTURE; not a normal campaign")+", automated GameAction input and public UI button handlers");
+            if (InitializeRecoveryMode())
+                return;
+            Debug.Log("[Stage E2E] START — " + (backendJourney ? "server profile/town journey" : "LEGACY SUPPLIED FIXTURE; not a normal campaign") + ", automated GameAction input and public UI button handlers");
             Debug.Log("[Stage E2E] BUILD " + (preferSkills ? "skill" : preferRanged ? "ranged" : "melee") + "; ordinary drops and player-facing inventory keys only");
-            if (Application.isBatchMode) Debug.Log("[Stage E2E] HEADLESS LOGIC ONLY — no rendered play, video, visual completion or performance evidence.");
+            if (Application.isBatchMode)
+                Debug.Log("[Stage E2E] HEADLESS LOGIC ONLY — no rendered play, video, visual completion or performance evidence.");
         }
 
         private void Update()
         {
             StageValidationInput.BeginFrame();
-            if (game == null || !StageValidationInput.Enabled) return;
+            if (game == null || !StageValidationInput.Enabled)
+                return;
 
             ReleaseTimedInputs();
             CaptureValidationFrame();
-            if (completionLogged) return;
+            if (completionLogged)
+                return;
             TickDemo();
-            if (recoveryTicket != null) { DriveRecoveryJourney(); return; }
+            if (recoveryTicket != null)
+            {
+                DriveRecoveryJourney();
+                return;
+            }
 
             if (Time.unscaledTime - startedAt > RunTimeoutSeconds)
             {
@@ -97,12 +105,23 @@ namespace RuinRunner
                 return;
             }
 
-            if(backendJourney&&DriveSessionJourney())return;
-            if(game.Phase==GameSessionPhase.BossIntro){StageValidationInput.ReleaseAll();return;}
-            if(DriveAdversityState())return;
-            if(DriveInputObservations())return;
+            if (backendJourney && DriveSessionJourney())
+                return;
+            if (game.Phase == GameSessionPhase.BossIntro)
+            {
+                StageValidationInput.ReleaseAll();
+                return;
+            }
+            if (DriveAdversityState())
+                return;
+            if (DriveInputObservations())
+                return;
             ObserveAwakenedEquipment();
-            if(backendJourney&&game.IsServiceOpen){DriveFieldFacility();return;}
+            if (backendJourney && game.IsServiceOpen)
+            {
+                DriveFieldFacility();
+                return;
+            }
 
             if (!game.IsRunActive || game.Player == null)
             {
@@ -115,24 +134,30 @@ namespace RuinRunner
             {
                 currentIntent = "stage loading";
                 StageValidationInput.ReleaseAll();
-                route.Clear(); routeRoom = -1;
+                route.Clear();
+                routeRoom = -1;
                 return;
             }
             if (game.CurrentStageIndex != lastStage)
             {
-                lastStage = game.CurrentStageIndex; lastRoom = -1;
-                route.Clear(); routeRoom = -1; stalledFor = 0;
+                lastStage = game.CurrentStageIndex;
+                lastRoom = -1;
+                route.Clear();
+                routeRoom = -1;
+                stalledFor = 0;
                 leavingEquipment = false;
                 maintenanceRoom = -1;
-                Debug.Log("[Stage E2E] STAGE " + (lastStage+1) + "/3 seed=" + game.RunSeed);
+                Debug.Log("[Stage E2E] STAGE " + (lastStage + 1) + "/3 seed=" + game.RunSeed);
             }
 
             if (game.CurrentRoom != lastRoom)
             {
                 lastRoom = game.CurrentRoom;
-                var regionKey=game.CurrentStageIndex+":"+game.DungeonMap.GetRegionId(lastRoom);
-                if(!visitedRegions.Add(regionKey)&&game.DungeonMap.Regions[lastRoom].Phase==EncounterRegionPhase.Cleared)clearedRevisits++;
-                else if(game.DungeonMap.IsProcedural&&!game.DungeonMap.RequiresCombat(lastRoom)&&lastRoom!=game.DungeonMap.EntranceRoomIndex)branchVisits++;
+                var regionKey = game.CurrentStageIndex + ":" + game.DungeonMap.GetRegionId(lastRoom);
+                if (!visitedRegions.Add(regionKey) && game.DungeonMap.Regions[lastRoom].Phase == EncounterRegionPhase.Cleared)
+                    clearedRevisits++;
+                else if (game.DungeonMap.IsProcedural && !game.DungeonMap.RequiresCombat(lastRoom) && lastRoom != game.DungeonMap.EntranceRoomIndex)
+                    branchVisits++;
                 Debug.Log("[Stage E2E] ROOM " + (lastRoom + 1) + "/" + game.DungeonMap.RoomCount + " entered " + game.DungeonMap.GetRoom(lastRoom).roomId);
             }
             if (!telegraphMovementChecked && game.IsEncounterTransitioning)
@@ -157,8 +182,13 @@ namespace RuinRunner
                 // not wall time since Initialize. A short sample is not a PASS.
                 if (duration < .45f)
                     Debug.Log("[Stage E2E] Telegraph movement INCONCLUSIVE startup sample=" + duration.ToString("0.00") + "s distance=" + distance.ToString("0.00"));
-                else if (distance < 1f) { Finish(false, "movement blocked during telegraph: input=" + duration.ToString("0.00") + "s distance=" + distance.ToString("0.00")); return; }
-                else Debug.Log("[Stage E2E] Telegraph movement PASS input=" + duration.ToString("0.00") + "s distance=" + distance.ToString("0.00"));
+                else if (distance < 1f)
+                {
+                    Finish(false, "movement blocked during telegraph: input=" + duration.ToString("0.00") + "s distance=" + distance.ToString("0.00"));
+                    return;
+                }
+                else
+                    Debug.Log("[Stage E2E] Telegraph movement PASS input=" + duration.ToString("0.00") + "s distance=" + distance.ToString("0.00"));
             }
             if (game.Stats != null && game.Stats.EnemiesDefeated != lastKills)
             {
@@ -170,7 +200,8 @@ namespace RuinRunner
             {
                 currentIntent = "choose level upgrade";
                 ReleaseMovement();
-                if (HoldDemoChoice()) return;
+                if (HoldDemoChoice())
+                    return;
                 var choice = SelectUpgrade();
                 Tap(GameSettingsService.AccessoryChoiceAction(choice));
                 return;
@@ -178,9 +209,13 @@ namespace RuinRunner
 
             if (game.IsGameOver)
             {
-                if (!game.IsVictory && game.Player.DeathProgress < 1f) { StageValidationInput.ReleaseAll(); return; }
-                Finish(game.IsVictory && game.StagesCleared == CampaignStage.Count && (!game.DungeonMap.IsProcedural || branchVisits>=3&&clearedRevisits>=3),
-                    game.IsVictory ? "all three guardians cleared; final ending reached; branches="+branchVisits+" cleared revisits="+clearedRevisits+"; legacy maintenance counts are not new growth-system validation" : "player defeated");
+                if (!game.IsVictory && game.Player.DeathProgress < 1f)
+                {
+                    StageValidationInput.ReleaseAll();
+                    return;
+                }
+                Finish(game.IsVictory && game.StagesCleared == CampaignStage.Count && (!game.DungeonMap.IsProcedural || branchVisits >= 3 && clearedRevisits >= 3),
+                    game.IsVictory ? "all three guardians cleared; final ending reached; branches=" + branchVisits + " cleared revisits=" + clearedRevisits + "; legacy maintenance counts are not new growth-system validation" : "player defeated");
                 return;
             }
             if (leavingEquipment)
@@ -188,18 +223,24 @@ namespace RuinRunner
                 ObserveAdversityExit();
                 if (game.PendingStageRewards == 0)
                 {
-                    StageValidationInput.SetHeld(GameAction.Interact,false);
+                    StageValidationInput.SetHeld(GameAction.Interact, false);
                     leavingEquipment = false;
                     nextInteractAt = Time.unscaledTime + .3f;
                 }
-                else StageValidationInput.SetHeld(GameAction.Interact,true);
+                else
+                    StageValidationInput.SetHeld(GameAction.Interact, true);
                 return;
             }
 
-            if (!backendJourney&&maintenanceActive) { DriveEquipmentMaintenance(); return; }
+            if (!backendJourney && maintenanceActive)
+            {
+                DriveEquipmentMaintenance();
+                return;
+            }
 
             if (game.IsInventoryOpen || game.EnemiesAlive == 0 && !game.IsEncounterTransitioning)
-                if (EquipStoredUpgrade()) return;
+                if (EquipStoredUpgrade())
+                    return;
 
             if (game.EnemiesAlive > 0)
             {
@@ -212,7 +253,8 @@ namespace RuinRunner
 
         private void DriveCombat()
         {
-            if(DriveAdversityCombat())return;
+            if (DriveAdversityCombat())
+                return;
             var player = game.Player;
             SelectCombatWeapon();
             var target = FindNearestEnemy(player.transform.position);
@@ -236,16 +278,22 @@ namespace RuinRunner
             var lineOfSight = StageNavigation.HasCombatLane(player.transform.position,
                 target.transform.position, .32f);
             var move = Vector2.zero;
-            if (!lineOfSight || distance > desiredDistance + .35f) move = direction;
-            else if (ranged && distance < desiredDistance - .9f) move = -direction;
-            else if (!ranged && distance < .55f) move = -direction;
+            if (!lineOfSight || distance > desiredDistance + .35f)
+                move = direction;
+            else if (ranged && distance < desiredDistance - .9f)
+                move = -direction;
+            else if (!ranged && distance < .55f)
+                move = -direction;
             // React only to visible, already committed attack warnings. No enemy state is changed.
             if (target.IsBoss && target.IsActing && target.AttackVisualPhase < 2 && distance < 3.4f)
                 move = -direction;
             var escape = HazardEscape(player.transform.position);
-            if (escape.sqrMagnitude < .01f) escape = ProjectileEscape(player.transform.position);
-            if (escape.sqrMagnitude < .01f) escape = VisibleWarningEscape(player.transform.position);
-            if (escape.sqrMagnitude > .01f) move = escape;
+            if (escape.sqrMagnitude < .01f)
+                escape = ProjectileEscape(player.transform.position);
+            if (escape.sqrMagnitude < .01f)
+                escape = VisibleWarningEscape(player.transform.position);
+            if (escape.sqrMagnitude > .01f)
+                move = escape;
             // Visible, unobstructed targets do not need a whole-stage BFS every time
             // they move. Reserve route finding for blocked approaches.
             var combatMove = escape.sqrMagnitude > .01f ? escape : move.sqrMagnitude > .01f && Vector2.Dot(move, direction) > 0f
@@ -254,7 +302,8 @@ namespace RuinRunner
             if (!lineOfSight && distance < 1.5f && escape.sqrMagnitude < .01f)
             {
                 var clearance = StageNavigation.WallClearanceDirection(player.transform.position, .34f);
-                if (clearance.sqrMagnitude > .01f) combatMove = clearance;
+                if (clearance.sqrMagnitude > .01f)
+                    combatMove = clearance;
             }
             SetMove(combatMove);
 
@@ -295,8 +344,9 @@ namespace RuinRunner
             {
                 var dashDirection = escape.sqrMagnitude > .01f ? escape : player.Health <= player.MaxHealth * .45f
                     ? -direction
-                    : preferMobility && distance < 3.5f ? new Vector2(-direction.y,direction.x) : direction;
-                if (Physics2D.CircleCast(player.transform.position,.35f,dashDirection,1.1f,1<<GameLayers.Ground)) dashDirection=-dashDirection;
+                    : preferMobility && distance < 3.5f ? new Vector2(-direction.y, direction.x) : direction;
+                if (Physics2D.CircleCast(player.transform.position, .35f, dashDirection, 1.1f, 1 << GameLayers.Ground))
+                    dashDirection = -dashDirection;
                 // Space prioritizes movement, not the cursor. Merely aiming
                 // away while holding approach keys dashed the pilot INTO danger.
                 SetMove(dashDirection);
@@ -316,46 +366,66 @@ namespace RuinRunner
                 var nearest = float.PositiveInfinity;
                 foreach (var candidate in RuntimeSceneObjects.FindAll<RewardChest>())
                 {
-                    if (!candidate.CanOpen) continue;
-                    var d = Vector2.SqrMagnitude(candidate.transform.position-player.transform.position);
-                    if (d < nearest) { nearest = d; chest = candidate; }
+                    if (!candidate.CanOpen)
+                        continue;
+                    var d = Vector2.SqrMagnitude(candidate.transform.position - player.transform.position);
+                    if (d < nearest)
+                    {
+                        nearest = d;
+                        chest = candidate;
+                    }
                 }
             }
             if (chest != null && !chest.IsOpened)
             {
                 currentIntent = "open chest at " + Format(chest.transform.position);
                 MoveTo(chest.transform.position, true);
-                if (chest.PlayerInRange) Tap(GameAction.Interact);
+                if (chest.PlayerInRange)
+                    Tap(GameAction.Interact);
                 return;
             }
 
-            if(ProbeAdversityFullBag())return;
-            FieldLootPickup pickup=null;float pickupDistance=float.PositiveInfinity;
-            foreach(var candidate in RuntimeSceneObjects.FindAll<FieldLootPickup>())
+            if (ProbeAdversityFullBag())
+                return;
+            FieldLootPickup pickup = null;
+            float pickupDistance = float.PositiveInfinity;
+            foreach (var candidate in RuntimeSceneObjects.FindAll<FieldLootPickup>())
             {
-                if(!game.Inventory.HasRoomFor(candidate.InventoryKind))continue;
-                float distance=Vector2.SqrMagnitude(candidate.transform.position-player.transform.position);
-                if(distance<pickupDistance){pickup=candidate;pickupDistance=distance;}
+                if (!game.Inventory.HasRoomFor(candidate.InventoryKind))
+                    continue;
+                float distance = Vector2.SqrMagnitude(candidate.transform.position - player.transform.position);
+                if (distance < pickupDistance)
+                {
+                    pickup = candidate;
+                    pickupDistance = distance;
+                }
             }
             if (pickup != null)
             {
                 currentIntent = "collect " + pickup.name + " at " + Format(pickup.transform.position);
                 var distance = Vector2.Distance(player.transform.position, pickup.transform.position);
                 MoveTo(pickup.transform.position, true);
-                if (distance <= 1.25f) Tap(GameAction.Interact);
+                if (distance <= 1.25f)
+                    Tap(GameAction.Interact);
                 return;
             }
 
-            if (backendJourney ? DriveFieldFacility() : BeginEquipmentMaintenance()) return;
+            if (backendJourney ? DriveFieldFacility() : BeginEquipmentMaintenance())
+                return;
 
             if (game.IsStageResultReady)
             {
                 currentIntent = "walk to stage seal at " + Format(game.StageExitPosition);
-                MoveTo(game.StageExitPosition,true);
+                MoveTo(game.StageExitPosition, true);
                 if (game.IsNearStageExit)
                 {
-                    if (game.PendingStageRewards > 0) { leavingEquipment = true; ReleaseMovement(); }
-                    else Tap(GameAction.Interact);
+                    if (game.PendingStageRewards > 0)
+                    {
+                        leavingEquipment = true;
+                        ReleaseMovement();
+                    }
+                    else
+                        Tap(GameAction.Interact);
                 }
                 return;
             }
@@ -370,14 +440,18 @@ namespace RuinRunner
 
             if (game.IsExitOpen)
             {
-                int next=game.DungeonMap.NextUnclearedCombat(game.CurrentRoom);
-                if(game.DungeonMap.IsProcedural)
-                    foreach(int neighbor in game.DungeonMap.GetNeighbors(game.CurrentRoom))
-                        if(!game.DungeonMap.RequiresCombat(neighbor)&&!game.DungeonMap.Regions[neighbor].Visited){next=neighbor;break;}
-                if(next>=0&&next!=game.CurrentRoom)
+                int next = game.DungeonMap.NextUnclearedCombat(game.CurrentRoom);
+                if (game.DungeonMap.IsProcedural)
+                    foreach (int neighbor in game.DungeonMap.GetNeighbors(game.CurrentRoom))
+                        if (!game.DungeonMap.RequiresCombat(neighbor) && !game.DungeonMap.Regions[neighbor].Visited)
+                        {
+                            next = neighbor;
+                            break;
+                        }
+                if (next >= 0 && next != game.CurrentRoom)
                 {
-                    var destination=game.DungeonMap.GetEntryPosition(game.CurrentRoom,next);
-                    currentIntent = "enter "+game.DungeonMap.GetRegionId(next)+" at " + Format(destination);
+                    var destination = game.DungeonMap.GetEntryPosition(game.CurrentRoom, next);
+                    currentIntent = "enter " + game.DungeonMap.GetRegionId(next) + " at " + Format(destination);
                     MoveTo(destination, false);
                     return;
                 }
@@ -389,7 +463,8 @@ namespace RuinRunner
 
         private void LateUpdate()
         {
-            if (completionLogged || game == null || game.Player == null || game.DungeonMap==null || game.IsStageTransitioning || Time.unscaledTime < nextStatusAt) return;
+            if (completionLogged || game == null || game.Player == null || game.DungeonMap == null || game.IsStageTransitioning || Time.unscaledTime < nextStatusAt)
+                return;
             nextStatusAt = Time.unscaledTime + 4f;
             var body = game.Player.GetComponent<Rigidbody2D>();
             var velocity = body == null ? Vector2.zero : body.linearVelocity;
@@ -405,7 +480,7 @@ namespace RuinRunner
                 }
             }
             Debug.Log("[Stage E2E] STATUS t=" + (Time.unscaledTime - startedAt).ToString("0.0") +
-                      " stage=" + (game.CurrentStageIndex+1) + " room=" + (game.CurrentRoom + 1) + "/" + game.DungeonMap.RoomCount +
+                      " stage=" + (game.CurrentStageIndex + 1) + " room=" + (game.CurrentRoom + 1) + "/" + game.DungeonMap.RoomCount +
                       " alive=" + game.EnemiesAlive + " hp=" + game.Player.Health.ToString("0.0") +
                       " weapon=" + (game.Player.EquippedWeapon == null ? "none" : game.Player.EquippedWeapon.Id) +
                       " bossHp=" + (game.Boss == null ? "none" : game.Boss.Health.ToString("0.0")) +
@@ -443,7 +518,8 @@ namespace RuinRunner
 
         private Vector2 NavigateToward(Vector2 destination)
         {
-            if (game.DungeonMap.IsAuthored) return NavigateContinuous(destination);
+            if (game.DungeonMap.IsAuthored)
+                return NavigateContinuous(destination);
             var center = game.DungeonMap.GetRoomCenter(game.CurrentRoom);
             var room = game.DungeonMap.GetRoom(game.CurrentRoom);
             var position = (Vector2)game.Player.transform.position;
@@ -462,7 +538,8 @@ namespace RuinRunner
                     // corridor first, then advance using axis dead zones.
                     var cross = new Vector2(-axis.y, axis.x);
                     var lateral = Vector2.Dot(destination - position, cross);
-                    if (Mathf.Abs(lateral) > .18f) return cross * Mathf.Sign(lateral);
+                    if (Mathf.Abs(lateral) > .18f)
+                        return cross * Mathf.Sign(lateral);
                     return axis;
                 }
                 localDestination = approach - center;
@@ -480,12 +557,15 @@ namespace RuinRunner
                     var angle = i * Mathf.PI / 4f;
                     var direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
                     var candidate = position + direction * .5f;
-                    if (!RoomLayoutRules.IsClear(room, candidate - center, RoomLayoutRules.FootHalfSize)) continue;
+                    if (!RoomLayoutRules.IsClear(room, candidate - center, RoomLayoutRules.FootHalfSize))
+                        continue;
                     var hit = Physics2D.CapsuleCast(bounds.center, bounds.size, CapsuleDirection2D.Horizontal, 0,
                         direction, .5f, 1 << GameLayers.Ground);
-                    if (hit.collider != null) continue;
+                    if (hit.collider != null)
+                        continue;
                     var score = Vector2.SqrMagnitude(candidate - destination);
-                    if (score >= best) continue;
+                    if (score >= best)
+                        continue;
                     best = score;
                     recovery = direction;
                 }
@@ -500,14 +580,15 @@ namespace RuinRunner
             {
                 var found = false;
                 for (var radius = .5f; radius <= 1.25f && !found; radius += .25f)
-                for (var index = 0; index < 8 && !found; index++)
-                {
-                    var angle = index * Mathf.PI / 4f;
-                    var candidate = localDestination + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
-                    if (!RoomLayoutRules.IsClear(room, candidate, RoomLayoutRules.FootHalfSize)) continue;
-                    localDestination = candidate;
-                    found = true;
-                }
+                    for (var index = 0; index < 8 && !found; index++)
+                    {
+                        var angle = index * Mathf.PI / 4f;
+                        var candidate = localDestination + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                        if (!RoomLayoutRules.IsClear(room, candidate, RoomLayoutRules.FootHalfSize))
+                            continue;
+                        localDestination = candidate;
+                        found = true;
+                    }
             }
             if (routeRoom != game.CurrentRoom || Vector2.Distance(routeDestination, localDestination) > .75f ||
                 ((route.Count == 0 || stalledFor > .6f) && Time.unscaledTime >= nextRouteAt))
@@ -517,20 +598,27 @@ namespace RuinRunner
                 nextRouteAt = Time.unscaledTime + .6f;
                 route.Clear();
                 var path = RoomLayoutRules.FindPath(room, position - center, localDestination);
-                if (path != null) foreach (var point in path) route.Add(point + center);
+                if (path != null)
+                    foreach (var point in path)
+                        route.Add(point + center);
                 for (var i = 1; i + 1 < route.Count;)
                 {
-                    if (Vector2.Dot((route[i] - route[i - 1]).normalized, (route[i + 1] - route[i]).normalized) > .999f) route.RemoveAt(i);
-                    else i++;
+                    if (Vector2.Dot((route[i] - route[i - 1]).normalized, (route[i + 1] - route[i]).normalized) > .999f)
+                        route.RemoveAt(i);
+                    else
+                        i++;
                 }
             }
-            if (route.Count == 0) return Vector2.zero;
+            if (route.Count == 0)
+                return Vector2.zero;
             var velocity = game.Player.GetComponent<Rigidbody2D>().linearVelocity;
             if (Vector2.Distance(position, route[0]) < .18f)
             {
-                if (velocity.sqrMagnitude > .04f) return Vector2.zero;
+                if (velocity.sqrMagnitude > .04f)
+                    return Vector2.zero;
                 route.RemoveAt(0);
-                if (route.Count == 0) return Vector2.zero;
+                if (route.Count == 0)
+                    return Vector2.zero;
             }
             var delta = route[0] - position;
             if (delta.magnitude < .5f && Vector2.Dot(velocity, delta) > 0 && velocity.sqrMagnitude / 128f + .06f >= delta.magnitude)
@@ -543,10 +631,12 @@ namespace RuinRunner
 
         private static Vector2 SteerAroundObstacles(Vector2 origin, Vector2 desiredDirection)
         {
-            if (desiredDirection.sqrMagnitude < .01f) return Vector2.zero;
+            if (desiredDirection.sqrMagnitude < .01f)
+                return Vector2.zero;
             desiredDirection.Normalize();
             var hit = Physics2D.Raycast(origin, desiredDirection, .9f, 1 << GameLayers.Ground);
-            if (hit.collider == null) return desiredDirection;
+            if (hit.collider == null)
+                return desiredDirection;
 
             // The generated rooms use axis-aligned solid modules. Follow the
             // obstacle edge until the direct route opens again.
@@ -555,18 +645,24 @@ namespace RuinRunner
 
         private Vector2 NavigateContinuous(Vector2 destination)
         {
-            if (demoRun) return DemoNavigate(destination);
+            if (demoRun)
+                return DemoNavigate(destination);
             var body = game.Player.GetComponent<Rigidbody2D>();
             var position = body.position;
             if (routeRoom != game.CurrentRoom || Vector2.Distance(routeDestination, destination) > .75f ||
                 (route.Count == 0 || stalledFor > .6f) && Time.unscaledTime >= nextRouteAt)
             {
-                routeRoom = game.CurrentRoom; routeDestination = destination; nextRouteAt = Time.unscaledTime + .6f;
+                routeRoom = game.CurrentRoom;
+                routeDestination = destination;
+                nextRouteAt = Time.unscaledTime + .6f;
                 var path = StageNavigation.FindPath(game.DungeonMap.Terrain, position, destination);
-                route.Clear(); if (path != null) route.AddRange(path);
+                route.Clear();
+                if (path != null)
+                    route.AddRange(path);
                 brakingAtWaypoint = false;
             }
-            if (route.Count == 0) return Vector2.zero;
+            if (route.Count == 0)
+                return Vector2.zero;
             var velocity = body.linearVelocity;
             var delta = route[0] - position;
             // FixedUpdate consumes the previous Update's digital input. Include
@@ -575,13 +671,20 @@ namespace RuinRunner
             // around short waypoints at 20 Hz.
             if (brakingAtWaypoint)
             {
-                if (velocity.sqrMagnitude > .04f) return Vector2.zero;
+                if (velocity.sqrMagnitude > .04f)
+                    return Vector2.zero;
                 brakingAtWaypoint = false;
             }
             if (delta.magnitude < .2f)
             {
-                if (velocity.sqrMagnitude > .04f) { brakingAtWaypoint = true; return Vector2.zero; }
-                route.RemoveAt(0); if (route.Count == 0) return Vector2.zero;
+                if (velocity.sqrMagnitude > .04f)
+                {
+                    brakingAtWaypoint = true;
+                    return Vector2.zero;
+                }
+                route.RemoveAt(0);
+                if (route.Count == 0)
+                    return Vector2.zero;
                 delta = route[0] - position;
             }
             // Also cover a caller running after Player.Update (the isolated route
@@ -590,7 +693,10 @@ namespace RuinRunner
             var speedAtRelease = Mathf.Min(game.Player.Stats.MoveSpeed, velocity.magnitude + 44f * responseTime);
             var stoppingDistance = speedAtRelease * speedAtRelease / 128f + velocity.magnitude * responseTime + 22f * responseTime * responseTime + .03f;
             if (Vector2.Dot(velocity, delta) > 0 && stoppingDistance >= delta.magnitude)
-            { brakingAtWaypoint = true; return Vector2.zero; }
+            {
+                brakingAtWaypoint = true;
+                return Vector2.zero;
+            }
             return new Vector2(Mathf.Abs(delta.x) > .055f ? Mathf.Sign(delta.x) : 0, Mathf.Abs(delta.y) > .055f ? Mathf.Sign(delta.y) : 0);
         }
 
@@ -602,10 +708,12 @@ namespace RuinRunner
 
         private bool Tap(GameAction action)
         {
-            if (Time.unscaledTime < nextInteractAt && action == GameAction.Interact) return false;
+            if (Time.unscaledTime < nextInteractAt && action == GameAction.Interact)
+                return false;
             StageValidationInput.SetHeld(action, true);
             StageValidationInput.SetHeld(action, false);
-            if (action == GameAction.Interact) nextInteractAt = Time.unscaledTime + .22f;
+            if (action == GameAction.Interact)
+                nextInteractAt = Time.unscaledTime + .22f;
             return true;
         }
 
@@ -627,41 +735,57 @@ namespace RuinRunner
 
         private void UpdateStallTimer(Vector2 currentPosition)
         {
-            if (Vector2.Distance(currentPosition, lastPosition) < .015f) stalledFor += Time.unscaledDeltaTime;
-            else stalledFor = 0f;
+            if (Vector2.Distance(currentPosition, lastPosition) < .015f)
+                stalledFor += Time.unscaledDeltaTime;
+            else
+                stalledFor = 0f;
             lastPosition = currentPosition;
         }
 
         private static EnemyController FindNearestEnemy(Vector2 origin)
         {
-            EnemyController nearest=null; var best=float.PositiveInfinity;
-            foreach(var enemy in RuntimeSceneObjects.FindAll<EnemyController>())
+            EnemyController nearest = null;
+            var best = float.PositiveInfinity;
+            foreach (var enemy in RuntimeSceneObjects.FindAll<EnemyController>())
             {
-                if(enemy.IsDead)continue;
-                var distance=Vector2.SqrMagnitude((Vector2)enemy.transform.position-origin);
-                if(distance<best){best=distance;nearest=enemy;}
+                if (enemy.IsDead)
+                    continue;
+                var distance = Vector2.SqrMagnitude((Vector2)enemy.transform.position - origin);
+                if (distance < best)
+                {
+                    best = distance;
+                    nearest = enemy;
+                }
             }
             return nearest;
         }
 
         private void SelectCombatWeapon()
         {
-            var best=-1;var score=float.NegativeInfinity;
-            for(var i=0;i<game.Inventory.QuickSlots.Count;i++)
+            var best = -1;
+            var score = float.NegativeInfinity;
+            for (var i = 0; i < game.Inventory.QuickSlots.Count; i++)
             {
-                var item=game.Inventory.QuickSlots[i].Item;
-                if(item==null)continue;
-                var rank=OwnedWeaponRank(item);
-                if(rank>score){score=rank;best=i;}
+                var item = game.Inventory.QuickSlots[i].Item;
+                if (item == null)
+                    continue;
+                var rank = OwnedWeaponRank(item);
+                if (rank > score)
+                {
+                    score = rank;
+                    best = i;
+                }
             }
-            if(best>=0 && best!=game.Inventory.ActiveSlotIndex) Tap(best==0?GameAction.Weapon1:best==1?GameAction.Weapon2:GameAction.Weapon3);
+            if (best >= 0 && best != game.Inventory.ActiveSlotIndex)
+                Tap(best == 0 ? GameAction.Weapon1 : best == 1 ? GameAction.Weapon2 : GameAction.Weapon3);
         }
 
         private float WeaponRank(WeaponDefinition weapon)
         {
-            if (weapon == null) return float.NegativeInfinity;
+            if (weapon == null)
+                return float.NegativeInfinity;
             if (preferMobility)
-                return (weapon.Family==WeaponFamily.Dagger||weapon.Family==WeaponFamily.Katana?1400:weapon.AttackType==WeaponAttackType.Melee?700:0)+(int)weapon.Rarity*100+weapon.PowerScore;
+                return (weapon.Family == WeaponFamily.Dagger || weapon.Family == WeaponFamily.Katana ? 1400 : weapon.AttackType == WeaponAttackType.Melee ? 700 : 0) + (int)weapon.Rarity * 100 + weapon.PowerScore;
             if (preferSkills)
             {
                 var manaAction = weapon.Family == WeaponFamily.Mace || weapon.Family == WeaponFamily.Crossbow || weapon.Family == WeaponFamily.Cannon;
@@ -673,24 +797,29 @@ namespace RuinRunner
 
         private float OwnedWeaponRank(OwnedWeapon item)
         {
-            if(item==null)return float.NegativeInfinity;
+            if (item == null)
+                return float.NegativeInfinity;
             // A player who accepts an oath keeps using that copy until the
             // condition and its awakened attack have actually been experienced.
-            return WeaponRank(item.Definition)+(backendJourney&&FitsJourneyBuild(item.Definition)&&item.Oath!=EquipmentOath.None&&
-                (!item.Awakened||!awakenedCopiesUsed.Contains(item.Identity))?2200:0);
+            return WeaponRank(item.Definition) + (backendJourney && FitsJourneyBuild(item.Definition) && item.Oath != EquipmentOath.None &&
+                (!item.Awakened || !awakenedCopiesUsed.Contains(item.Identity)) ? 2200 : 0);
         }
 
         private bool FitsJourneyBuild(WeaponDefinition weapon)
         {
-            if (weapon == null) return false;
-            if (preferMobility) return weapon.Family == WeaponFamily.Dagger || weapon.Family == WeaponFamily.Katana;
-            if (preferSkills) return weapon.Family == WeaponFamily.Mace || weapon.Family == WeaponFamily.Crossbow || weapon.Family == WeaponFamily.Cannon;
+            if (weapon == null)
+                return false;
+            if (preferMobility)
+                return weapon.Family == WeaponFamily.Dagger || weapon.Family == WeaponFamily.Katana;
+            if (preferSkills)
+                return weapon.Family == WeaponFamily.Mace || weapon.Family == WeaponFamily.Crossbow || weapon.Family == WeaponFamily.Cannon;
             return (weapon.AttackType == WeaponAttackType.Ranged) == preferRanged;
         }
 
         private bool EquipStoredUpgrade()
         {
-            if (HoldDemoInventory()) return true;
+            if (HoldDemoInventory())
+                return true;
             var bestRank = float.NegativeInfinity;
             var weakestRank = float.PositiveInfinity;
             var replaceSlot = 0;
@@ -698,20 +827,28 @@ namespace RuinRunner
             {
                 var rank = OwnedWeaponRank(game.Inventory.QuickSlots[i].Item);
                 bestRank = Mathf.Max(bestRank, rank);
-                if (rank < weakestRank) { weakestRank = rank; replaceSlot = i; }
+                if (rank < weakestRank)
+                {
+                    weakestRank = rank;
+                    replaceSlot = i;
+                }
             }
             var cell = -1;
             for (var i = 0; i < game.Inventory.UnlockedCapacity; i++)
             {
                 var entry = game.Inventory.GetCell(i);
-                if (entry == null || entry.Kind != InventoryEntryKind.Weapon) continue;
+                if (entry == null || entry.Kind != InventoryEntryKind.Weapon)
+                    continue;
                 var rank = OwnedWeaponRank(game.Inventory.OwnedWeapons[entry.ItemIndex]);
-                if (rank <= bestRank) continue;
-                bestRank = rank; cell = i;
+                if (rank <= bestRank)
+                    continue;
+                bestRank = rank;
+                cell = i;
             }
             if (cell < 0)
             {
-                if (!game.IsInventoryOpen) return false;
+                if (!game.IsInventoryOpen)
+                    return false;
                 StageValidationInput.ReleaseAll();
                 Tap(GameAction.Inventory);
                 return true;
@@ -719,13 +856,24 @@ namespace RuinRunner
             StageValidationInput.ReleaseAll();
             attackHeld = false;
             currentIntent = "equip stored weapon through inventory keys";
-            if (!game.IsInventoryOpen) { Tap(GameAction.Inventory); demoKeyAt = Time.unscaledTime + DemoMenuSeconds; return true; }
+            if (!game.IsInventoryOpen)
+            {
+                Tap(GameAction.Inventory);
+                demoKeyAt = Time.unscaledTime + DemoMenuSeconds;
+                return true;
+            }
             var focus = game.InventoryFocusCell;
-            if (game.InventoryFocusQuickSlot >= 0) { Tap(GameAction.MoveDown); return true; }
+            if (game.InventoryFocusQuickSlot >= 0)
+            {
+                Tap(GameAction.MoveDown);
+                return true;
+            }
             var dx = InventorySystem.BagColumn(cell) - InventorySystem.BagColumn(focus);
             var dy = InventorySystem.BagRow(cell) - InventorySystem.BagRow(focus);
-            if (dx != 0) Tap(dx < 0 ? GameAction.MoveLeft : GameAction.MoveRight);
-            else if (dy != 0) Tap(dy < 0 ? GameAction.MoveUp : GameAction.MoveDown);
+            if (dx != 0)
+                Tap(dx < 0 ? GameAction.MoveLeft : GameAction.MoveRight);
+            else if (dy != 0)
+                Tap(dy < 0 ? GameAction.MoveUp : GameAction.MoveDown);
             else
             {
                 Debug.Log("[Stage E2E] Inventory input equip cell=" + cell + " slot=" + (replaceSlot + 1));
@@ -739,28 +887,35 @@ namespace RuinRunner
             // Read the warnings visible to the player, including an enemy other
             // than the current attack target. Do not inspect future actions.
             var camera = Camera.main;
-            if (camera == null) return Vector2.zero;
+            if (camera == null)
+                return Vector2.zero;
             var closestThreat = float.PositiveInfinity;
             var escape = Vector2.zero;
             foreach (var enemy in RuntimeSceneObjects.FindAll<EnemyController>())
             {
-                if (enemy.IsDead || !enemy.IsActing || enemy.AttackVisualPhase >= 2) continue;
+                if (enemy.IsDead || !enemy.IsActing || enemy.AttackVisualPhase >= 2)
+                    continue;
                 var viewport = camera.WorldToViewportPoint(enemy.transform.position);
-                if (viewport.z < 0f || viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f) continue;
+                if (viewport.z < 0f || viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f)
+                    continue;
                 var delta = (Vector2)enemy.transform.position - position;
                 var distance = delta.magnitude;
                 var reach = enemy.IsBoss ? 6f : enemy.Type == EnemyType.Shooter ? 7f :
                     enemy.Type == EnemyType.Charger || enemy.Type == EnemyType.Leaper ? 6f :
                     enemy.Type == EnemyType.Grunt ? 2.6f : 0f;
                 if (reach <= 0f || distance >= reach || distance < .001f ||
-                    !StageNavigation.HasCombatLane(position, enemy.transform.position, .2f)) continue;
+                    !StageNavigation.HasCombatLane(position, enemy.transform.position, .2f))
+                    continue;
                 var threat = distance / reach;
-                if (threat >= closestThreat) continue;
+                if (threat >= closestThreat)
+                    continue;
                 var direction = delta / distance;
                 var dodge = enemy.Type == EnemyType.Grunt || enemy.IsBoss && distance < 3.4f
                     ? -direction : new Vector2(-direction.y, direction.x);
-                if (Physics2D.CircleCast(position, .35f, dodge, 1.1f, 1 << GameLayers.Ground)) dodge = -dodge;
-                if (Physics2D.CircleCast(position, .35f, dodge, .65f, 1 << GameLayers.Ground)) continue;
+                if (Physics2D.CircleCast(position, .35f, dodge, 1.1f, 1 << GameLayers.Ground))
+                    dodge = -dodge;
+                if (Physics2D.CircleCast(position, .35f, dodge, .65f, 1 << GameLayers.Ground))
+                    continue;
                 closestThreat = threat;
                 escape = dodge;
             }
@@ -769,68 +924,108 @@ namespace RuinRunner
 
         private Vector2 HazardEscape(Vector2 position)
         {
-            var hazards=RuntimeSceneObjects.FindAll<ArenaHazard>();
-            var unsafeHere=false;
-            foreach(var hazard in hazards)if(hazard.Contains(position)){unsafeHere=true;break;}
-            if(!unsafeHere)return Vector2.zero;
-            var best=float.PositiveInfinity;var direction=Vector2.zero;
-            for(var ring=1;ring<=5;ring++)for(var i=0;i<16;i++)
-            {
-                var angle=i*Mathf.PI/8;var candidateDirection=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
-                var candidate=position+candidateDirection*ring*.7f;var safe=true;
-                foreach(var hazard in hazards)if(hazard.Contains(candidate)){safe=false;break;}
-                if(!safe || Physics2D.CircleCast(position,.35f,candidateDirection,ring*.7f,1<<GameLayers.Ground))continue;
-                var distance=Vector2.SqrMagnitude(candidate-position);
-                if(distance>=best)continue;
-                best=distance;direction=candidateDirection;
-            }
+            var hazards = RuntimeSceneObjects.FindAll<ArenaHazard>();
+            var unsafeHere = false;
+            foreach (var hazard in hazards)
+                if (hazard.Contains(position))
+                {
+                    unsafeHere = true;
+                    break;
+                }
+            if (!unsafeHere)
+                return Vector2.zero;
+            var best = float.PositiveInfinity;
+            var direction = Vector2.zero;
+            for (var ring = 1; ring <= 5; ring++)
+                for (var i = 0; i < 16; i++)
+                {
+                    var angle = i * Mathf.PI / 8;
+                    var candidateDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    var candidate = position + candidateDirection * ring * .7f;
+                    var safe = true;
+                    foreach (var hazard in hazards)
+                        if (hazard.Contains(candidate))
+                        {
+                            safe = false;
+                            break;
+                        }
+                    if (!safe || Physics2D.CircleCast(position, .35f, candidateDirection, ring * .7f, 1 << GameLayers.Ground))
+                        continue;
+                    var distance = Vector2.SqrMagnitude(candidate - position);
+                    if (distance >= best)
+                        continue;
+                    best = distance;
+                    direction = candidateDirection;
+                }
             return direction;
         }
 
         private Vector2 ProjectileEscape(Vector2 position)
         {
-            foreach(var projectile in RuntimeSceneObjects.FindAll<EnemyProjectile>())
+            foreach (var projectile in RuntimeSceneObjects.FindAll<EnemyProjectile>())
             {
-                var delta=position-(Vector2)projectile.transform.position;
-                var forward=Vector2.Dot(delta,projectile.TravelDirection);
-                var side=new Vector2(-projectile.TravelDirection.y,projectile.TravelDirection.x);
-                var lateral=Vector2.Dot(delta,side);
-                if(forward<0 || forward>2.8f || Mathf.Abs(lateral)>.65f)continue;
-                var dodge=side*(lateral>=0?1:-1);
-                if(Physics2D.CircleCast(position,.35f,dodge,1.3f,1<<GameLayers.Ground))dodge=-dodge;
-                if(!Physics2D.CircleCast(position,.35f,dodge,.65f,1<<GameLayers.Ground))return dodge;
+                var delta = position - (Vector2)projectile.transform.position;
+                var forward = Vector2.Dot(delta, projectile.TravelDirection);
+                var side = new Vector2(-projectile.TravelDirection.y, projectile.TravelDirection.x);
+                var lateral = Vector2.Dot(delta, side);
+                if (forward < 0 || forward > 2.8f || Mathf.Abs(lateral) > .65f)
+                    continue;
+                var dodge = side * (lateral >= 0 ? 1 : -1);
+                if (Physics2D.CircleCast(position, .35f, dodge, 1.3f, 1 << GameLayers.Ground))
+                    dodge = -dodge;
+                if (!Physics2D.CircleCast(position, .35f, dodge, .65f, 1 << GameLayers.Ground))
+                    return dodge;
             }
             return Vector2.zero;
         }
 
         private int SelectUpgrade()
         {
-            var best=0;var score=float.NegativeInfinity;
-            for(var i=0;i<game.CurrentAccessoryChoices.Length;i++)
+            var best = 0;
+            var score = float.NegativeInfinity;
+            for (var i = 0; i < game.CurrentAccessoryChoices.Length; i++)
             {
-                var item=game.CurrentAccessoryChoices[i];
-                var value=AccessoryRank(item);
-                if(value>score){score=value;best=i;}
+                var item = game.CurrentAccessoryChoices[i];
+                var value = AccessoryRank(item);
+                if (value > score)
+                {
+                    score = value;
+                    best = i;
+                }
             }
-            Debug.Log("[Stage E2E] CHOICE stage=" + (game.CurrentStageIndex+1) + " id=" + game.CurrentAccessoryChoices[best].Id + " build=" + (preferMobility ? "mobility" : preferSkills ? "skill" : preferRanged ? "ranged" : "melee"));
+            Debug.Log("[Stage E2E] CHOICE stage=" + (game.CurrentStageIndex + 1) + " id=" + game.CurrentAccessoryChoices[best].Id + " build=" + (preferMobility ? "mobility" : preferSkills ? "skill" : preferRanged ? "ranged" : "melee"));
             return best;
         }
 
         private float AccessoryRank(AccessoryDefinition item)
         {
             float value = (int)item.Rarity * 3;
-            if (preferMobility && (item.Id=="rush_spur"||item.Id=="storm_feather"||item.Id=="trail_spindle")) value += 50;
-            else if (preferSkills && (item.SetType == ItemSetType.Arcanist || item.Id == "arcane_lens")) value += 45;
-            else if (preferRanged && (item.SetType == ItemSetType.Storm || item.Id == "steady_locket" || item.Id == "powder_satchel")) value += 45;
-            else if (!preferSkills && !preferRanged && (item.SetType == ItemSetType.BloodMoon || item.SetType == ItemSetType.Guardian)) value += 40;
-            if (item.Id == "vampire_fang") value += 16;
-            if (item.Id == "ruby_heart" && game.Player.Health < game.Player.MaxHealth * .5f) value += 45;
+            if (preferMobility && (item.Id == "rush_spur" || item.Id == "storm_feather" || item.Id == "trail_spindle"))
+                value += 50;
+            else if (preferSkills && (item.SetType == ItemSetType.Arcanist || item.Id == "arcane_lens"))
+                value += 45;
+            else if (preferRanged && (item.SetType == ItemSetType.Storm || item.Id == "steady_locket" || item.Id == "powder_satchel"))
+                value += 45;
+            else if (!preferSkills && !preferRanged && (item.SetType == ItemSetType.BloodMoon || item.SetType == ItemSetType.Guardian))
+                value += 40;
+            if (item.Id == "vampire_fang")
+                value += 16;
+            if (item.Id == "ruby_heart" && game.Player.Health < game.Player.MaxHealth * .5f)
+                value += 45;
             int copies = 0;
-            foreach (var owned in game.Inventory.OwnedAccessories) if (owned.Definition.Id == item.Id) copies++;
-            if(backendJourney&&copies==0)
-                foreach(var recipe in game.ExchangeRecipes)
-                    for(int i=0;i<recipe.InputIds.Count;i++)if(recipe.InputIds[i]==item.Id)
-                        foreach(var owned in game.Inventory.OwnedAccessories)if(owned.Definition.Id==recipe.InputIds[1-i]){value+=80;break;}
+            foreach (var owned in game.Inventory.OwnedAccessories)
+                if (owned.Definition.Id == item.Id)
+                    copies++;
+            if (backendJourney && copies == 0)
+                foreach (var recipe in game.ExchangeRecipes)
+                    for (int i = 0; i < recipe.InputIds.Count; i++)
+                        if (recipe.InputIds[i] == item.Id)
+                            foreach (var owned in game.Inventory.OwnedAccessories)
+                                if (owned.Definition.Id == recipe.InputIds[1 - i])
+                                {
+                                    value += 80;
+                                    break;
+                                }
             return value - (copies > 0 ? 12 : 0) - (copies >= 3 ? 60 : 0);
         }
 
@@ -839,14 +1034,18 @@ namespace RuinRunner
         private bool BeginEquipmentMaintenance()
         {
             int roomKey = game.CurrentStageIndex * 100 + game.CurrentRoom;
-            if (maintenanceRoom == roomKey || game.EnemiesAlive != 0 || game.IsEncounterTransitioning) return false;
+            if (maintenanceRoom == roomKey || game.EnemiesAlive != 0 || game.IsEncounterTransitioning)
+                return false;
             maintenanceRoom = roomKey;
             OwnedWeapon spare = null;
             foreach (var item in game.Inventory.OwnedWeapons)
-                if (item.UpgradeLevel == 0 && (spare == null || WeaponRank(item.Weapon) < WeaponRank(spare.Weapon))) spare = item;
+                if (item.UpgradeLevel == 0 && (spare == null || WeaponRank(item.Weapon) < WeaponRank(spare.Weapon)))
+                    spare = item;
             var upgrade = FindMaintenanceUpgrade();
-            if (spare == null && upgrade == null) return false;
-            StageValidationInput.ReleaseAll(); attackHeld = false;
+            if (spare == null && upgrade == null)
+                return false;
+            StageValidationInput.ReleaseAll();
+            attackHeld = false;
             maintenanceIdentity = spare?.Identity ?? upgrade.Identity;
             maintenancePhase = spare == null ? 4 : 1;
             maintenanceActive = true;
@@ -858,42 +1057,65 @@ namespace RuinRunner
 
         private OwnedEquipment FindMaintenanceUpgrade()
         {
-            OwnedEquipment best = null; float rank = float.NegativeInfinity;
+            OwnedEquipment best = null;
+            float rank = float.NegativeInfinity;
             foreach (var slot in game.Inventory.QuickSlots)
             {
                 var item = slot.Item;
-                if (item == null || item.UpgradeLevel >= 3 || item.UpgradeCost > game.Inventory.UpgradeMaterials) continue;
+                if (item == null || item.UpgradeLevel >= 3 || item.UpgradeCost > game.Inventory.UpgradeMaterials)
+                    continue;
                 float score = WeaponRank(item.Weapon) + 2000;
-                if (score > rank) { rank = score; best = item; }
+                if (score > rank)
+                {
+                    rank = score;
+                    best = item;
+                }
             }
             foreach (var item in game.Inventory.OwnedAccessories)
             {
-                if (item.UpgradeLevel >= 3 || item.UpgradeCost > game.Inventory.UpgradeMaterials) continue;
+                if (item.UpgradeLevel >= 3 || item.UpgradeCost > game.Inventory.UpgradeMaterials)
+                    continue;
                 float score = AccessoryRank(item.Definition);
-                if (score > rank) { rank = score; best = item; }
+                if (score > rank)
+                {
+                    rank = score;
+                    best = item;
+                }
             }
             return best;
         }
 
         private bool FocusOwnedWithKeys(long identity)
         {
-            if (game.SelectedEquipment?.Identity == identity) return true;
+            if (game.SelectedEquipment?.Identity == identity)
+                return true;
             for (int slot = 0; slot < game.Inventory.QuickSlots.Count; slot++)
             {
-                if (game.Inventory.QuickSlots[slot].Item?.Identity != identity) continue;
-                if (game.InventoryFocusQuickSlot < 0) Tap(GameAction.MoveUp);
-                else Tap(slot < game.InventoryFocusQuickSlot ? GameAction.MoveLeft : GameAction.MoveRight);
+                if (game.Inventory.QuickSlots[slot].Item?.Identity != identity)
+                    continue;
+                if (game.InventoryFocusQuickSlot < 0)
+                    Tap(GameAction.MoveUp);
+                else
+                    Tap(slot < game.InventoryFocusQuickSlot ? GameAction.MoveLeft : GameAction.MoveRight);
                 return false;
             }
-            if (game.InventoryFocusQuickSlot >= 0) { Tap(GameAction.MoveDown); return false; }
+            if (game.InventoryFocusQuickSlot >= 0)
+            {
+                Tap(GameAction.MoveDown);
+                return false;
+            }
             for (int cell = 0; cell < game.Inventory.UnlockedCapacity; cell++)
             {
-                if (game.Inventory.GetOwnedCell(cell)?.Identity != identity) continue;
+                if (game.Inventory.GetOwnedCell(cell)?.Identity != identity)
+                    continue;
                 int dx = InventorySystem.BagColumn(cell) - InventorySystem.BagColumn(game.InventoryFocusCell);
                 int dy = InventorySystem.BagRow(cell) - InventorySystem.BagRow(game.InventoryFocusCell);
-                if (dx != 0) Tap(dx < 0 ? GameAction.MoveLeft : GameAction.MoveRight);
-                else if (dy != 0) Tap(dy < 0 ? GameAction.MoveUp : GameAction.MoveDown);
-                else Tap(GameAction.MoveUp); // Re-enter a cell after its previous copy was removed.
+                if (dx != 0)
+                    Tap(dx < 0 ? GameAction.MoveLeft : GameAction.MoveRight);
+                else if (dy != 0)
+                    Tap(dy < 0 ? GameAction.MoveUp : GameAction.MoveDown);
+                else
+                    Tap(GameAction.MoveUp); // Re-enter a cell after its previous copy was removed.
                 return false;
             }
             return false;
@@ -901,47 +1123,93 @@ namespace RuinRunner
 
         private void DriveEquipmentMaintenance()
         {
-            StageValidationInput.ReleaseAll(); attackHeld = false;
-            if (Time.unscaledTime > maintenanceDeadline) { Finish(false, "inventory keyboard maintenance stalled phase=" + maintenancePhase); return; }
-            if (!game.IsInventoryOpen) { Tap(GameAction.Inventory); return; }
-            if (!game.EquipmentOperationReady) return;
+            StageValidationInput.ReleaseAll();
+            attackHeld = false;
+            if (Time.unscaledTime > maintenanceDeadline)
+            {
+                Finish(false, "inventory keyboard maintenance stalled phase=" + maintenancePhase);
+                return;
+            }
+            if (!game.IsInventoryOpen)
+            {
+                Tap(GameAction.Inventory);
+                return;
+            }
+            if (!game.EquipmentOperationReady)
+                return;
             var item = game.Inventory.FindOwned(maintenanceIdentity);
             switch (maintenancePhase)
             {
                 case 1:
-                    if (!FocusOwnedWithKeys(maintenanceIdentity)) return;
-                    maintenanceMaterials = game.Inventory.UpgradeMaterials; maintenanceDelta = item.DisassemblyYield;
-                    Tap(GameAction.Dismantle); maintenancePhase = 2; break;
+                    if (!FocusOwnedWithKeys(maintenanceIdentity))
+                        return;
+                    maintenanceMaterials = game.Inventory.UpgradeMaterials;
+                    maintenanceDelta = item.DisassemblyYield;
+                    Tap(GameAction.Dismantle);
+                    maintenancePhase = 2;
+                    break;
                 case 2:
-                    if (!game.HasDisassemblyConfirmation) { Finish(false, "disassembly request did not show confirmation"); return; }
+                    if (!game.HasDisassemblyConfirmation)
+                    {
+                        Finish(false, "disassembly request did not show confirmation");
+                        return;
+                    }
                     // Loot pickup can still be inside the pilot's interaction interval.
                     // Stay on confirmation until an E press was actually issued.
-                    if (!Tap(GameAction.Interact)) return;
-                    CaptureGrowth("disassembly-request"); maintenancePhase = 3; break;
+                    if (!Tap(GameAction.Interact))
+                        return;
+                    CaptureGrowth("disassembly-request");
+                    maintenancePhase = 3;
+                    break;
                 case 3:
-                    if (item != null || game.Inventory.UpgradeMaterials != maintenanceMaterials + maintenanceDelta) { Finish(false, "disassembly result/material mismatch identity=" + maintenanceIdentity + " remains=" + (item != null) + " expected=" + (maintenanceMaterials + maintenanceDelta) + " actual=" + game.Inventory.UpgradeMaterials); return; }
-                    disassemblyCount++; if (game.CurrentStageIndex == 0) firstStageDisassemblies++;
-                    Debug.Log("[Stage E2E] DISASSEMBLED stage=" + (game.CurrentStageIndex+1) + " identity=" + maintenanceIdentity + " materials=" + maintenanceMaterials + "->" + game.Inventory.UpgradeMaterials);
+                    if (item != null || game.Inventory.UpgradeMaterials != maintenanceMaterials + maintenanceDelta)
+                    {
+                        Finish(false, "disassembly result/material mismatch identity=" + maintenanceIdentity + " remains=" + (item != null) + " expected=" + (maintenanceMaterials + maintenanceDelta) + " actual=" + game.Inventory.UpgradeMaterials);
+                        return;
+                    }
+                    disassemblyCount++;
+                    if (game.CurrentStageIndex == 0)
+                        firstStageDisassemblies++;
+                    Debug.Log("[Stage E2E] DISASSEMBLED stage=" + (game.CurrentStageIndex + 1) + " identity=" + maintenanceIdentity + " materials=" + maintenanceMaterials + "->" + game.Inventory.UpgradeMaterials);
                     CaptureGrowth("disassembly-complete");
-                    item = FindMaintenanceUpgrade(); maintenanceIdentity = item?.Identity ?? 0; maintenancePhase = item == null ? 6 : 4; break;
+                    item = FindMaintenanceUpgrade();
+                    maintenanceIdentity = item?.Identity ?? 0;
+                    maintenancePhase = item == null ? 6 : 4;
+                    break;
                 case 4:
-                    if (!FocusOwnedWithKeys(maintenanceIdentity)) return;
-                    maintenanceLevel = item.UpgradeLevel; maintenanceMaterials = game.Inventory.UpgradeMaterials; maintenanceDelta = item.UpgradeCost;
-                    Tap(GameAction.Reload); maintenancePhase = 5; break;
+                    if (!FocusOwnedWithKeys(maintenanceIdentity))
+                        return;
+                    maintenanceLevel = item.UpgradeLevel;
+                    maintenanceMaterials = game.Inventory.UpgradeMaterials;
+                    maintenanceDelta = item.UpgradeCost;
+                    Tap(GameAction.Reload);
+                    maintenancePhase = 5;
+                    break;
                 case 5:
-                    if (item == null || item.UpgradeLevel != maintenanceLevel + 1 || game.Inventory.UpgradeMaterials != maintenanceMaterials - maintenanceDelta) { Finish(false, "upgrade result/material mismatch"); return; }
-                    upgradeCount++; if (game.CurrentStageIndex == 0) firstStageUpgrades++;
-                    Debug.Log("[Stage E2E] UPGRADED stage=" + (game.CurrentStageIndex+1) + " identity=" + maintenanceIdentity + " item=" + item.DisplayName + " materials=" + maintenanceMaterials + "->" + game.Inventory.UpgradeMaterials);
-                    CaptureGrowth("upgrade-complete"); maintenancePhase = 6; break;
+                    if (item == null || item.UpgradeLevel != maintenanceLevel + 1 || game.Inventory.UpgradeMaterials != maintenanceMaterials - maintenanceDelta)
+                    {
+                        Finish(false, "upgrade result/material mismatch");
+                        return;
+                    }
+                    upgradeCount++;
+                    if (game.CurrentStageIndex == 0)
+                        firstStageUpgrades++;
+                    Debug.Log("[Stage E2E] UPGRADED stage=" + (game.CurrentStageIndex + 1) + " identity=" + maintenanceIdentity + " item=" + item.DisplayName + " materials=" + maintenanceMaterials + "->" + game.Inventory.UpgradeMaterials);
+                    CaptureGrowth("upgrade-complete");
+                    maintenancePhase = 6;
+                    break;
                 default:
-                    Tap(GameAction.Inventory); maintenanceActive = false; break;
+                    Tap(GameAction.Inventory);
+                    maintenanceActive = false;
+                    break;
             }
         }
 
         private void CaptureGrowth(string label)
         {
-            if (!captureScreenshots || string.IsNullOrEmpty(captureDirectory) || Application.isBatchMode) return;
-            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(captureDirectory, "growth-stage" + (game.CurrentStageIndex+1) + "-room" + (game.CurrentRoom+1) + "-" + label + ".png"));
+            if (!captureScreenshots || string.IsNullOrEmpty(captureDirectory) || Application.isBatchMode)
+                return;
+            ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(captureDirectory, "growth-stage" + (game.CurrentStageIndex + 1) + "-room" + (game.CurrentRoom + 1) + "-" + label + ".png"));
         }
 
         private static T FindNearest<T>(Vector2 origin, float maxDistance = float.PositiveInfinity) where T : Component
@@ -951,9 +1219,11 @@ namespace RuinRunner
             var best = maxDistance * maxDistance;
             foreach (var candidate in candidates)
             {
-                if (candidate == null || !candidate.gameObject.activeInHierarchy) continue;
+                if (candidate == null || !candidate.gameObject.activeInHierarchy)
+                    continue;
                 var distance = ((Vector2)candidate.transform.position - origin).sqrMagnitude;
-                if (distance >= best) continue;
+                if (distance >= best)
+                    continue;
                 best = distance;
                 nearest = candidate;
             }
@@ -978,7 +1248,8 @@ namespace RuinRunner
                 : captureIndex == 1
                     ? motion == PlayerMotionState.Attack
                     : motion == PlayerMotionState.Attack && game.Player.ActiveComboAnimationStep >= 1;
-            if (!validPose) return;
+            if (!validPose)
+                return;
 
             captureIndex++;
             var path = System.IO.Path.Combine(captureDirectory, "animation-validation-" + captureIndex.ToString("00") + ".png");
@@ -1006,18 +1277,20 @@ namespace RuinRunner
 
         private void Finish(bool passed, string reason)
         {
-            passed=ValidateAdversityCompletion(passed,reason);
+            passed = ValidateAdversityCompletion(passed, reason);
             completionLogged = true;
             ReleaseMovement();
             StageValidationInput.ReleaseAll();
             var elapsed = Time.unscaledTime - startedAt;
-            if(backendJourney)WriteJourneyEvidence(passed,reason);
-            else Debug.Log("[Stage E2E] LEGACY FIXTURE upgrades=" + upgradeCount + " disassemblies=" + disassemblyCount);
+            if (backendJourney)
+                WriteJourneyEvidence(passed, reason);
+            else
+                Debug.Log("[Stage E2E] LEGACY FIXTURE upgrades=" + upgradeCount + " disassemblies=" + disassemblyCount);
             Debug.Log((passed ? "[Stage E2E] PASS" : "[Stage E2E] FAIL") +
                       " — " + reason + ", elapsed=" + elapsed.ToString("0.0") + "s, rooms=" +
                       (game == null ? 0 : game.CurrentRoom + 1) + ", kills=" +
                       (game == null || game.Stats == null ? 0 : game.Stats.EnemiesDefeated));
-            if (!backendJourney&&passed && System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--validation-lifecycle") >= 0)
+            if (!backendJourney && passed && System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--validation-lifecycle") >= 0)
             {
                 game.gameObject.AddComponent<SaveLifecycleValidation>().Initialize(game, false);
                 return;

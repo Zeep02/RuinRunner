@@ -117,7 +117,11 @@ namespace RuinRunner
             }
         }
 
-        static void RecoveryRequire(bool value) { if (!value) throw new InvalidOperationException("Recovery evidence mismatch."); }
+        static void RecoveryRequire(bool value)
+        {
+            if (!value)
+                throw new InvalidOperationException("Recovery evidence mismatch.");
+        }
         static string RecoveryBounded(string path, string root)
         {
             var full = Path.GetFullPath(path);
@@ -133,7 +137,8 @@ namespace RuinRunner
         {
             recoveryTicket = authorizedRecoveryTicket;
             authorizedRecoveryTicket = null;
-            if (recoveryTicket == null) return false;
+            if (recoveryTicket == null)
+                return false;
             recoveryStore = new BackendPrivateStore(Path.Combine(game.SaveSlots.SaveDirectory, "BackendRecovery"));
             recoveryExpectedLegacy = recoveryTicket.Value<long>("beforeLegacy");
             recoveryExpectedVictories = recoveryTicket.Value<int>("beforeCampaignVictories");
@@ -144,56 +149,93 @@ namespace RuinRunner
 
         void DriveRecoveryJourney()
         {
-            if (Time.unscaledTime - startedAt > 180f) { FinishRecovery(false, "recovery timeout at step " + recoveryStep); return; }
+            if (Time.unscaledTime - startedAt > 180f)
+            {
+                FinishRecovery(false, "recovery timeout at step " + recoveryStep);
+                return;
+            }
             if (game.SessionOperationPending || game.BackendBusy || game.EconomyOperationPending || Time.unscaledTime < recoveryActionAt)
-            { StageValidationInput.ReleaseAll(); return; }
+            {
+                StageValidationInput.ReleaseAll();
+                return;
+            }
             if (game.BackendHasPending || recoveryStep > 0 && !game.BackendReady)
-            { StageValidationInput.ReleaseAll(); game.RetrySessionConnection(); recoveryActionAt = Time.unscaledTime + 3; return; }
+            {
+                StageValidationInput.ReleaseAll();
+                game.RetrySessionConnection();
+                recoveryActionAt = Time.unscaledTime + 3;
+                return;
+            }
             try
             {
                 switch (recoveryStep)
                 {
                     case 0:
-                        game.OpenSaveSlots(); RecoveryNext(1); break;
+                        game.OpenSaveSlots();
+                        RecoveryNext(1);
+                        break;
                     case 1:
-                        game.StartSlot(1); RecoveryNext(2); break;
+                        game.StartSlot(1);
+                        RecoveryNext(2);
+                        break;
                     case 2:
                         RecoveryRequire(game.IsTown && game.BackendProfile?.profileId == recoveryTicket.Value<string>("profileId"));
                         VerifyRecoveryReceipt();
                         RecoveryRequire(RecoveryTownInventoryOnly());
                         recoveryChecks.Add("same server profile entered town; old expedition item/heal state was not injected");
                         RecoveryCapture("reconnected-town");
-                        RecoveryNext(recoveryTicket.Value<string>("action") == "buy" ? 3 : 5); break;
+                        RecoveryNext(recoveryTicket.Value<string>("action") == "buy" ? 3 : 5);
+                        break;
                     case 3:
-                        if (!RecoveryWalkToGate()) break;
+                        if (!RecoveryWalkToGate())
+                            break;
                         game.ResolveInterruptedExpedition();
                         recoveryChecks.Add("walked to departure gate and invoked the production interrupted-expedition cleanup button");
-                        RecoveryNext(4); break;
+                        RecoveryNext(4);
+                        break;
                     case 4:
                         RecoveryRequire(!game.BackendHasUnfinishedRun && game.BackendRun?.runId == recoveryTicket.Value<string>("runId") && game.BackendRun.status == "abandoned");
                         VerifyRecoveryTotals();
                         RecoveryRequire(RecoveryTownInventoryOnly());
                         recoveryChecks.Add("abandoned cleanup confirmed once; legacy unchanged; no pending work blocks next departure");
-                        RecoveryCapture("cleanup-confirmed"); RecoveryNext(5); break;
+                        RecoveryCapture("cleanup-confirmed");
+                        RecoveryNext(5);
+                        break;
                     case 5:
-                        game.CloseService(); game.ReturnToMainMenu(); RecoveryNext(6); break;
+                        game.CloseService();
+                        game.ReturnToMainMenu();
+                        RecoveryNext(6);
+                        break;
                     case 6:
-                        game.OpenSaveSlots(); RecoveryNext(7); break;
+                        game.OpenSaveSlots();
+                        RecoveryNext(7);
+                        break;
                     case 7:
-                        game.StartSlot(1); RecoveryNext(8); break;
+                        game.StartSlot(1);
+                        RecoveryNext(8);
+                        break;
                     case 8:
                         RecoveryRequire(game.IsTown && !game.BackendHasUnfinishedRun && !game.BackendHasPending && RecoveryTownInventoryOnly());
                         VerifyRecoveryTotals();
                         recoveryChecks.Add("second authoritative profile selection kept the same legacy/run/victory totals and no active prior run");
                         VerifyRecoveryProxy();
                         RecoveryCapture("verified-town");
-                        FinishRecovery(true, "pending UUID replayed and authoritative town state confirmed without combat resume"); break;
+                        FinishRecovery(true, "pending UUID replayed and authoritative town state confirmed without combat resume");
+                        break;
                 }
             }
-            catch (Exception e) when (!(e is OutOfMemoryException)) { FinishRecovery(false, "recovery assertion failed at step " + recoveryStep); }
+            catch (Exception e) when (!(e is OutOfMemoryException))
+            {
+                FinishRecovery(false, "recovery assertion failed at step " + recoveryStep);
+            }
         }
 
-        void RecoveryNext(int next) { recoveryStep = next; recoveryActionAt = Time.unscaledTime + .5f; StageValidationInput.ReleaseAll(); }
+        void RecoveryNext(int next)
+        {
+            recoveryStep = next;
+            recoveryActionAt = Time.unscaledTime + .5f;
+            StageValidationInput.ReleaseAll();
+        }
         bool RecoveryTownInventoryOnly()
         {
             var items = game.Inventory.AllEquipment().ToArray();
@@ -239,12 +281,21 @@ namespace RuinRunner
         bool RecoveryWalkToGate()
         {
             RecoveryRequire(game.IsTown && game.Player != null);
-            if (game.OpenService?.Kind == FieldServiceKind.Expedition) { ReleaseMovement(); return true; }
+            if (game.OpenService?.Kind == FieldServiceKind.Expedition)
+            {
+                ReleaseMovement();
+                return true;
+            }
             var gate = RuntimeSceneObjects.FindAll<FieldServiceObject>().FirstOrDefault(x => x.Kind == FieldServiceKind.Expedition);
             RecoveryRequire(gate != null);
             Vector2 delta = (Vector2)gate.transform.position - (Vector2)game.Player.transform.position;
-            if (delta.magnitude > 1.4f) SetMove(delta.normalized);
-            else { ReleaseMovement(); Tap(GameAction.Interact); }
+            if (delta.magnitude > 1.4f)
+                SetMove(delta.normalized);
+            else
+            {
+                ReleaseMovement();
+                Tap(GameAction.Interact);
+            }
             return false;
         }
         void VerifyRecoveryProxy()
@@ -262,21 +313,35 @@ namespace RuinRunner
         }
         void FinishRecovery(bool passed, string reason)
         {
-            completionLogged = true; ReleaseMovement(); StageValidationInput.ReleaseAll();
-            var report = new JObject {
-                ["schemaVersion"] = 1, ["recoveryPassed"] = passed, ["normalCampaign"] = false,
-                ["manualUiInput"] = false, ["cheatsOrSuppliedState"] = false, ["reason"] = reason,
-                ["action"] = recoveryTicket.Value<string>("action"), ["operationId"] = recoveryTicket.Value<string>("operationId"),
-                ["runId"] = recoveryTicket.Value<string>("runId"), ["profileId"] = recoveryTicket.Value<string>("profileId"),
-                ["elapsedSeconds"] = Time.unscaledTime - startedAt, ["checks"] = recoveryChecks,
-                ["legacy"] = game.BackendProfile?.legacyShards, ["totalRuns"] = game.BackendProfile?.state?.totalRuns,
+            completionLogged = true;
+            ReleaseMovement();
+            StageValidationInput.ReleaseAll();
+            var report = new JObject
+            {
+                ["schemaVersion"] = 1,
+                ["recoveryPassed"] = passed,
+                ["normalCampaign"] = false,
+                ["manualUiInput"] = false,
+                ["cheatsOrSuppliedState"] = false,
+                ["reason"] = reason,
+                ["action"] = recoveryTicket.Value<string>("action"),
+                ["operationId"] = recoveryTicket.Value<string>("operationId"),
+                ["runId"] = recoveryTicket.Value<string>("runId"),
+                ["profileId"] = recoveryTicket.Value<string>("profileId"),
+                ["elapsedSeconds"] = Time.unscaledTime - startedAt,
+                ["checks"] = recoveryChecks,
+                ["legacy"] = game.BackendProfile?.legacyShards,
+                ["totalRuns"] = game.BackendProfile?.state?.totalRuns,
                 ["campaignVictories"] = game.BackendProfile?.state?.campaignVictories,
-                ["resultOverlayRestored"] = false, ["combatResumeAttempted"] = false,
+                ["resultOverlayRestored"] = false,
+                ["combatResumeAttempted"] = false,
                 ["confirmationSurface"] = "authoritative server profile selected into Town; previous result overlay is not restored"
             };
-            if (!string.IsNullOrWhiteSpace(captureDirectory)) File.WriteAllText(Path.Combine(captureDirectory, "recovery-report.json"), report.ToString(Formatting.Indented), new UTF8Encoding(false));
+            if (!string.IsNullOrWhiteSpace(captureDirectory))
+                File.WriteAllText(Path.Combine(captureDirectory, "recovery-report.json"), report.ToString(Formatting.Indented), new UTF8Encoding(false));
             Debug.Log((passed ? "[Recovery E2E] PASS " : "[Recovery E2E] FAIL ") + reason);
-            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--validation-quit") >= 0) Application.Quit(passed ? 0 : 2);
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "--validation-quit") >= 0)
+                Application.Quit(passed ? 0 : 2);
         }
     }
 }

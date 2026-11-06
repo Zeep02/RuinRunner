@@ -16,7 +16,8 @@ namespace RuinRunner
         {
             var arguments = Environment.GetCommandLineArgs();
             var at = Array.IndexOf(arguments, "--capture-frames");
-            if (at < 0 || at + 4 >= arguments.Length) return;
+            if (at < 0 || at + 4 >= arguments.Length)
+                return;
             var root = new GameObject("FrameSequenceCapture");
             DontDestroyOnLoad(root);
             var capture = root.AddComponent<FrameSequenceCapture>();
@@ -29,7 +30,8 @@ namespace RuinRunner
 
         void Update()
         {
-            if (left <= 0 || Time.unscaledTime < next) return;
+            if (left <= 0 || Time.unscaledTime < next)
+                return;
             next += every;
             left--;
             ScreenCapture.CaptureScreenshot(Path.Combine(folder, (index++).ToString("0000") + ".png"));

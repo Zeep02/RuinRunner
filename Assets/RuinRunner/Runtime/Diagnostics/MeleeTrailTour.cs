@@ -18,7 +18,8 @@ namespace RuinRunner
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Boot()
         {
-            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Argument) < 0) return;
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), Argument) < 0)
+                return;
             DontDestroyOnLoad(new GameObject("MeleeTrailTour").AddComponent<MeleeTrailTour>());
         }
 
@@ -68,7 +69,8 @@ namespace RuinRunner
                         var swing = MeleeComboFrames.Has(family, step) ? MeleeComboFrames.SwingSeconds(family, step, float.MaxValue) + SwingMargin : SwingSeconds;
                         for (var clock = 0f; clock < swing; clock += Time.deltaTime)
                         {
-                            if (frame % CaptureEveryFrames == 0) ScreenCapture.CaptureScreenshot(Path.Combine(folder, name + (frame / CaptureEveryFrames).ToString("D2") + ".png"));
+                            if (frame % CaptureEveryFrames == 0)
+                                ScreenCapture.CaptureScreenshot(Path.Combine(folder, name + (frame / CaptureEveryFrames).ToString("D2") + ".png"));
                             frame++;
                             yield return null;
                         }
@@ -112,11 +114,13 @@ namespace RuinRunner
                 {
                     contacts = player.MeleeContactsResolved;
                     Debug.Log("[Melee Trail Tour] live frame " + frame + " pose " + player.GetComponent<PlayerAnimationController>().PoseName + " time scale " + Time.timeScale.ToString("0.00") + " damage " + (health - (enemy == null ? 0f : enemy.Health)).ToString("0.0"));
-                    if (enemy != null) health = enemy.Health;
+                    if (enemy != null)
+                        health = enemy.Health;
                 }
             }
             StageValidationInput.SetHeld(GameAction.Attack, false);
-            if (enemy != null) Destroy(enemy.gameObject);
+            if (enemy != null)
+                Destroy(enemy.gameObject);
             yield return null;
         }
     }

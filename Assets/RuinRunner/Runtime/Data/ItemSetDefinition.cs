@@ -25,7 +25,7 @@ namespace RuinRunner
             SetType = setType;
             RequiredPieces = requiredPieces;
             Name = name;
-            Tuning = tuning ?? AccessoryTuning.Legacy(ItemSetCatalog.TuningId(setType,requiredPieces));
+            Tuning = tuning ?? AccessoryTuning.Legacy(ItemSetCatalog.TuningId(setType, requiredPieces));
             Description = Tuning.Format(description);
         }
     }
@@ -43,47 +43,69 @@ namespace RuinRunner
             new SetBonusDefinition(ItemSetType.Arcanist, 2, "마력 공명", "초당 마나 +1.5. 마나를 쓴 무기 스킬 3번마다 마나 1을 돌려받습니다."),
             new SetBonusDefinition(ItemSetType.Arcanist, 3, "대마도", "최대 마나 +30, 무기 스킬 피해 +15%. 마나를 쓴 무기 스킬 3번마다 마지막 비용의 30%(최대 4)를 돌려받고, 비전 렌즈의 빛이 적 3마리까지 맞힙니다.")
         };
-        public static SetBonusDefinition[] Bonuses { get; private set; }=(SetBonusDefinition[])legacyBonuses.Clone();
+        public static SetBonusDefinition[] Bonuses { get; private set; } = (SetBonusDefinition[])legacyBonuses.Clone();
         public static SetBonusDefinition[] Capture() => (SetBonusDefinition[])Bonuses.Clone();
         public static string ContentId(ItemSetType type)
         {
-            switch(type)
+            switch (type)
             {
-                case ItemSetType.BloodMoon:return "blood_moon";
-                case ItemSetType.Storm:return "storm";
-                case ItemSetType.Guardian:return "guardian";
-                case ItemSetType.Arcanist:return "arcanist";
-                default:throw new ArgumentException("Unknown item set");
+                case ItemSetType.BloodMoon:
+                    return "blood_moon";
+                case ItemSetType.Storm:
+                    return "storm";
+                case ItemSetType.Guardian:
+                    return "guardian";
+                case ItemSetType.Arcanist:
+                    return "arcanist";
+                default:
+                    throw new ArgumentException("Unknown item set");
             }
         }
-        public static string TuningId(ItemSetType type,int pieces)=>"set."+ContentId(type)+"."+pieces;
+        public static string TuningId(ItemSetType type, int pieces) => "set." + ContentId(type) + "." + pieces;
         internal static SetBonusDefinition[] Prepare(ContentCatalog catalog)
         {
-            if(catalog.accessoryTuningVersion==0)return (SetBonusDefinition[])legacyBonuses.Clone();
-            if(catalog.itemSets==null||catalog.itemSets.Length!=legacyBonuses.Length)throw new ArgumentException("Pinned item set catalog is incomplete");
-            var next=new SetBonusDefinition[legacyBonuses.Length];
-            for(int i=0;i<legacyBonuses.Length;i++)
+            if (catalog.accessoryTuningVersion == 0)
+                return (SetBonusDefinition[])legacyBonuses.Clone();
+            if (catalog.itemSets == null || catalog.itemSets.Length != legacyBonuses.Length)
+                throw new ArgumentException("Pinned item set catalog is incomplete");
+            var next = new SetBonusDefinition[legacyBonuses.Length];
+            for (int i = 0; i < legacyBonuses.Length; i++)
             {
-                var old=legacyBonuses[i]; CatalogItemSet selected=null;
-                foreach(var row in catalog.itemSets)if(row.id==ContentId(old.SetType)&&row.pieces==old.RequiredPieces)
-                {if(selected!=null)throw new ArgumentException("Duplicate item set tuning");selected=row;}
-                if(selected==null)throw new ArgumentException("Missing item set tuning");
-                var tuning=AccessoryTuning.Parse(TuningId(old.SetType,old.RequiredPieces),selected.stats,catalog.accessoryTuningVersion);
-                next[i]=new SetBonusDefinition(old.SetType,old.RequiredPieces,selected.name,selected.description,tuning);
+                var old = legacyBonuses[i];
+                CatalogItemSet selected = null;
+                foreach (var row in catalog.itemSets)
+                    if (row.id == ContentId(old.SetType) && row.pieces == old.RequiredPieces)
+                    {
+                        if (selected != null)
+                            throw new ArgumentException("Duplicate item set tuning");
+                        selected = row;
+                    }
+                if (selected == null)
+                    throw new ArgumentException("Missing item set tuning");
+                var tuning = AccessoryTuning.Parse(TuningId(old.SetType, old.RequiredPieces), selected.stats, catalog.accessoryTuningVersion);
+                next[i] = new SetBonusDefinition(old.SetType, old.RequiredPieces, selected.name, selected.description, tuning);
             }
             return next;
         }
-        internal static void Commit(SetBonusDefinition[] definitions) { Bonuses=definitions; }
+        internal static void Commit(SetBonusDefinition[] definitions)
+        {
+            Bonuses = definitions;
+        }
 
         public static string GetName(ItemSetType setType)
         {
             switch (setType)
             {
-                case ItemSetType.BloodMoon: return "핏빛 달";
-                case ItemSetType.Storm: return "폭풍";
-                case ItemSetType.Guardian: return "수호자";
-                case ItemSetType.Arcanist: return "대마법사";
-                default: return "세트 없음";
+                case ItemSetType.BloodMoon:
+                    return "핏빛 달";
+                case ItemSetType.Storm:
+                    return "폭풍";
+                case ItemSetType.Guardian:
+                    return "수호자";
+                case ItemSetType.Arcanist:
+                    return "대마법사";
+                default:
+                    return "세트 없음";
             }
         }
     }

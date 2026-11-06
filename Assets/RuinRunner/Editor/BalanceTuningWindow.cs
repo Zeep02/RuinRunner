@@ -17,7 +17,7 @@ namespace RuinRunner.EditorTools
         private bool showEnemies = true;
         private bool showWeapons = true;
 
-        [MenuItem("Prototype/Balance Tuning", priority = 3)]
+        [MenuItem("RuinRunner/Balance Tuning", priority = 3)]
         public static void Open()
         {
             GetWindow<BalanceTuningWindow>("Balance Tuning").minSize = new Vector2(560f, 620f);
@@ -105,7 +105,12 @@ namespace RuinRunner.EditorTools
                         EditorGUILayout.HelpBox("Scene에서 몬스터 선택: 청록=발밑 이동 충돌, 주황=피격 영역. 피격 영역은 벽 충돌 크기를 바꾸지 않습니다.", MessageType.None);
                         if (Application.isPlaying && GUILayout.Button("씬에서 " + enemy.type + " 선택"))
                             foreach (var actor in UnityEngine.Object.FindObjectsByType<EnemyController>(FindObjectsSortMode.None))
-                                if (actor.Type == enemy.type) { Selection.activeGameObject = actor.gameObject; SceneView.FrameLastActiveSceneView(); break; }
+                                if (actor.Type == enemy.type) 
+{ 
+Selection.activeGameObject = actor.gameObject; 
+SceneView.FrameLastActiveSceneView(); 
+break; 
+}
                     }
                     EditorGUILayout.Space(5f);
                 }
@@ -126,7 +131,11 @@ namespace RuinRunner.EditorTools
                     if (value == null) continue;
                     WeaponDefinition definition = null;
                     foreach (var candidate in definitions)
-                        if (candidate.Id == value.id) { definition = candidate; break; }
+                        if (candidate.Id == value.id) 
+{ 
+definition = candidate; 
+break; 
+}
                     var title = definition == null ? value.id : definition.Name + "  [" + WeaponFamilyCatalog.GetName(definition.Family) + "]";
                     if (!string.IsNullOrEmpty(weaponSearch) && title.IndexOf(weaponSearch, System.StringComparison.OrdinalIgnoreCase) < 0 && value.id.IndexOf(weaponSearch, System.StringComparison.OrdinalIgnoreCase) < 0)
                         continue;

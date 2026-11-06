@@ -13,14 +13,18 @@ namespace RuinRunner
 
         public static WeaponDefinition Find(string id)
         {
-            foreach (var weapon in Weapons) if (weapon.Id == id) return weapon;
-            if (SignatureWeaponCatalog.Has(id)) return SignatureWeaponCatalog.Find(id);
+            foreach (var weapon in Weapons)
+                if (weapon.Id == id)
+                    return weapon;
+            if (SignatureWeaponCatalog.Has(id))
+                return SignatureWeaponCatalog.Find(id);
             throw new System.ArgumentException("Unknown weapon id: " + id, nameof(id));
         }
 
         public static void ApplyBalance(GameBalanceConfig config)
         {
-            if(!string.IsNullOrEmpty(PinnedCatalogVersion))return;
+            if (!string.IsNullOrEmpty(PinnedCatalogVersion))
+                return;
             foreach (var weapon in Weapons)
                 weapon.ApplyBalance(config == null ? null : config.GetWeapon(weapon.Id));
         }
@@ -28,14 +32,16 @@ namespace RuinRunner
         public static WeaponDefinition FindFirst(WeaponAttackType attackType)
         {
             foreach (var weapon in Weapons)
-                if (weapon.AttackType == attackType) return weapon;
+                if (weapon.AttackType == attackType)
+                    return weapon;
             return null;
         }
 
         public static WeaponDefinition FindFirst(WeaponFamily family)
         {
             foreach (var weapon in Weapons)
-                if (weapon.Family == family) return weapon;
+                if (weapon.Family == family)
+                    return weapon;
             return null;
         }
 
@@ -53,11 +59,16 @@ namespace RuinRunner
         {
             switch (family)
             {
-                case WeaponFamily.Dagger: return .3f;
-                case WeaponFamily.Mace: return .5f;
-                case WeaponFamily.Greatsword: return .55f;
-                case WeaponFamily.Katana: return .38f;
-                default: return .44f;
+                case WeaponFamily.Dagger:
+                    return .3f;
+                case WeaponFamily.Mace:
+                    return .5f;
+                case WeaponFamily.Greatsword:
+                    return .55f;
+                case WeaponFamily.Katana:
+                    return .38f;
+                default:
+                    return .44f;
             }
         }
 
@@ -65,27 +76,37 @@ namespace RuinRunner
         {
             switch (rarity)
             {
-                case WeaponRarity.Uncommon: return new Color(.25f, .9f, .42f);
-                case WeaponRarity.Rare: return new Color(.25f, .55f, 1f);
-                case WeaponRarity.Epic: return new Color(.75f, .25f, 1f);
-                case WeaponRarity.Legendary: return new Color(1f, .62f, .12f);
-                default: return new Color(.75f, .75f, .75f);
+                case WeaponRarity.Uncommon:
+                    return new Color(.25f, .9f, .42f);
+                case WeaponRarity.Rare:
+                    return new Color(.25f, .55f, 1f);
+                case WeaponRarity.Epic:
+                    return new Color(.75f, .25f, 1f);
+                case WeaponRarity.Legendary:
+                    return new Color(1f, .62f, .12f);
+                default:
+                    return new Color(.75f, .75f, .75f);
             }
         }
 
         public static WeaponDefinition Roll(float luck = 0f)
         {
-            if(!string.IsNullOrEmpty(PinnedCatalogVersion))return WeightedWeapon(EligibleWeapons(),luck);
+            if (!string.IsNullOrEmpty(PinnedCatalogVersion))
+                return WeightedWeapon(EligibleWeapons(), luck);
             return WeightedWeapon(EligibleNearest(RollRarity(luck)));
         }
 
         public static WeaponRarity RollRarity(float luck)
         {
             var roll = Mathf.Clamp(Random.value * 100f - Mathf.Max(0f, luck) * .75f, 0f, 100f);
-            if (roll < 2f) return WeaponRarity.Legendary;
-            if (roll < 8f) return WeaponRarity.Epic;
-            if (roll < 22f) return WeaponRarity.Rare;
-            if (roll < 50f) return WeaponRarity.Uncommon;
+            if (roll < 2f)
+                return WeaponRarity.Legendary;
+            if (roll < 8f)
+                return WeaponRarity.Epic;
+            if (roll < 22f)
+                return WeaponRarity.Rare;
+            if (roll < 50f)
+                return WeaponRarity.Uncommon;
             return WeaponRarity.Common;
         }
 

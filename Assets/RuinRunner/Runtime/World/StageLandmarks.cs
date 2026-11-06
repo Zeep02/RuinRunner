@@ -12,17 +12,27 @@ namespace RuinRunner
         // Evenly spaced pillars must not all land on the same variant.
         static uint Mix(int x, int y)
         {
-            unchecked { var h = (uint)(x * 73856093) ^ (uint)(y * 19349663); h ^= h >> 16; h *= 0x7feb352du; h ^= h >> 15; h *= 0x846ca68bu; return h ^ (h >> 16); }
+            unchecked
+            {
+                var h = (uint)(x * 73856093) ^ (uint)(y * 19349663);
+                h ^= h >> 16;
+                h *= 0x7feb352du;
+                h ^= h >> 15;
+                h *= 0x846ca68bu;
+                return h ^ (h >> 16);
+            }
         }
 
         public static void Place(Transform parent, int stage, Vector2 center, Vector2 size, List<Rect> occupied)
         {
             var key = Mathf.RoundToInt(size.x) + "x" + Mathf.RoundToInt(size.y);
-            if (!Variants.TryGetValue(key, out var variants)) throw new System.InvalidOperationException("No landmark drawn for footprint " + key);
+            if (!Variants.TryGetValue(key, out var variants))
+                throw new System.InvalidOperationException("No landmark drawn for footprint " + key);
             // The room's own position picks the variant, so a seed always builds the same room.
             var variant = (int)(Mix(Mathf.RoundToInt(center.x), Mathf.RoundToInt(center.y)) % (uint)variants);
             var sprite = IndividualArt.Sprite("Campaign/Landmark/" + StageTerrainArt.Theme(stage) + "/" + key + "-" + variant);
-            if (sprite == null) throw new System.InvalidOperationException("Missing landmark sprite " + key + "-" + variant);
+            if (sprite == null)
+                throw new System.InvalidOperationException("Missing landmark sprite " + key + "-" + variant);
             // A tall structure stands on the footprint's front edge and rises past it; a low one sits in the middle of it.
             var height = sprite.bounds.size.y;
             var foot = new Vector2(center.x, center.y - Mathf.Min(size.y, height) * .5f);

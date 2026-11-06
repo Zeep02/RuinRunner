@@ -103,34 +103,44 @@ namespace RuinRunner
 
         bool HasAlly()
         {
-            foreach (var other in director.Members) if (other != null && other != this && !other.IsDead) return true;
+            foreach (var other in director.Members)
+                if (other != null && other != this && !other.IsDead)
+                    return true;
             return false;
         }
         bool HasWoundedAlly() => MostWoundedAlly() != null;
         EnemyController MostWoundedAlly()
         {
-            EnemyController worst = null; var lowest = .75f;
+            EnemyController worst = null;
+            var lowest = .75f;
             foreach (var other in director.Members)
-                if (other != null && other != this && !other.IsDead && other.Health / other.MaxHealth < lowest) { worst = other; lowest = other.Health / other.MaxHealth; }
+                if (other != null && other != this && !other.IsDead && other.Health / other.MaxHealth < lowest)
+                {
+                    worst = other;
+                    lowest = other.Health / other.MaxHealth;
+                }
             return worst;
         }
         public void ReceiveHealing(float share)
         {
-            if (dead) return;
+            if (dead)
+                return;
             Health = Mathf.Min(MaxHealth, Health + MaxHealth * share);
             UpdateHealthBar();
             BossNativeEffect.CreateOverActors(this, "ECastWater", (Vector2)transform.position + Vector2.up * .4f, .5f);
         }
         public void ReceiveWard(float seconds)
         {
-            if (dead) return;
+            if (dead)
+                return;
             wardUntil = Time.time + seconds;
             BossNativeEffect.CreateOverActors(this, "ECastSeal", (Vector2)transform.position + Vector2.up * .4f, .6f);
         }
         // Damage only comes through a shield from the side or behind; a blocked hit rings instead of landing.
         float StageMobDamage(float amount)
         {
-            if (Time.time < wardUntil) amount *= WardReduction;
+            if (Time.time < wardUntil)
+                amount *= WardReduction;
             if (Type == EnemyType.BoneShield && !acting && player != null)
             {
                 var toPlayer = (Vector2)player.transform.position - (Vector2)transform.position;
@@ -236,7 +246,7 @@ namespace RuinRunner
             AttackVisualPhase = 1;
             Shoot(ShotOrigin, direction, 12f, contactDamage * 1.5f, .24f);
             Muzzle(direction);
-            PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .4f);
+            GameAudio.Play(GameSound.Shoot, AudioChannel.Monster, .4f);
             yield return EndMove(.5f, 1.7f);
         }
         IEnumerator ArcherVolley()
@@ -266,7 +276,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(1.1f);
             FloorStrike("ERingStone", point, 2.9f, .3f);
             Strike("EBurstSpore", point, 2.9f, .4f);
-            if (cameraFollow != null) cameraFollow.Shake(.12f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.12f);
         }
         IEnumerator BeetleBomb(Vector2 direction)
         {
@@ -307,10 +318,12 @@ namespace RuinRunner
         IEnumerator EelSpit(Vector2 direction)
         {
             BeginMove(direction, Color.white);
-            foreach (var angle in new[] { -14f, 0f, 14f }) AimLine(ShotOrigin, Rotate(direction, angle), .55f);
+            foreach (var angle in new[] { -14f, 0f, 14f })
+                AimLine(ShotOrigin, Rotate(direction, angle), .55f);
             yield return new WaitForSeconds(.55f);
             AttackVisualPhase = 1;
-            foreach (var angle in new[] { -14f, 0f, 14f }) Shoot(ShotOrigin, Rotate(direction, angle), 8f, contactDamage);
+            foreach (var angle in new[] { -14f, 0f, 14f })
+                Shoot(ShotOrigin, Rotate(direction, angle), 8f, contactDamage);
             Muzzle(direction);
             yield return EndMove(.55f, 1.6f);
         }
@@ -348,7 +361,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(.7f);
             AttackVisualPhase = 1;
             GroundSlam(point, 1.5f);
-            if (cameraFollow != null) cameraFollow.Shake(.14f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.14f);
             yield return EndMove(.9f, 1.6f);
         }
         IEnumerator CoralSpines()
@@ -396,7 +410,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(.8f);
             AttackVisualPhase = 1;
             var patient = MostWoundedAlly();
-            if (patient != null) patient.ReceiveHealing(HealShare);
+            if (patient != null)
+                patient.ReceiveHealing(HealShare);
             yield return EndMove(.5f, 2.6f);
         }
         IEnumerator SirenHymn()
@@ -406,16 +421,19 @@ namespace RuinRunner
             yield return new WaitForSeconds(.7f);
             AttackVisualPhase = 1;
             foreach (var other in director.Members)
-                if (other != null && other != this && !other.IsDead) other.specialTimer = Mathf.Max(0f, other.specialTimer - .8f);
+                if (other != null && other != this && !other.IsDead)
+                    other.specialTimer = Mathf.Max(0f, other.specialTimer - .8f);
             yield return EndMove(.5f, 3.2f);
         }
         IEnumerator SirenWave(Vector2 direction)
         {
             BeginMove(direction, Color.white);
-            foreach (var angle in new[] { -20f, 0f, 20f }) AimLine(ShotOrigin, Rotate(direction, angle), .6f);
+            foreach (var angle in new[] { -20f, 0f, 20f })
+                AimLine(ShotOrigin, Rotate(direction, angle), .6f);
             yield return new WaitForSeconds(.6f);
             AttackVisualPhase = 1;
-            foreach (var angle in new[] { -20f, 0f, 20f }) Shoot(ShotOrigin, Rotate(direction, angle), 6f, contactDamage);
+            foreach (var angle in new[] { -20f, 0f, 20f })
+                Shoot(ShotOrigin, Rotate(direction, angle), 6f, contactDamage);
             yield return EndMove(.6f, 1.9f);
         }
 
@@ -460,7 +478,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(.95f);
             AttackVisualPhase = 1;
             GroundSlam(transform.position, 2.8f);
-            if (cameraFollow != null) cameraFollow.Shake(.2f);
+            if (cameraFollow != null)
+                cameraFollow.Shake(.2f);
             yield return EndMove(1f, 1.7f);
         }
         IEnumerator GolemQuake(Vector2 direction)
@@ -471,7 +490,8 @@ namespace RuinRunner
             for (var step = 1; step <= 4; step++)
             {
                 var point = (Vector2)transform.position + direction * (1.1f + step * 1.25f);
-                if (Physics2D.OverlapPoint(point, 1 << GameLayers.Ground) != null) break;
+                if (Physics2D.OverlapPoint(point, 1 << GameLayers.Ground) != null)
+                    break;
                 Circle(point, .95f, .55f, .14f);
                 StartCoroutine(DelayedFx("EBurstStone", point, .55f, .3f));
                 yield return new WaitForSeconds(.16f);
@@ -488,7 +508,7 @@ namespace RuinRunner
             AttackVisualPhase = 1;
             Shoot(ShotOrigin, direction, 14f, contactDamage * 1.5f, .24f);
             Muzzle(direction);
-            PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .45f);
+            GameAudio.Play(GameSound.Shoot, AudioChannel.Monster, .45f);
             yield return EndMove(.6f, 1.9f);
         }
         IEnumerator BolterTriple(Vector2 direction)
@@ -543,7 +563,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(.8f);
             AttackVisualPhase = 1;
             foreach (var other in director.Members)
-                if (other != null && other != this && !other.IsDead) other.ReceiveWard(4f);
+                if (other != null && other != this && !other.IsDead)
+                    other.ReceiveWard(4f);
             yield return EndMove(.5f, 3.6f);
         }
         IEnumerator PriestMend()
@@ -553,7 +574,8 @@ namespace RuinRunner
             yield return new WaitForSeconds(.8f);
             AttackVisualPhase = 1;
             var patient = MostWoundedAlly();
-            if (patient != null) patient.ReceiveHealing(HealShare);
+            if (patient != null)
+                patient.ReceiveHealing(HealShare);
             yield return EndMove(.5f, 2.8f);
         }
     }

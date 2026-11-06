@@ -1,71 +1,97 @@
 # Ruin Runner
 
-Unity 6000.6.0f1 기반 Windows 싱글플레이 탑다운 액션 로그라이트입니다. 마을에서 시작 장비와 재능을 고르고, 연결된 세 지역을 탐험하며 장비 조합을 완성해 세 수호자를 쓰러뜨립니다. 원정이 끝나면 서버에 정산된 유산으로 다음 출정을 준비합니다.
+Unity 6로 만든 탑다운 액션 로그라이트 게임과, 영구 진행을 저장하는 ASP.NET Core·PostgreSQL 서버로 이루어진 졸업작품입니다.
 
-현재 플레이 범위는 마을 준비 → 출정 → 외곽 유적·침수된 회랑·봉인의 심부 → 세 보스 → 엔딩·정산 → 귀환·재출정입니다. 상인 거래와 형상 모루·서약석·교환 제단이 정상 원정에 연결되어 있습니다. 현장 성장은 장비의 행동을 바꾸며, +n 강화나 U키 스탯 구매는 사용하지 않습니다.
+마을에서 시작 무기와 재능을 고르고 출정해, 시드마다 다르게 생성되는 세 지역(외곽 유적, 침수된 회랑, 봉인의 심부)을 지나 세 보스를 쓰러뜨립니다. 원정 결과는 서버에서 정산되고, 얻은 유산으로 다음 원정의 선택지를 해금합니다.
 
-## 실행
+## 주요 기능
 
-서버 포함 패키지의 `Start Local Game.cmd`를 실행합니다. 포함된 PostgreSQL과 API가 준비된 뒤 게임이 열립니다. 게임 종료 후 `Stop Local Backend.cmd`로 백엔드를 종료합니다. 프로필과 DB는 패키지 밖 `%LOCALAPPDATA%/RuinRunner/LocalBackend`에 보존됩니다. 실행 파일만 사용할 때는 먼저 API를 실행하고 공개 주소를 `RUINRUNNER_API_URL`에 지정해야 합니다.
+| 영역 | 내용 |
+| --- | --- |
+| 절차적 생성 | 공간 모듈을 시드 기반 그래프로 연결해 지역을 만든다. 같은 생성 코드를 게임과 서버가 함께 쓴다. |
+| 전투 | 단검·대검·카타나·창·지팡이·오브·총기 무기군의 무기 70종, 무기마다 다른 우클릭 스킬, 콤보·히트스톱·대시 |
+| 적과 보스 | 적 AI 디렉터, 보스 3종의 페이즈별 패턴과 대기술 |
+| 성장 | 레벨업 선택지, 장신구 50종과 세트 효과, 현장 장비 변형(형상 모루·서약석·교환 제단) |
+| 영구 진행 | 게스트 인증, 프로필·해금·원정 정산을 서버 DB에 저장, 응답 유실 시 같은 요청 ID로 재전송 |
+| 검증 | 명령줄 플래그로 켜는 자동 플레이·전투 샌드박스·스모크 테스트 (별도 어셈블리) |
 
-서버와 게임을 다른 PC에서 실행하려면 서버 PC에서 `Start Server.cmd`, 게임 PC에서 `Join Server.cmd`를 실행하고 안내된 주소를 입력합니다. 게임 PC와 같은 네트워크(공유기 내부, VPN)여야 하며 암호화 없는 HTTP는 사설 주소에서만 허용합니다. 자세한 내용은 패키지의 `SERVER-README.txt`에 있습니다. 데이터베이스는 항상 서버 PC 안에서만 접속합니다.
+## 구조
 
-현재 패키지는 `deliverables/RuinRunner-Candidate-20261025-184044`입니다. 최신 후보와 검증 범위는 [마감 기록 — 2026-10-25 갱신](Docs/GoalFinish-20261021.md)을 참조합니다. 정상 자동 입력 완주, 실제 마우스·키보드 검사, 공급 상태 기능 검사, 연속 모션·음향 평가는 별도로 기록합니다. [2026-10-09 통합 기록](Docs/GoalIntegration-20261009.md)의 기존 네 성향 완주·구매/정산 재실행 복구 근거를 보존합니다.
+```mermaid
+graph LR
+    Editor[RuinRunner.Editor] --> Diagnostics[RuinRunner.Diagnostics]
+    Editor --> Runtime
+    Diagnostics --> Runtime[RuinRunner.Runtime]
+    Runtime --> Backend[RuinRunner.Backend]
+    Runtime --> Generation[RuinRunner.Generation]
+    Api[RuinRunner.Api 서버] -. 같은 소스 공유 .-> Generation
+    Backend -- HTTP/JSON --> Api
+    Api --> DB[(PostgreSQL)]
+```
 
-## 게임 흐름
-
-| 스테이지 | 지형과 전투 | 보스 |
+| 어셈블리 | 경로 | 역할 |
 | --- | --- | --- |
-| 외곽 유적 | 풍화 석회암·이끼·돌무더기, 굽은 연결로와 초반 적 | THE WARDEN |
-| 침수된 회랑 | 청록 판석·수로 벽·일체형 수조, 장판과 측면 공격 | THE TIDEKEEPER |
-| 봉인의 심부 | 자주색 석판·금색 봉인 기둥·제단, 후반 적 조합 | THE SEAL HEART |
+| RuinRunner.Generation | `Assets/RuinRunner/Runtime/World/Generation` | Unity에 의존하지 않는 지역 생성. 서버도 같은 파일을 컴파일한다. |
+| RuinRunner.Backend | `Assets/RuinRunner/Runtime/Backend` | API 클라이언트, 요청 저널, 보호된 로컬 자격 정보 |
+| RuinRunner.Runtime | `Assets/RuinRunner/Runtime` | 게임 본체 |
+| RuinRunner.Diagnostics | `Assets/RuinRunner/Runtime/Diagnostics` | 자동 검증과 시험 장면. 게임 코드는 이 어셈블리를 참조하지 않는다. |
+| RuinRunner.Editor | `Assets/RuinRunner/Editor` | 빌드 메뉴, 에셋 임포트, 방·밸런스 편집 창 |
+| RuinRunner.Api | `Backend/RuinRunner.Api` | ASP.NET Core 최소 API, Npgsql, SQL 마이그레이션 |
 
-각 스테이지는 시드에 따라 일반 전투 3~4구역과 보스 구역을 연결하며, 상인·현장 성장 시설·선택 보급함으로 이어지는 갈림길이 있습니다. 구역 사이를 직접 걷고 클리어한 공간으로 되돌아갈 수 있습니다. 장벽은 전투 완료 후 해제됩니다. 지도와 실제 충돌·길찾기는 같은 공간 데이터를 사용합니다.
+`RuinRunner.Runtime` 내부 폴더는 다음과 같습니다.
 
-처치 경험치와 상자 보상을 회수하고 성장 선택을 마친 뒤 봉인석에서 E를 누르면 다음 스테이지로 갑니다. 가방이 가득 찼다면 봉인석에서 E를 1.2초 유지해 남은 장비를 두고 가기로 선택한 뒤 다시 E를 누릅니다. 보스 상자는 최대 체력 30%, 선택 보급함은 10%를 회복합니다. 스테이지를 넘어도 장비·탄약·가방·레벨·장신구·세트·통계는 유지됩니다.
+| 폴더 | 내용 |
+| --- | --- |
+| `Core` | `GameBootstrap`, `GameController`(메뉴·원정·스테이지 진행), 시간·난수·밸런스 |
+| `Player`, `CombatActions` | 플레이어 이동·공격·피격, 무기별 스킬, 콤보 |
+| `Enemies`, `Combat` | 적·보스 행동, 투사체, 몸 충돌 |
+| `Items`, `Progression` | 가방·장비·보상, 레벨·스탯·재능·메타 진행 |
+| `World` | 지형·벽·소품 배치, 길찾기, 지도, 마을 |
+| `Data` | 무기·장신구·적·방 정의와 드롭 표 |
+| `Feedback`, `UI` | 이펙트·카메라·소리, HUD와 메뉴 |
+| `Save` | 설정과 저장 슬롯 |
 
-첫 두 보스는 중간 클리어이며 최종 보스 보상과 봉인석 이후 엔딩/결과가 나옵니다. 실패와 최종 승리는 한 번만 정산합니다. 정산된 유산은 마을에서 시작 장비와 재능을 해금하는 데 사용합니다.
+자세한 설명은 [ARCHITECTURE.md](ARCHITECTURE.md)에 있습니다.
 
-## 기본 조작
+## 조작
 
 | 행동 | 입력 |
 | --- | --- |
 | 이동 / 조준 | WASD 또는 방향키 / 마우스 |
-| 기본 공격·사격 | 마우스 왼쪽 또는 J |
-| 무기 행동 | 마우스 오른쪽 |
-| 대시 | Space: 이동 중 이동 방향, 정지 중 조준 방향 |
-| 상자·드롭·봉인석 | E |
-| 장착 무기 교체 / 재장전 | 1·2·3 / R |
-| 성장 선택 | 1~6 또는 아이콘 클릭 |
-| 가방 / 지도 / 상세 스탯 | I / Tab / C |
-| 일시정지·화면 닫기 | Esc |
-| 결과에서 귀환·재도전 | R 또는 버튼 |
+| 공격 | 마우스 왼쪽 또는 J |
+| 무기 스킬 | 마우스 오른쪽 |
+| 대시 | Space |
+| 상호작용 | E |
+| 무기 교체 / 재장전 | 1·2·3 / R |
+| 가방 / 지도 / 스탯 | I / Tab / C |
+| 일시정지 | Esc |
 
-옵션에서 기본·보조 키를 변경할 수 있고 안내에는 변경된 키가 표시됩니다. 점프·Ctrl 공통 기술은 사용하지 않습니다. 한손검은 짧게 받아낸 뒤 반격, 카타나는 타이밍 패링, 단검은 찌르기, 대검은 우클릭 유지 후 해제 강공격입니다. 철퇴와 원거리 무기군에는 마나를 사용하는 고유 행동이 있습니다.
+키 배치는 옵션에서 바꿀 수 있습니다.
 
-전체 지도는 게임을 일시정지합니다. Tab이나 Esc로 닫으면 다시 진행하며, 지도를 닫는 입력이 공격이나 다른 화면 열기로 함께 처리되지 않습니다.
+## 실행
 
-무기·장신구의 희귀도·운·세트 효과를 정상 보상에서 사용하며, 일부 유물은 현장의 교환 제단에서 얻습니다. 가방은 기본20칸, 유산으로 최대32칸이며 장착3슬롯은 용량에서 제외됩니다. 원정 시작 시 고정되는 항목과 수치는 `Backend/Content` 카탈로그, 클라이언트 행동과 설명은 `Assets/RuinRunner/Runtime`에 있습니다.
+필요한 것: Unity 6000.6.0f1. 서버용 .NET SDK 10과 PostgreSQL 18은 아래 스크립트가 `Backend/.local`에 설치합니다.
 
-## 저장과 아트
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Backend/Install-BackendTools.ps1
+```
 
-일반 진행의 확정 프로필·경제·정산은 API/PostgreSQL에 저장됩니다. 로컬에는 설정과 보호된 게스트 식별·미확정 요청 복구 기록을 보관합니다. 회사/제품 identity와 기존 `Application.persistentDataPath/RuinRunner` 경로, 이관 원본은 유지합니다. 미확정 요청은 같은 식별자로 재전송하며 서버 확인 전에는 확정 저장으로 표시하지 않습니다. 세 슬롯의 프로필 초기화는 서버 소유권 검사와 두 단계 확인을 거칩니다.
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Backend/Start-Backend.ps1
+```
 
-월드는 픽셀 구도와 Point 필터의 원본 PNG/Sprite를 유지하며 창 해상도에 직접 그립니다. 승인된 Sscary 배낭 주인공의 얼굴·몸체·발 피벗과 전용 근접·특수행동·원거리·재장전·피격 프레임을 보존합니다. 세 보스의 본체와 전용 동작, 실제 애니메이션 시계와 판정 연결은 [최신 통합 기록](Docs/GoalIntegration-20261009.md)을 참조합니다. 채택 프레임은 개별 PNG로 보관하고 런타임 아틀라스로 묶습니다. 이전 시안은 보존합니다. 동적 문자는 Galmuri이며 출처·라이선스·수정 여부는 `ASSET_SOURCES.md`, 배포 크레딧은 `Assets/StreamingAssets/ThirdPartyNotices`에 있습니다. 캡처와 기능 검사를 실제 연속 모션 시청·음향 청취 합격으로 대신하지 않습니다.
+Unity에서 `Assets/RuinRunner/Scenes/Demo.unity`를 열고 실행하거나, 에디터 메뉴 `RuinRunner > Build Windows Demo`로 빌드합니다. 명령줄 빌드와 스모크 테스트는 `Tools/Build-Clean.ps1`이 수행합니다. 서버 주소는 환경 변수 `RUINRUNNER_API_URL`로 지정합니다.
 
-## 빌드와 검증
+서버를 포함한 배포 패키지는 `Tools/Backend/New-LocalRelease.ps1`로 만듭니다. 패키지의 `Start Local Game.cmd`가 내장 PostgreSQL과 API를 띄운 뒤 게임을 엽니다.
 
-빌드 보관 정책(2026-10-16): `Builds`는 **성공한 최신 빌드 + 직전 2개 = 총 3개**, 서버 포함 `deliverables` 패키지도 별도로 최신 3개만 보관합니다. Unity 빌드 완료 훅과 패키지 생성 스크립트에 자동 정리를 연결했습니다. 기본 메뉴 빌드는 시간별 폴더를 사용합니다. 실패·진행 중인 빌드, 실행 중인 프로그램이 있는 폴더와 링크 폴더는 정리하지 않습니다. `Tools/Build-Clean.ps1`은 실행 검증과 승격 후 같은 정책을 적용합니다. 수동 미리보기는 `powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Prune-Builds.ps1`, 실제 정리는 여기에 `-Apply`를 추가합니다. 이전 문서의 빌드 경로는 당시 이력이며 보관 정책에 따라 실행 파일이 삭제됐을 수 있습니다.
+## 저장소 구성
 
-에디터 메뉴의 `Prototype > Build Windows Demo`라는 기존 명령명은 호환을 위해 유지합니다. 기본 실행 씬은 정상 메뉴이며 검증 장면은 명시적 명령줄 옵션에서만 켜집니다. `Tools/Build-Clean.ps1`은 에디터를 닫은 상태에서 staging 클린 빌드와 실행 파일 smoke 검사를 수행한 뒤 배포 폴더를 교체합니다. 연결된 에디터에서는 Pipeline `build`의 `CleanBuildCache` 옵션을 사용하며 같은 프로젝트에 배치 에디터를 동시에 실행하지 않습니다.
+| 경로 | 내용 |
+| --- | --- |
+| `Assets/RuinRunner` | 게임 소스, 씬, 리소스 |
+| `Backend` | API 서버, 콘텐츠 카탈로그(`Content`), Dockerfile |
+| `Tools/Backend` | 서버 설치·실행·백업·통합 테스트 스크립트 |
+| `Tools/Art` | pixelfx 이펙트를 Unity 클립으로 내보내는 스크립트, 무기 카탈로그 생성기 |
+| `Tools/pixelfx` | 픽셀 이펙트 생성 라이브러리 |
 
-검증 플래그 사용 시 `--validation-profile --validation-profile-name 고유이름`을 함께 지정해 슬롯과 환경설정을 사용자 데이터와 분리합니다. 자동 정상 입력은 `--automated-stage-validation`; 장비/진행 상태를 주입하는 격리 검사는 정상 완주 증거와 구분합니다.
-
-## 자료와 이전 기록
-
-- 현재 작업 상태: [WORK_STATUS](WORK_STATUS.md), [최신 마감 기록](Docs/GoalFinish-20261021.md).
-- 장비 원본·라이선스: [무기](Docs/WeaponNativeSources-20261004.md), [장신구](Docs/AccessoryNativeSources-20261004.md), [전체 출처](ASSET_SOURCES.md).
-- 생성 그래프와 소품 지지: [월드 기록](Docs/GoalWorld-20261009.md). 원정은 서버에 고정된 생성 버전과 카탈로그를 사용합니다.
-- 구매·정산의 응답 유실과 앱 재실행: [복구 경계](Docs/GoalRestartRecoveryAudit-20261009.md), [실행 결과](Docs/GoalIntegration-20261009.md).
-
-과거 후보의 검증과 실패 자료는 각 날짜의 Docs·Logs 기록에 남아 있습니다. 과거 성공을 최신 후보의 검사로 세지 않으며 자동 플레이 시간은 일반 플레이어의 체험 분량을 뜻하지 않습니다.
+에셋 출처와 라이선스는 [ASSET_SOURCES.md](ASSET_SOURCES.md)와 `Assets/StreamingAssets/ThirdPartyNotices`에 있습니다.

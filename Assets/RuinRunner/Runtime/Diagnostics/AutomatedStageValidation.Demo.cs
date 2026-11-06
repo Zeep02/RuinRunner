@@ -19,32 +19,44 @@ namespace RuinRunner
 
         void TickDemo()
         {
-            if (!demoRun) return;
+            if (!demoRun)
+                return;
             telegraphMovementChecked = true;
-            if (game.Player != null) game.Player.SandboxInvulnerable = true;
+            if (game.Player != null)
+                game.Player.SandboxInvulnerable = true;
         }
 
         bool HoldDemoChoice()
         {
-            if (!demoRun) return false;
-            if (demoChoiceAt <= 0f) demoChoiceAt = Time.unscaledTime + DemoChoiceSeconds;
-            if (Time.unscaledTime < demoChoiceAt) return true;
+            if (!demoRun)
+                return false;
+            if (demoChoiceAt <= 0f)
+                demoChoiceAt = Time.unscaledTime + DemoChoiceSeconds;
+            if (Time.unscaledTime < demoChoiceAt)
+                return true;
             demoChoiceAt = 0f;
             return false;
         }
 
         bool HoldDemoResult()
         {
-            if (!demoRun) return false;
-            if (demoResultAt <= 0f) demoResultAt = Time.unscaledTime + DemoResultSeconds;
+            if (!demoRun)
+                return false;
+            if (demoResultAt <= 0f)
+                demoResultAt = Time.unscaledTime + DemoResultSeconds;
             return Time.unscaledTime < demoResultAt;
         }
 
         // Inventory keys one at a time, slowly enough to follow the cursor.
         bool HoldDemoInventory()
         {
-            if (!demoRun || !game.IsInventoryOpen) return false;
-            if (Time.unscaledTime < demoKeyAt) { StageValidationInput.ReleaseAll(); return true; }
+            if (!demoRun || !game.IsInventoryOpen)
+                return false;
+            if (Time.unscaledTime < demoKeyAt)
+            {
+                StageValidationInput.ReleaseAll();
+                return true;
+            }
             demoKeyAt = Time.unscaledTime + .35f;
             return false;
         }
@@ -56,21 +68,32 @@ namespace RuinRunner
             if (routeRoom != game.CurrentRoom || Vector2.Distance(routeDestination, destination) > .75f ||
                 (route.Count == 0 || stalledFor > .4f) && Time.unscaledTime >= nextRouteAt)
             {
-                routeRoom = game.CurrentRoom; routeDestination = destination; nextRouteAt = Time.unscaledTime + .4f;
+                routeRoom = game.CurrentRoom;
+                routeDestination = destination;
+                nextRouteAt = Time.unscaledTime + .4f;
                 var path = StageNavigation.FindPath(game.DungeonMap.Terrain, position, destination);
-                route.Clear(); if (path != null) route.AddRange(path);
+                route.Clear();
+                if (path != null)
+                    route.AddRange(path);
             }
             for (var i = Mathf.Min(route.Count - 1, 10); i > 0; i--)
-                if (StageNavigation.HasCombatLane(position, route[i], .36f)) { route.RemoveRange(0, i); break; }
-            while (route.Count > 0 && Vector2.Distance(position, route[0]) < .35f) route.RemoveAt(0);
-            if (route.Count == 0) return Vector2.zero;
+                if (StageNavigation.HasCombatLane(position, route[i], .36f))
+                {
+                    route.RemoveRange(0, i);
+                    break;
+                }
+            while (route.Count > 0 && Vector2.Distance(position, route[0]) < .35f)
+                route.RemoveAt(0);
+            if (route.Count == 0)
+                return Vector2.zero;
             var heading = (route[0] - position).normalized;
             return new Vector2(Mathf.Abs(heading.x) > .38f ? Mathf.Sign(heading.x) : 0f, Mathf.Abs(heading.y) > .38f ? Mathf.Sign(heading.y) : 0f);
         }
 
         void DashWhileTravelling(float distanceLeft)
         {
-            if (!demoRun || distanceLeft < 4f || Time.unscaledTime < nextDashAt) return;
+            if (!demoRun || distanceLeft < 4f || Time.unscaledTime < nextDashAt)
+                return;
             Tap(GameAction.Dash);
             nextDashAt = Time.unscaledTime + .8f;
         }
@@ -88,7 +111,8 @@ namespace RuinRunner
         {
             var args = Environment.GetCommandLineArgs();
             var at = Array.IndexOf(args, "--demo-video");
-            if (at < 0 || at + 2 >= args.Length) return;
+            if (at < 0 || at + 2 >= args.Length)
+                return;
             var root = new GameObject("DemoVideoRecorder");
             DontDestroyOnLoad(root);
             root.AddComponent<DemoVideoRecorder>().Begin(args[at + 1], args[at + 2]);
@@ -102,7 +126,9 @@ namespace RuinRunner
                 FileName = ffmpeg,
                 Arguments = "-y -loglevel error -f rawvideo -pix_fmt rgba -s " + Screen.width + "x" + Screen.height + " -framerate " + Fps +
                     " -i - -an -vf vflip -c:v libx264 -preset veryfast -crf 20 -pix_fmt yuv420p -movflags +faststart \"" + output + "\"",
-                UseShellExecute = false, CreateNoWindow = true, RedirectStandardInput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardInput = true,
             });
             StartCoroutine(Record());
         }
@@ -119,7 +145,8 @@ namespace RuinRunner
                 yield return endOfFrame;
                 var frame = ScreenCapture.CaptureScreenshotAsTexture();
                 var data = frame.GetRawTextureData<byte>();
-                if (buffer == null || buffer.Length != data.Length) buffer = new byte[data.Length];
+                if (buffer == null || buffer.Length != data.Length)
+                    buffer = new byte[data.Length];
                 data.CopyTo(buffer);
                 encoder.StandardInput.BaseStream.Write(buffer, 0, buffer.Length);
                 Destroy(frame);
@@ -128,7 +155,8 @@ namespace RuinRunner
 
         void OnApplicationQuit()
         {
-            if (encoder == null || encoder.HasExited) return;
+            if (encoder == null || encoder.HasExited)
+                return;
             encoder.StandardInput.BaseStream.Flush();
             encoder.StandardInput.Close();
             encoder.WaitForExit(60000);

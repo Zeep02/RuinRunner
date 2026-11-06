@@ -30,12 +30,14 @@ namespace RuinRunner
         // still use the label's normal wrapping instead of being clipped.
         public static string WrapWords(string text, GUIStyle style, float width)
         {
-            if (string.IsNullOrEmpty(text)) return text;
+            if (string.IsNullOrEmpty(text))
+                return text;
             var result = new StringBuilder(text.Length + 16);
             var content = new GUIContent();
             foreach (var paragraph in text.Split('\n'))
             {
-                if (result.Length > 0) result.Append('\n');
+                if (result.Length > 0)
+                    result.Append('\n');
                 string line = "";
                 foreach (var word in paragraph.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))
                 {
@@ -46,7 +48,8 @@ namespace RuinRunner
                         result.Append(line).Append('\n');
                         line = word;
                     }
-                    else line = candidate;
+                    else
+                        line = candidate;
                 }
                 result.Append(line);
             }
@@ -55,9 +58,11 @@ namespace RuinRunner
 
         private static Font Load(ref Font font, string name)
         {
-            if (font != null) return font;
+            if (font != null)
+                return font;
             font = Resources.Load<Font>("Fonts/" + name);
-            if (font == null) throw new InvalidOperationException("Missing bundled font: " + name);
+            if (font == null)
+                throw new InvalidOperationException("Missing bundled font: " + name);
             if (!subscribed)
             {
                 Font.textureRebuilt += ApplyPointFilter;
@@ -69,7 +74,8 @@ namespace RuinRunner
 
         private static void ApplyPointFilter(Font font)
         {
-            if (font != regular && font != emphasis && font != detail) return;
+            if (font != regular && font != emphasis && font != detail)
+                return;
             if (font.material != null && font.material.mainTexture != null)
                 font.material.mainTexture.filterMode = FilterMode.Point;
         }

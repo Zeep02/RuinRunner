@@ -54,7 +54,8 @@ namespace RuinRunner.Generation
 
         public static ModuleDefinition Compose(int stage, RegionRole role, ref GenerationRandom random)
         {
-            if (stage < 0 || stage >= Themes.Length) throw new ArgumentOutOfRangeException(nameof(stage));
+            if (stage < 0 || stage >= Themes.Length)
+                throw new ArgumentOutOfRangeException(nameof(stage));
             bool boss = role == RegionRole.Boss, combat = role == RegionRole.Combat;
             int halfWidth = boss ? BossHalfWidth : combat ? 11 + random.Next(4) : 9 + random.Next(3);
             int halfHeight = boss ? BossHalfHeight : combat ? 8 + random.Next(3) : 6 + random.Next(2);
@@ -63,14 +64,24 @@ namespace RuinRunner.Generation
             var pieces = new List<MapRect> { R(-halfWidth, -BandHalfWidth, halfWidth * 2, BandHalfWidth * 2), R(-BandHalfWidth, -halfHeight, BandHalfWidth * 2, halfHeight * 2) };
             var shape = boss ? RoomShapes[0] : RoomShapes[random.Next(RoomShapes.Length)];
             int turn = random.Next(4);
-            for (int i = 0; i < 4; i++) AddCorner(pieces, Corners[i], shape[(i + turn) % 4], halfWidth, halfHeight, ref random);
+            for (int i = 0; i < 4; i++)
+                AddCorner(pieces, Corners[i], shape[(i + turn) % 4], halfWidth, halfHeight, ref random);
             var cells = new HashSet<long>();
-            foreach (var r in pieces) for (int y = (int)r.Y; y < r.Top; y++) for (int x = (int)r.X; x < r.Right; x++) cells.Add(Key(x, y));
+            foreach (var r in pieces)
+                for (int y = (int)r.Y; y < r.Top; y++)
+                    for (int x = (int)r.X; x < r.Right; x++)
+                        cells.Add(Key(x, y));
 
             var plan = new Plan { Cells = cells, HalfWidth = halfWidth, HalfHeight = halfHeight, WallMargin = combat ? 2 : 1, KeepMiddle = !combat };
-            if (combat) { PlaceInterior(plan, ref random); Scatter(plan, 4 + random.Next(3), ref random); }
-            else if (boss) PlaceBossPillars(plan, ref random);
-            else Scatter(plan, 1 + random.Next(2), ref random);
+            if (combat)
+            {
+                PlaceInterior(plan, ref random);
+                Scatter(plan, 4 + random.Next(3), ref random);
+            }
+            else if (boss)
+                PlaceBossPillars(plan, ref random);
+            else
+                Scatter(plan, 1 + random.Next(2), ref random);
 
             var taken = new List<MapPoint>();
             var player = FindSpot(plan, new MapPoint(-2, 0), taken);
@@ -80,14 +91,23 @@ namespace RuinRunner.Generation
             var spawns = PlaceSpawns(plan, player, taken, ref random);
             var names = Names[stage];
             var signature = halfWidth + "x" + halfHeight + "-" + cells.Count + "-" + plan.Placed.Count;
-            foreach (var o in plan.Placed) signature += "-" + (int)o.X + "," + (int)o.Y;
+            foreach (var o in plan.Placed)
+                signature += "-" + (int)o.X + "," + (int)o.Y;
             return new ModuleDefinition
             {
-                Id = Themes[stage] + "-" + signature, DisplayName = names[random.Next(names.Length)], Theme = Themes[stage],
-                FloorPieces = pieces.ToArray(), Obstacles = plan.Placed.ToArray(),
-                Bounds = new MapRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2), Outline = TraceExterior(cells),
-                PlayerAnchor = player, RewardAnchor = reward, ServiceAnchor = service, ExitAnchor = exit,
-                SpawnCandidates = spawns, DecorationSupports = Array.Empty<MapRect>()
+                Id = Themes[stage] + "-" + signature,
+                DisplayName = names[random.Next(names.Length)],
+                Theme = Themes[stage],
+                FloorPieces = pieces.ToArray(),
+                Obstacles = plan.Placed.ToArray(),
+                Bounds = new MapRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2),
+                Outline = TraceExterior(cells),
+                PlayerAnchor = player,
+                RewardAnchor = reward,
+                ServiceAnchor = service,
+                ExitAnchor = exit,
+                SpawnCandidates = spawns,
+                DecorationSupports = Array.Empty<MapRect>()
             };
         }
 
@@ -96,9 +116,15 @@ namespace RuinRunner.Generation
         {
             int wideX = halfWidth - random.Next(2), wideY = halfHeight - random.Next(2);
             int shortX = Math.Min(halfWidth, 6 + random.Next(2)), shortY = Math.Min(halfHeight, 5 + random.Next(2));
-            if (kind == CornerWhole) pieces.Add(Corner(corner, wideX, wideY));
-            else if (kind == CornerCut) pieces.Add(Corner(corner, shortX, shortY));
-            else { pieces.Add(Corner(corner, wideX, shortY)); pieces.Add(Corner(corner, shortX, wideY)); }
+            if (kind == CornerWhole)
+                pieces.Add(Corner(corner, wideX, wideY));
+            else if (kind == CornerCut)
+                pieces.Add(Corner(corner, shortX, shortY));
+            else
+            {
+                pieces.Add(Corner(corner, wideX, shortY));
+                pieces.Add(Corner(corner, shortX, wideY));
+            }
         }
         static MapRect Corner(int[] corner, int w, int h) => R(corner[0] > 0 ? 0 : -w, corner[1] > 0 ? 0 : -h, w, h);
 
@@ -108,50 +134,54 @@ namespace RuinRunner.Generation
             switch (random.Next(6))
             {
                 case 0: // Two rows of pillars along the room, a few of them fallen.
-                {
-                    int spacing = 4 + random.Next(2), row = 3 + random.Next(2);
-                    for (int i = -3; i <= 3; i++)
-                        foreach (int side in new[] { row, -row - 2 })
-                            if (random.Next(5) > 0) Try(plan, i * spacing - 1, side, 2, 2);
-                    break;
-                }
+                    {
+                        int spacing = 4 + random.Next(2), row = 3 + random.Next(2);
+                        for (int i = -3; i <= 3; i++)
+                            foreach (int side in new[] { row, -row - 2 })
+                                if (random.Next(5) > 0)
+                                    Try(plan, i * spacing - 1, side, 2, 2);
+                        break;
+                    }
                 case 1: // Two rows across the room.
-                {
-                    int spacing = 4 + random.Next(2), column = 4 + random.Next(2);
-                    for (int i = -2; i <= 2; i++)
-                        foreach (int side in new[] { column, -column - 2 })
-                            if (random.Next(5) > 0) Try(plan, side, i * spacing - 1, 2, 2);
-                    break;
-                }
+                    {
+                        int spacing = 4 + random.Next(2), column = 4 + random.Next(2);
+                        for (int i = -2; i <= 2; i++)
+                            foreach (int side in new[] { column, -column - 2 })
+                                if (random.Next(5) > 0)
+                                    Try(plan, side, i * spacing - 1, 2, 2);
+                        break;
+                    }
                 case 2: // One large structure in the middle; the fight circles it.
-                {
-                    var size = BlockSizes[random.Next(BlockSizes.Length)];
-                    Try(plan, -size[0] / 2 + random.Next(3) - 1, -size[1] / 2 + random.Next(3) - 1, size[0], size[1]);
-                    break;
-                }
+                    {
+                        var size = BlockSizes[random.Next(BlockSizes.Length)];
+                        Try(plan, -size[0] / 2 + random.Next(3) - 1, -size[1] / 2 + random.Next(3) - 1, size[0], size[1]);
+                        break;
+                    }
                 case 3: // A broken ring around an open centre.
-                {
-                    int across = hw - 5, up = hh - 4;
-                    foreach (var step in new[] { new[] { 2, 0 }, new[] { 1, 1 }, new[] { 0, 2 }, new[] { -1, 1 }, new[] { -2, 0 }, new[] { -1, -1 }, new[] { 0, -2 }, new[] { 1, -1 } })
-                        if (random.Next(4) > 0) Try(plan, step[0] * across / 2 - 1, step[1] * up / 2 - 1, 2, 2);
-                    break;
-                }
+                    {
+                        int across = hw - 5, up = hh - 4;
+                        foreach (var step in new[] { new[] { 2, 0 }, new[] { 1, 1 }, new[] { 0, 2 }, new[] { -1, 1 }, new[] { -2, 0 }, new[] { -1, -1 }, new[] { 0, -2 }, new[] { 1, -1 } })
+                            if (random.Next(4) > 0)
+                                Try(plan, step[0] * across / 2 - 1, step[1] * up / 2 - 1, 2, 2);
+                        break;
+                    }
                 case 4: // Staggered blocks to weave through.
-                {
-                    int shift = random.Next(2);
-                    for (int row = -1; row <= 1; row++)
-                        for (int column = -2; column <= 2; column++)
-                            if ((row + column + shift) % 2 == 0) Try(plan, column * 5 - 1, row * 5 - 1, 3, 3);
-                    break;
-                }
+                    {
+                        int shift = random.Next(2);
+                        for (int row = -1; row <= 1; row++)
+                            for (int column = -2; column <= 2; column++)
+                                if ((row + column + shift) % 2 == 0)
+                                    Try(plan, column * 5 - 1, row * 5 - 1, 3, 3);
+                        break;
+                    }
                 default: // Two long structures offset from each other, so the way through bends.
-                {
-                    int flip = random.Next(2) == 0 ? 1 : -1;
-                    Try(plan, flip > 0 ? -hw + 3 : hw - 8, 2 + random.Next(2), 5, 2);
-                    Try(plan, flip > 0 ? hw - 8 : -hw + 3, -4 - random.Next(2), 5, 2);
-                    Try(plan, -1 + (flip > 0 ? 3 : -3) - 1, -2 + random.Next(2), 3, 3);
-                    break;
-                }
+                    {
+                        int flip = random.Next(2) == 0 ? 1 : -1;
+                        Try(plan, flip > 0 ? -hw + 3 : hw - 8, 2 + random.Next(2), 5, 2);
+                        Try(plan, flip > 0 ? hw - 8 : -hw + 3, -4 - random.Next(2), 5, 2);
+                        Try(plan, -1 + (flip > 0 ? 3 : -3) - 1, -2 + random.Next(2), 3, 3);
+                        break;
+                    }
             }
         }
 
@@ -159,7 +189,8 @@ namespace RuinRunner.Generation
         {
             // The arena stays readable: the same pillar in each corner, set a little differently each time.
             int size = 2 + random.Next(2), across = 7 + random.Next(3), up = 4 + random.Next(2);
-            foreach (var corner in Corners) Try(plan, corner[0] > 0 ? across : -across - size, corner[1] > 0 ? up : -up - size, size, size);
+            foreach (var corner in Corners)
+                Try(plan, corner[0] > 0 ? across : -across - size, corner[1] > 0 ? up : -up - size, size, size);
         }
 
         static void Scatter(Plan plan, int wanted, ref GenerationRandom random)
@@ -174,7 +205,8 @@ namespace RuinRunner.Generation
         static bool Try(Plan plan, int x, int y, int w, int h)
         {
             var candidate = R(x, y, w, h);
-            if (!Allowed(plan, candidate)) return false;
+            if (!Allowed(plan, candidate))
+                return false;
             plan.Placed.Add(candidate);
             return true;
         }
@@ -183,42 +215,68 @@ namespace RuinRunner.Generation
         {
             if (plan.KeepMiddle)
             {
-                if (r.X < ClearHalfWidth && r.Right > -ClearHalfWidth && r.Y < ClearHalfHeight && r.Top > -ClearHalfHeight) return false;
-                if (r.X < LaneHalfWidth && r.Right > -LaneHalfWidth) return false;
-                if (r.Y < LaneHalfWidth && r.Top > -LaneHalfWidth) return false;
+                if (r.X < ClearHalfWidth && r.Right > -ClearHalfWidth && r.Y < ClearHalfHeight && r.Top > -ClearHalfHeight)
+                    return false;
+                if (r.X < LaneHalfWidth && r.Right > -LaneHalfWidth)
+                    return false;
+                if (r.Y < LaneHalfWidth && r.Top > -LaneHalfWidth)
+                    return false;
             }
             // In front of each doorway.
-            if (r.Y < LaneHalfWidth && r.Top > -LaneHalfWidth && (r.Right > plan.HalfWidth - DoorDepth || r.X < -plan.HalfWidth + DoorDepth)) return false;
-            if (r.X < LaneHalfWidth && r.Right > -LaneHalfWidth && (r.Top > plan.HalfHeight - DoorDepth || r.Y < -plan.HalfHeight + DoorDepth)) return false;
+            if (r.Y < LaneHalfWidth && r.Top > -LaneHalfWidth && (r.Right > plan.HalfWidth - DoorDepth || r.X < -plan.HalfWidth + DoorDepth))
+                return false;
+            if (r.X < LaneHalfWidth && r.Right > -LaneHalfWidth && (r.Top > plan.HalfHeight - DoorDepth || r.Y < -plan.HalfHeight + DoorDepth))
+                return false;
             // Room to walk all the way around it. Separate islands can never cut the floor in two.
             int margin = plan.WallMargin;
-            for (int y = (int)r.Y - margin; y < r.Top + margin; y++) for (int x = (int)r.X - margin; x < r.Right + margin; x++) if (!plan.Cells.Contains(Key(x, y))) return false;
-            foreach (var other in plan.Placed) if (r.X - 2 < other.Right && r.Right + 2 > other.X && r.Y - 2 < other.Top && r.Top + 2 > other.Y) return false;
+            for (int y = (int)r.Y - margin; y < r.Top + margin; y++)
+                for (int x = (int)r.X - margin; x < r.Right + margin; x++)
+                    if (!plan.Cells.Contains(Key(x, y)))
+                        return false;
+            foreach (var other in plan.Placed)
+                if (r.X - 2 < other.Right && r.Right + 2 > other.X && r.Y - 2 < other.Top && r.Top + 2 > other.Y)
+                    return false;
             return true;
         }
 
         // The nearest free floor to where this anchor would like to be.
         static MapPoint FindSpot(Plan plan, MapPoint wanted, List<MapPoint> taken)
         {
-            bool found = false; var best = wanted; float bestDistance = float.MaxValue;
-            if (SpotIsFree(plan, wanted, taken)) { taken.Add(wanted); return wanted; }
+            bool found = false;
+            var best = wanted;
+            float bestDistance = float.MaxValue;
+            if (SpotIsFree(plan, wanted, taken))
+            {
+                taken.Add(wanted);
+                return wanted;
+            }
             for (float y = -plan.HalfHeight; y <= plan.HalfHeight; y += .5f)
                 for (float x = -plan.HalfWidth; x <= plan.HalfWidth; x += .5f)
                 {
-                    var point = new MapPoint(x, y); var distance = Distance(point, wanted);
-                    if (distance >= bestDistance || !SpotIsFree(plan, point, taken)) continue;
-                    best = point; bestDistance = distance; found = true;
+                    var point = new MapPoint(x, y);
+                    var distance = Distance(point, wanted);
+                    if (distance >= bestDistance || !SpotIsFree(plan, point, taken))
+                        continue;
+                    best = point;
+                    bestDistance = distance;
+                    found = true;
                 }
-            if (!found) throw new InvalidOperationException("No free floor for a room anchor");
+            if (!found)
+                throw new InvalidOperationException("No free floor for a room anchor");
             taken.Add(best);
             return best;
         }
         static bool SpotIsFree(Plan plan, MapPoint point, List<MapPoint> taken)
         {
-            foreach (var other in taken) if (Distance(point, other) < 2f) return false;
-            if (InsideAny(plan.Placed, point)) return false;
-            for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++)
-                if (!plan.Cells.Contains(Key((int)Math.Floor(point.X + x * 1f), (int)Math.Floor(point.Y + y * .8f)))) return false;
+            foreach (var other in taken)
+                if (Distance(point, other) < 2f)
+                    return false;
+            if (InsideAny(plan.Placed, point))
+                return false;
+            for (int y = -1; y <= 1; y++)
+                for (int x = -1; x <= 1; x++)
+                    if (!plan.Cells.Contains(Key((int)Math.Floor(point.X + x * 1f), (int)Math.Floor(point.Y + y * .8f))))
+                        return false;
             return true;
         }
 
@@ -231,61 +289,95 @@ namespace RuinRunner.Generation
                 for (int x = -hw + 2; x <= hw - 2; x++)
                 {
                     var point = new MapPoint(x, y);
-                    if (Distance(point, player) < 4f || !HasMargin(plan.Cells, point) || InsideAny(plan.Placed, point)) continue;
+                    if (Distance(point, player) < 4f || !HasMargin(plan.Cells, point) || InsideAny(plan.Placed, point))
+                        continue;
                     bool clear = true;
-                    foreach (var anchor in anchors) if (Distance(point, anchor) < 2f) clear = false;
+                    foreach (var anchor in anchors)
+                        if (Distance(point, anchor) < 2f)
+                            clear = false;
                     // Nothing appears in the player's face as they step through a doorway.
-                    foreach (var door in doors) if (Distance(point, door) < 5f) clear = false;
-                    if (clear) candidates.Add(point);
+                    foreach (var door in doors)
+                        if (Distance(point, door) < 5f)
+                            clear = false;
+                    if (clear)
+                        candidates.Add(point);
                 }
-            if (candidates.Count == 0) throw new InvalidOperationException("No floor for enemy spawns");
+            if (candidates.Count == 0)
+                throw new InvalidOperationException("No floor for enemy spawns");
             random.Shuffle(candidates);
             var spots = new List<MapPoint>();
             foreach (float spacing in new[] { 2.5f, 1.5f })
                 foreach (var point in candidates)
                 {
-                    if (spots.Count >= 8) break;
+                    if (spots.Count >= 8)
+                        break;
                     bool clear = true;
-                    foreach (var other in spots) if (Distance(point, other) < spacing) clear = false;
-                    if (clear) spots.Add(point);
+                    foreach (var other in spots)
+                        if (Distance(point, other) < spacing)
+                            clear = false;
+                    if (clear)
+                        spots.Add(point);
                 }
             return spots.ToArray();
         }
 
         static bool HasMargin(HashSet<long> cells, MapPoint point)
         {
-            for (int y = -2; y <= 1; y++) for (int x = -2; x <= 1; x++) if (!cells.Contains(Key((int)Math.Floor(point.X) + x, (int)Math.Floor(point.Y) + y))) return false;
+            for (int y = -2; y <= 1; y++)
+                for (int x = -2; x <= 1; x++)
+                    if (!cells.Contains(Key((int)Math.Floor(point.X) + x, (int)Math.Floor(point.Y) + y)))
+                        return false;
             return true;
         }
         static bool InsideAny(List<MapRect> rects, MapPoint point)
         {
-            foreach (var r in rects) if (point.X > r.X - 1.5f && point.X < r.Right + 1.5f && point.Y > r.Y - 1.5f && point.Y < r.Top + 1.5f) return true;
+            foreach (var r in rects)
+                if (point.X > r.X - 1.5f && point.X < r.Right + 1.5f && point.Y > r.Y - 1.5f && point.Y < r.Top + 1.5f)
+                    return true;
             return false;
         }
         static float Distance(MapPoint a, MapPoint b) => (float)Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 
         static MapPoint[] TraceExterior(HashSet<long> cells)
         {
-            var edges = new Dictionary<long,long>();
-            foreach(var key in cells)
+            var edges = new Dictionary<long, long>();
+            foreach (var key in cells)
             {
-                int x=(int)(key>>32),y=(int)key;
-                if(!cells.Contains(Key(x,y-1))) edges.Add(Key(x,y),Key(x+1,y));
-                if(!cells.Contains(Key(x+1,y))) edges.Add(Key(x+1,y),Key(x+1,y+1));
-                if(!cells.Contains(Key(x,y+1))) edges.Add(Key(x+1,y+1),Key(x,y+1));
-                if(!cells.Contains(Key(x-1,y))) edges.Add(Key(x,y+1),Key(x,y));
+                int x = (int)(key >> 32), y = (int)key;
+                if (!cells.Contains(Key(x, y - 1)))
+                    edges.Add(Key(x, y), Key(x + 1, y));
+                if (!cells.Contains(Key(x + 1, y)))
+                    edges.Add(Key(x + 1, y), Key(x + 1, y + 1));
+                if (!cells.Contains(Key(x, y + 1)))
+                    edges.Add(Key(x + 1, y + 1), Key(x, y + 1));
+                if (!cells.Contains(Key(x - 1, y)))
+                    edges.Add(Key(x, y + 1), Key(x, y));
             }
-            long start=long.MaxValue; foreach(var key in edges.Keys) if(key<start)start=key;
-            long current=start;var points=new List<MapPoint>();
-            do { points.Add(new MapPoint((int)(current>>32),(int)current)); current=edges[current]; if(points.Count>edges.Count)throw new InvalidOperationException("Unclosed module boundary"); } while(current!=start);
-            if(points.Count!=edges.Count)throw new InvalidOperationException("Module floor has a hole or disconnected component; express holes as obstacles");
-            for(int i=points.Count-1;i>=0;i--)
+            long start = long.MaxValue;
+            foreach (var key in edges.Keys)
+                if (key < start)
+                    start = key;
+            long current = start;
+            var points = new List<MapPoint>();
+            do
             {
-                var a=points[(i+points.Count-1)%points.Count];var b=points[i];var c=points[(i+1)%points.Count];
-                if((b.X-a.X)*(c.Y-b.Y)==(b.Y-a.Y)*(c.X-b.X))points.RemoveAt(i);
+                points.Add(new MapPoint((int)(current >> 32), (int)current));
+                current = edges[current];
+                if (points.Count > edges.Count)
+                    throw new InvalidOperationException("Unclosed module boundary");
+            } while (current != start);
+            if (points.Count != edges.Count)
+                throw new InvalidOperationException("Module floor has a hole or disconnected component; express holes as obstacles");
+            for (int i = points.Count - 1; i >= 0; i--)
+            {
+                var a = points[(i + points.Count - 1) % points.Count];
+                var b = points[i];
+                var c = points[(i + 1) % points.Count];
+                if ((b.X - a.X) * (c.Y - b.Y) == (b.Y - a.Y) * (c.X - b.X))
+                    points.RemoveAt(i);
             }
             return points.ToArray();
         }
-        internal static long Key(int x,int y) => ((long)x<<32)|(uint)y;
+        internal static long Key(int x, int y) => ((long)x << 32) | (uint)y;
     }
 }

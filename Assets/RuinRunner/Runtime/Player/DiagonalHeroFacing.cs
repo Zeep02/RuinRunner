@@ -15,14 +15,19 @@ namespace RuinRunner
             if (previous != NorthEast && previous != SouthEast && previous != SouthWest && previous != NorthWest)
                 previous = SouthEast;
             float magnitudeSquared = x * x + y * y;
-            if (magnitudeSquared < .001f) return previous;
+            if (magnitudeSquared < .001f)
+                return previous;
             float threshold = (float)System.Math.Sqrt(magnitudeSquared) * axisDeadZone;
             bool east = previous == NorthEast || previous == SouthEast;
             bool north = previous == NorthEast || previous == NorthWest;
-            if (x > threshold) east = true;
-            else if (x < -threshold) east = false;
-            if (y > threshold) north = true;
-            else if (y < -threshold) north = false;
+            if (x > threshold)
+                east = true;
+            else if (x < -threshold)
+                east = false;
+            if (y > threshold)
+                north = true;
+            else if (y < -threshold)
+                north = false;
             return north ? (east ? NorthEast : NorthWest) : (east ? SouthEast : SouthWest);
         }
     }

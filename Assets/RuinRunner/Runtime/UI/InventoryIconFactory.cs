@@ -16,9 +16,11 @@ namespace RuinRunner
         public static Sprite GetWorldSprite(string id, Color rarityColor, InventoryIconKind kind)
         {
             var key = kind + ":" + id;
-            if (WorldSprites.TryGetValue(key, out var sprite)) return sprite;
+            if (WorldSprites.TryGetValue(key, out var sprite))
+                return sprite;
             var texture = Get(id, rarityColor, kind);
-            if (texture == null) return null;
+            if (texture == null)
+                return null;
             var accessory = kind == InventoryIconKind.Accessory ? AccessoryLootTable.Find(id) : null;
             var path = ItemIconLibrary.ResourcePath(accessory == null ? id : accessory.IconId,
                 accessory == null ? kind : accessory.IconKind);
@@ -29,7 +31,8 @@ namespace RuinRunner
                 return null;
             }
             var bounds = ItemIconLibrary.ContentBounds(texture);
-            if (bounds.width == 0) return null;
+            if (bounds.width == 0)
+                return null;
             // Center the visible content without normalizing every item to one world unit.
             sprite = Sprite.Create(texture, new Rect(bounds.x, bounds.y, bounds.width, bounds.height),
                 new Vector2(.5f, .5f), importedSprite.pixelsPerUnit, 0, SpriteMeshType.FullRect);

@@ -4,27 +4,43 @@ using System.Collections.Generic;
 namespace RuinRunner
 {
     // Published IDs are persistence contracts; enum ordinals are never recycled.
-    public enum TalentId { ComboMemory=1, StoredGuard=2, CrossChamber=3, TurningDash=4, BrakeDash=5, ReturnDash=6, SurveyNext=7, SupplyChoice=8, ReturnTrail=9, ChestIntent=10, MerchantBarter=11, ReserveOffer=12,
-        GlassBlade=13, LastStand=14, CorpseBurst=15, BloodPact=16, VoidRush=17, ChainChant=18, GhostMine=19, RazorWind=20, CloseCall=21, Miser=22, Revenant=23, Gambler=24,
-        ExecutionerEdge=25, FirstBlood=26, Bloodthirst=27, FullCup=28, ManaHeart=29, HunterBreath=30, DoubleStep=31, Momentum=32, PhantomStep=33, CursedPower=34, Duelist=35, LateBloom=36 }
+    public enum TalentId
+    {
+        ComboMemory = 1, StoredGuard = 2, CrossChamber = 3, TurningDash = 4, BrakeDash = 5, ReturnDash = 6, SurveyNext = 7, SupplyChoice = 8, ReturnTrail = 9, ChestIntent = 10, MerchantBarter = 11, ReserveOffer = 12,
+        GlassBlade = 13, LastStand = 14, CorpseBurst = 15, BloodPact = 16, VoidRush = 17, ChainChant = 18, GhostMine = 19, RazorWind = 20, CloseCall = 21, Miser = 22, Revenant = 23, Gambler = 24,
+        ExecutionerEdge = 25, FirstBlood = 26, Bloodthirst = 27, FullCup = 28, ManaHeart = 29, HunterBreath = 30, DoubleStep = 31, Momentum = 32, PhantomStep = 33, CursedPower = 34, Duelist = 35, LateBloom = 36
+    }
     public enum TalentFamily { Blade, Mana, Step, Fate }
     public sealed class TalentDefinition
     {
-        public readonly TalentId Type; public readonly string Id, Name, Summary; public readonly TalentFamily Family;
-        public TalentDefinition(TalentId type,string id,string name,TalentFamily family,string summary)
-        { Type=type;Id=id;Name=name;Family=family;Summary=summary; }
+        public readonly TalentId Type;
+        public readonly string Id, Name, Summary;
+        public readonly TalentFamily Family;
+        public TalentDefinition(TalentId type, string id, string name, TalentFamily family, string summary)
+        {
+            Type = type;
+            Id = id;
+            Name = name;
+            Family = family;
+            Summary = summary;
+        }
     }
     public sealed class MasteryTrack
     {
-        public readonly string Id,Name,Effect;
-        public MasteryTrack(string id,string name,string effect){Id=id;Name=name;Effect=effect;}
+        public readonly string Id, Name, Effect;
+        public MasteryTrack(string id, string name, string effect)
+        {
+            Id = id;
+            Name = name;
+            Effect = effect;
+        }
     }
     public static class TalentCatalog
     {
-        public const int PerFamily=6,MasteryRanks=5;
+        public const int PerFamily = 6, MasteryRanks = 5;
         // Published costs live in the server catalog; this is what the tree displays as the next price.
-        public static readonly int[] MasteryCosts={2,3,5,8,12};
-        public static readonly MasteryTrack[] Mastery={
+        public static readonly int[] MasteryCosts = { 2, 3, 5, 8, 12 };
+        public static readonly MasteryTrack[] Mastery ={
             new MasteryTrack("vigor","강인함","최대 체력 +8"),
             new MasteryTrack("focus","집중","최대 마나 +8"),
             new MasteryTrack("edge","예기","공격력 +4%"),
@@ -34,15 +50,17 @@ namespace RuinRunner
             new MasteryTrack("swift","질주","이동 속도 +0.12"),
             new MasteryTrack("wisdom","깨달음","경험치 +8%")
         };
-        public static string MasteryId(MasteryTrack track,int rank)=>"mastery_"+track.Id+"_"+rank;
-        public static int MasteryRank(string[] unlocked,MasteryTrack track)
+        public static string MasteryId(MasteryTrack track, int rank) => "mastery_" + track.Id + "_" + rank;
+        public static int MasteryRank(string[] unlocked, MasteryTrack track)
         {
-            int rank=0;
-            if(unlocked==null)return 0;
-            while(rank<MasteryRanks&&Array.IndexOf(unlocked,MasteryId(track,rank+1))>=0)rank++;
+            int rank = 0;
+            if (unlocked == null)
+                return 0;
+            while (rank < MasteryRanks && Array.IndexOf(unlocked, MasteryId(track, rank + 1)) >= 0)
+                rank++;
             return rank;
         }
-        public static readonly TalentDefinition[] All={
+        public static readonly TalentDefinition[] All ={
             new TalentDefinition(TalentId.GlassBlade,"glass_blade","유리 칼날",TalentFamily.Blade,"주는 피해 +60%.\n최대 체력이 절반이 됩니다."),
             new TalentDefinition(TalentId.LastStand,"last_stand","벼랑 끝",TalentFamily.Blade,"잃은 체력만큼 피해가 늘어 빈사일 때 +120%.\n회복량은 절반이 됩니다."),
             new TalentDefinition(TalentId.CorpseBurst,"corpse_burst","시체 폭죽",TalentFamily.Blade,"처치한 적이 터져 주변을 휩쓸고, 그 폭발에 죽은 적도 터집니다."),
@@ -68,19 +86,49 @@ namespace RuinRunner
             new TalentDefinition(TalentId.Duelist,"duelist","결투가",TalentFamily.Fate,"가까운 적이 하나면 피해 +70%.\n셋 이상이면 -20%."),
             new TalentDefinition(TalentId.LateBloom,"late_bloom","대기만성",TalentFamily.Fate,"레벨 1에서는 피해 -20%.\n레벨이 오를 때마다 +6%.")
         };
-        public static TalentDefinition Find(string id) { foreach(var t in All)if(t.Id==id)return t;return null; }
-        public static TalentDefinition Find(TalentId id) { foreach(var t in All)if(t.Type==id)return t;return null; }
+        public static TalentDefinition Find(string id)
+        {
+            foreach (var t in All)
+                if (t.Id == id)
+                    return t;
+            return null;
+        }
+        public static TalentDefinition Find(TalentId id)
+        {
+            foreach (var t in All)
+                if (t.Type == id)
+                    return t;
+            return null;
+        }
     }
     public sealed class TalentLoadout
     {
-        readonly HashSet<TalentId> active=new HashSet<TalentId>();
-        public const int MaximumActive=4;
-        public bool Has(TalentId id)=>active.Contains(id);
-        public string[] Ids { get { var result=new List<string>();foreach(var t in TalentCatalog.All)if(Has(t.Type))result.Add(t.Id);return result.ToArray(); } }
-        public TalentLoadout(IEnumerable<string> ids=null)
+        readonly HashSet<TalentId> active = new HashSet<TalentId>();
+        public const int MaximumActive = 4;
+        public bool Has(TalentId id) => active.Contains(id);
+        public string[] Ids
         {
-            if(ids==null)return;var families=new HashSet<TalentFamily>();
-            foreach(var id in ids){var t=TalentCatalog.Find(id);if(t==null||active.Count>=MaximumActive||!families.Add(t.Family))continue;active.Add(t.Type);}
+            get
+            {
+                var result = new List<string>();
+                foreach (var t in TalentCatalog.All)
+                    if (Has(t.Type))
+                        result.Add(t.Id);
+                return result.ToArray();
+            }
+        }
+        public TalentLoadout(IEnumerable<string> ids = null)
+        {
+            if (ids == null)
+                return;
+            var families = new HashSet<TalentFamily>();
+            foreach (var id in ids)
+            {
+                var t = TalentCatalog.Find(id);
+                if (t == null || active.Count >= MaximumActive || !families.Add(t.Family))
+                    continue;
+                active.Add(t.Type);
+            }
         }
     }
 }

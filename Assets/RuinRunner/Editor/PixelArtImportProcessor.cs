@@ -7,7 +7,7 @@ namespace RuinRunner.EditorTools
     {
         // Changing a postprocessor does not migrate already imported textures.
         // Run before every clean build, and expose the same repair in the Editor.
-        [MenuItem("Prototype/Art/Validate and Repair Pixel Imports")]
+        [MenuItem("RuinRunner/Art/Validate and Repair Pixel Imports")]
         public static void EnsurePixelImports()
         {
             var repaired = 0;

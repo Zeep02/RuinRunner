@@ -18,8 +18,15 @@ namespace RuinRunner
             var root = new GameObject("BossSweepBeam");
             root.transform.position = origin;
             var beam = root.AddComponent<BossSweepBeam>();
-            beam.owner = owner; beam.player = player; beam.origin = origin; beam.angle = angle; beam.turn = turnPerSecond;
-            beam.warning = warning; beam.active = active; beam.width = width; beam.damage = damage;
+            beam.owner = owner;
+            beam.player = player;
+            beam.origin = origin;
+            beam.angle = angle;
+            beam.turn = turnPerSecond;
+            beam.warning = warning;
+            beam.active = active;
+            beam.width = width;
+            beam.damage = damage;
             beam.frames = NativeCombatEffect.Frames("ESealBeamLoop");
             beam.view = root.AddComponent<SpriteRenderer>();
             beam.view.sprite = beam.frames[0];
@@ -49,18 +56,30 @@ namespace RuinRunner
 
         void Update()
         {
-            if (owner == null || owner.IsDead || player == null) { Destroy(gameObject); return; }
-            if (owner.AnimationPaused) return;
+            if (owner == null || owner.IsDead || player == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            if (owner.AnimationPaused)
+                return;
             age += Time.deltaTime;
-            if (age >= warning + active) { Destroy(gameObject); return; }
-            if (age >= warning) angle += turn * Time.deltaTime;
+            if (age >= warning + active)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            if (age >= warning)
+                angle += turn * Time.deltaTime;
             var reach = Pose();
-            if (age < warning || age < nextHit) return;
+            if (age < warning || age < nextHit)
+                return;
             var radians = angle * Mathf.Deg2Rad;
             var along = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
             var feet = player.FeetPoint - origin;
             var closest = along * Mathf.Clamp(Vector2.Dot(feet, along), 0f, reach);
-            if ((feet - closest).sqrMagnitude > width * width * .25f) return;
+            if ((feet - closest).sqrMagnitude > width * width * .25f)
+                return;
             nextHit = age + RehitSeconds;
             player.TakeDamage(damage, feet - closest);
         }
