@@ -1,0 +1,29 @@
+{
+  "clip": "WChainHorizonA",
+  "ppu": 32,
+  "pivotX": 0.01034,
+  "pivotY": 0.4375,
+  "width": 145,
+  "height": 8,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/chain-long",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 12,
+  "loop": true,
+  "frames": 6,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 145,
+  "origin": [
+    1,
+    4
+  ],
+  "optionsJson": "{\"palette\":[\"#14161c\",\"#2c3038\",\"#4a4f5a\",\"#70757f\",\"#9ea3ac\",\"#d0d4da\",\"#f6f7f8\"]}"
+}

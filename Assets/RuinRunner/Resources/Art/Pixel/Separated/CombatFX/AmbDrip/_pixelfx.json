@@ -1,0 +1,29 @@
+{
+  "clip": "AmbDrip",
+  "ppu": 32,
+  "pivotX": 0.54444,
+  "pivotY": 0.1,
+  "width": 45,
+  "height": 85,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "water/drip",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 48,
+  "durationSeconds": 1.6,
+  "visibleDiameter": 81,
+  "origin": [
+    24,
+    76
+  ],
+  "optionsJson": "{}"
+}

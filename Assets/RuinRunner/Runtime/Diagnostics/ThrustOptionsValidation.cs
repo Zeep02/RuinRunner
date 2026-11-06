@@ -72,7 +72,7 @@ namespace RuinRunner
             foreach (var enemy in enemies) Destroy(enemy.gameObject);
             yield return null;
 
-            player.EquipWeapon(DemoContent.Weapon("rust_sword"));
+            player.EquipWeapon(DemoContent.Weapon("trainee_blade"));
             var third = MeleeComboCatalog.Get(player.EquippedWeapon).LightSteps[2];
             var preparation = Mathf.Min(.26f,player.AttackDelay * third.DelayMultiplier) * MeleeMotionTiming.ThrustStart;
             Require(preparation >= .04f && preparation <= .08f, "third-hit preparation is about0.06s without a movement lock");
@@ -85,11 +85,8 @@ namespace RuinRunner
             var started = Time.time;
             while (player.MeleeContactsResolved == contact) yield return null;
             Require(Time.time - started < .34f, "shortened third-hit damage arrives promptly");
-            var effect = UnityEngine.Object.FindAnyObjectByType<MeleeThrustEffect>();
-            Require(effect != null && effect.GetComponentInChildren<SpriteRenderer>() != null &&
-                effect.GetComponentInChildren<NativeCombatEffect>() != null &&
-                NativeCombatEffect.Frames("RifleFlash").Length == 5,
-                "actual combo spawns the five authored axial thrust poses");
+            var effect = UnityEngine.Object.FindAnyObjectByType<SignatureSlashEffect>();
+            Require(effect != null && effect.GetComponentInChildren<SpriteRenderer>() != null, "actual combo spawns the thrust trail");
             var shown = new HashSet<int>();
             while (effect != null)
             {

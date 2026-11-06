@@ -1,0 +1,29 @@
+{
+  "clip": "WBloodBankSlash",
+  "ppu": 32,
+  "pivotX": 0.36513,
+  "pivotY": 0.51056,
+  "width": 152,
+  "height": 142,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 50,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 119,
+  "origin": [
+    55,
+    69
+  ],
+  "optionsJson": "{\"palette\":[\"#14040a\",\"#3a0a14\",\"#6a101c\",\"#a01824\",\"#d42a30\",\"#ff5a50\",\"#ffc0b0\"],\"R\":53,\"W\":26}"
+}

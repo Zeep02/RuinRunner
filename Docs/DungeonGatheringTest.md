@@ -1,5 +1,7 @@
 # Dungeon Gathering — isolated map test
 
+> 2026-11-03: 이 씬과 빌드 코드(`World/DungeonGatheringTest.cs`, `Editor/DungeonGatheringTestBuild.cs`, `Scenes/DungeonGatheringTest.unity`)는 프로젝트 정리 때 지웠다. git의 `1a03e9a9a`에서 되살릴 수 있다. 에셋 팩 그림은 `StageTerrainArt`가 쓰므로 남아 있다. 아래는 당시 기록이다.
+
 ## Run
 
 Open `Builds/DungeonGatheringTest/DungeonGatheringTest.exe`. This is a separate

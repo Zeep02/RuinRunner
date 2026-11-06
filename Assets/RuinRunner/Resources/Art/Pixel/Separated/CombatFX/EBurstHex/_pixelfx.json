@@ -1,0 +1,29 @@
+{
+  "clip": "EBurstHex",
+  "ppu": 32,
+  "pivotX": 0.47973,
+  "pivotY": 0.37912,
+  "width": 74,
+  "height": 91,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": "0,-24",
+  "from": "0.25",
+  "until": "1.2",
+  "source": "pixelfx",
+  "effect": "spawn/poof",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 12,
+  "fps": 30,
+  "loop": false,
+  "frames": 28,
+  "durationSeconds": 0.933,
+  "visibleDiameter": 83,
+  "origin": [
+    35,
+    80
+  ],
+  "optionsJson": "{\"palette\":[\"#241638\",\"#3c2460\",\"#5e3290\",\"#8048b8\",\"#a970e0\",\"#e0c8ff\"],\"stars\":[\"#e0c8ff\",\"#a970e0\",\"#8048b8\",\"#5e3290\"]}"
+}

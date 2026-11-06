@@ -1,0 +1,29 @@
+{
+  "clip": "FxPropSpores",
+  "ppu": 32,
+  "pivotX": 0.325,
+  "pivotY": 0.02381,
+  "width": 20,
+  "height": 21,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "nature/prop-spores",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 120,
+  "durationSeconds": 4,
+  "visibleDiameter": 19,
+  "origin": [
+    6,
+    20
+  ],
+  "optionsJson": "{}"
+}

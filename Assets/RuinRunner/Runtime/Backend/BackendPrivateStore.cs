@@ -93,15 +93,6 @@ namespace RuinRunner.Backend
             }
             Write("legacy-receipts", id, result); return result;
         }
-        public void RestoreLegacyToNewFile(LegacyBackup backup, string destination)
-        {
-            var source = Path.GetFullPath(backup.encryptedOriginalPath);
-            if (!source.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Backup does not belong to this store.");
-            var raw = Protect(File.ReadAllBytes(source), false);
-            if (Hash(raw) != backup.originalSha256) throw new InvalidDataException("Backup checksum mismatch.");
-            // No overwrite or move of the player's original save.
-            using (var stream = new FileStream(Path.GetFullPath(destination), FileMode.CreateNew, FileAccess.Write, FileShare.None)) { stream.Write(raw, 0, raw.Length); stream.Flush(true); }
-        }
         static void AtomicWrite(string path, byte[] bytes)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(path)); var temporary = path + "." + Guid.NewGuid().ToString("N") + ".tmp";

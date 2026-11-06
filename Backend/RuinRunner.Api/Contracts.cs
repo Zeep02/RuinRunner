@@ -22,7 +22,7 @@ public sealed record StartRunRequest(Guid OperationId, Guid ProfileId, long Expe
 public sealed record SettleRequest(Guid OperationId, long ExpectedRunRevision, string Outcome, int EnemiesDefeated,
     int RoomsReached, int StagesCleared);
 public sealed record StarterWeapon(string Id, int UnlockCost, string Name = "");
-public sealed record Talent(string Id, string Branch, int UnlockCost, int RequiredRuns = 0, string Name = "", string Description = "");
+public sealed record Talent(string Id, string Branch, int UnlockCost, int RequiredRuns = 0, string Name = "", string Description = "", string? Requires = null);
 public sealed record SettlementRules(int MinimumReward, int KillsPerShard, int RewardPerRoom, int VictoryBonus,
     int CampaignStages, int MaxKills, int MaxRooms);
 public sealed record Catalog(string Version, string Status, string[] GeneratorVersions, int StartingLegacy,
@@ -53,8 +53,8 @@ public sealed class ProfileState
     public int BestCampaignStage { get; set; }
     public int DeepestRoom { get; set; }
     public int TotalKills { get; set; }
-    public string StartingWeaponId { get; set; } = "rust_sword";
-    public string[] UnlockedWeaponIds { get; set; } = ["rust_sword"];
+    public string StartingWeaponId { get; set; } = "trainee_blade";
+    public string[] UnlockedWeaponIds { get; set; } = ["trainee_blade"];
     public string[] UnlockedTalentIds { get; set; } = [];
     public string[] ActiveTalentIds { get; set; } = [];
     public string TrustOrigin { get; set; } = "server-created";

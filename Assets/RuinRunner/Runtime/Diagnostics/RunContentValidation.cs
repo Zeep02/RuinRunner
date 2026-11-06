@@ -38,6 +38,9 @@ namespace RuinRunner
                     signatures.Add(signature);
                     Require(RunContent.RollChest(seed, 3, 2, true).Accessory != null, "boss accessory guarantee");
                 }
+                // With 14 legendaries at 2 percent between them, seeing each one takes far more rolls than the checks above make.
+                for (var seed = 20000; seed < 60000 && weapons.Count < WeaponLootTable.Count; seed++)
+                    weapons.Add(RunContent.RollChest(seed, 2, 2, false).Weapon.Id);
                 Require(weapons.Count == WeaponLootTable.Count, "all weapons reachable " + weapons.Count);
                 Require(accessories.Count == AccessoryLootTable.Count, "all accessories reachable " + accessories.Count);
                 Require(signatures.Count > 100, "encounter variation");

@@ -21,8 +21,8 @@ namespace RuinRunner
             float radius;
             if(step.Motion==MeleeAttackMotion.Thrust)
             {
-                radius=MeleeThrustEffect.VisibleReach(family);
-                size.y=MeleeThrustEffect.VisibleBreadth(family);
+                radius=MeleeThrustReach.VisibleReach(family);
+                size.y=MeleeThrustReach.VisibleBreadth(family);
             }
             else if(step.Motion==MeleeAttackMotion.Cleave&&family==WeaponFamily.Greatsword)
                 radius=Mathf.Max(size.x,size.y)*1.08f*49f/88f;

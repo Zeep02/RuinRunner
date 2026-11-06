@@ -89,16 +89,7 @@ namespace RuinRunner
                     if(hurtTime>=.18f)hurtTime=-1;
                 }
                 target.flipX=false;
-                return;
             }
-
-            var frames = PixelArtAtlas.GetEnemyFrames(owner.Type, state);
-            if (frames == null || frames.Length == 0) return;
-            var frame = owner.Type != EnemyType.Boss && state == 2
-                ? Mathf.Clamp((int)owner.Type >= (int)EnemyType.Tidekeeper ? (owner.AttackVisualPhase == 0 ? (stateTime < .2f ? 0 : 1) : owner.AttackVisualPhase == 1 ? 2 : 3) : owner.AttackVisualPhase, 0, frames.Length - 1)
-                : Mathf.FloorToInt(stateTime * (state == 0 ? 3f : 8f)) % frames.Length;
-            target.sprite = frames[frame];
-            target.flipX = owner.FacingDirection < 0f;
         }
     }
 }

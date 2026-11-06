@@ -1,0 +1,28 @@
+{
+  "clip": "WBloodBankA2",
+  "ppu": 32,
+  "pivotX": 0.9,
+  "pivotY": 0.07143,
+  "width": 5,
+  "height": 21,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 80,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 21,
+  "origin": [
+    4,
+    19
+  ],
+  "optionsJson": "{\"palette\":[\"#14040a\",\"#3a0a14\",\"#6a101c\",\"#a01824\",\"#d42a30\",\"#ff5a50\",\"#ffc0b0\"],\"shape\":\"gauge\",\"size\":1,\"fill\":0.4}"
+}

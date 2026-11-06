@@ -1,0 +1,28 @@
+{
+  "clip": "WardenIdle",
+  "ppu": 32,
+  "pivotX": 0.45213,
+  "pivotY": 0.01648,
+  "width": 94,
+  "height": 91,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-idle",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": true,
+  "frames": 24,
+  "durationSeconds": 1.6,
+  "visibleDiameter": 94,
+  "origin": [
+    42,
+    89
+  ],
+  "optionsJson": "{}"
+}

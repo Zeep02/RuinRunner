@@ -1,0 +1,29 @@
+{
+  "clip": "WCharcoalStaffCast",
+  "ppu": 32,
+  "pivotX": 0.08013,
+  "pivotY": 0.37611,
+  "width": 156,
+  "height": 113,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "fire/fire-breath",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 30,
+  "fps": 30,
+  "loop": true,
+  "frames": 38,
+  "durationSeconds": 1.267,
+  "visibleDiameter": 129,
+  "origin": [
+    12,
+    70
+  ],
+  "optionsJson": "{\"palette\":[\"#2a0a10\",\"#5c1212\",\"#a4231a\",\"#e2481c\",\"#ff8a2a\",\"#ffd166\",\"#fff3c4\"]}"
+}

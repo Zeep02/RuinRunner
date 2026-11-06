@@ -1,0 +1,28 @@
+{
+  "clip": "ERingSpore",
+  "ppu": 32,
+  "pivotX": 0.5041,
+  "pivotY": 0.4959,
+  "width": 122,
+  "height": 122,
+  "premultiplied": true,
+  "canvas": "170x170",
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/ring",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 44,
+  "fps": 30,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 122,
+  "origin": [
+    61,
+    61
+  ],
+  "optionsJson": "{\"palette\":[\"#061a14\",\"#0e3a2c\",\"#17634c\",\"#26967a\",\"#4cc8a4\",\"#94ecd0\",\"#e8fff4\"],\"r\":61,\"squash\":1,\"thick\":3}"
+}

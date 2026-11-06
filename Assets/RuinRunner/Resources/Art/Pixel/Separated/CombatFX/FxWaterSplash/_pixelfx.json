@@ -1,0 +1,28 @@
+{
+  "clip": "FxWaterSplash",
+  "ppu": 32,
+  "pivotX": 0.5307,
+  "pivotY": 0.20707,
+  "width": 114,
+  "height": 99,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "water/splash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 39,
+  "durationSeconds": 2.6,
+  "visibleDiameter": 110,
+  "origin": [
+    60,
+    78
+  ],
+  "optionsJson": "{}"
+}

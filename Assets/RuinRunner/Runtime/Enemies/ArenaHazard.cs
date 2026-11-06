@@ -45,11 +45,11 @@ namespace RuinRunner
             return hazard;
         }
         public static ArenaHazard CreateChargeRoute(EnemyController owner, PlayerController player,
-            Vector2 origin, Vector2 direction, float distance, float warning, float active, Color color)
+            Vector2 origin, Vector2 direction, float distance, float warning, float active, Color color, float contactRadius)
         {
             direction = direction.sqrMagnitude > .0001f ? direction.normalized : Vector2.right;
             distance = Mathf.Max(0, distance);
-            float diameter = EnemyController.ChargeContactRadius * 2;
+            float diameter = contactRadius * 2;
             // The actual contact test sweeps a circle along the committed route.
             // Include both end caps: the previous thin rectangle omitted targets
             // beside the body and beyond the planned landing point.
@@ -102,10 +102,11 @@ namespace RuinRunner
             if (elapsed >= warning + active + (art == null ? 0 : ArenaHazardArt.TailSeconds)) { Destroy(gameObject); return; }
             if (art != null) art.Sample(elapsed,warning,active);
             footprint.gameObject.SetActive(elapsed < warning + active);
-            footprint.Sample(elapsed,warning,IsActive);
+            footprint.Sample(elapsed,warning,IsActive,active);
             view.enabled = !capsule && elapsed < warning + active && (!round || arcDegrees>=359);
             view.color = new Color(tint.r,tint.g,tint.b,IsActive ? 1f : .55f + .35f * Mathf.Clamp01(elapsed / warning));
-            if (damage<=0 || !IsActive || attempted || !ContainsActive(player.transform.position)) return;
+            // The warning is drawn on the floor, so it is the hero's feet that stand in it or not.
+            if (damage<=0 || !IsActive || attempted || !ContainsActive(player.FeetPoint)) return;
             attempted = true;
             player.TakeDamage(damage, ((Vector2)player.transform.position - (Vector2)transform.position).normalized);
         }

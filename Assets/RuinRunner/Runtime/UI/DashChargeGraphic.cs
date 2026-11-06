@@ -15,6 +15,7 @@ namespace RuinRunner
         private readonly List<int> triangles = new List<int>(600);
         private int previousCharges = -1;
         private float previousProgress = -1;
+        private int previousCapacity = -1;
         public float FirstFill { get; private set; }
         public float SecondFill { get; private set; }
 
@@ -29,18 +30,18 @@ namespace RuinRunner
             renderer.sortingOrder = 29;
         }
 
-        public void SetCharges(int ready, float progress)
+        public void SetCharges(int ready, float progress, int capacity = 2)
         {
             progress = Mathf.Clamp01(progress);
-            if (ready == previousCharges && Mathf.Approximately(progress, previousProgress)) return;
-            previousCharges = ready; previousProgress = progress;
+            if (ready == previousCharges && capacity == previousCapacity && Mathf.Approximately(progress, previousProgress)) return;
+            previousCharges = ready; previousProgress = progress; previousCapacity = capacity;
             vertices.Clear(); colors.Clear(); triangles.Clear();
-            Quad(0, 0, 15, 7, new Color32(18, 22, 32, 255));
+            Quad(0, 0, 1 + capacity * 7, 7, new Color32(18, 22, 32, 255));
             FirstFill = ready > 0 ? 1 : progress;
             SecondFill = ready > 1 ? 1 : ready == 1 ? progress : 0;
-            for (var charge = 0; charge < 2; charge++)
+            for (var charge = 0; charge < capacity; charge++)
             {
-                var ratio = charge == 0 ? FirstFill : SecondFill;
+                var ratio = charge == 0 ? FirstFill : charge == 1 ? SecondFill : ready > charge ? 1 : ready == charge ? progress : 0;
                 for (var y = 0; y < Rows.Length; y++) for (var x = 0; x < Rows[y].Length; x++)
                 {
                     if (Rows[y][x] == '.') continue;

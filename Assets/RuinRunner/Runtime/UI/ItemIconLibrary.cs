@@ -42,12 +42,16 @@ namespace RuinRunner
             var bounds=right < left ? new RectInt() : new RectInt(left, bottom, right - left + 1, top - bottom + 1);
             BoundsCache[texture]=bounds;return bounds;
         }
+        private const int SetIconPixels=30,SetIconMinimum=20;
         public static void DrawGUI(Rect area,Texture2D texture)
         {
             if(texture==null)return;
             var bounds=ContentBounds(texture);if(bounds.width==0||bounds.height==0)return;
             var uiScale=Mathf.Abs(GUI.matrix.m00);
-            var fit=Mathf.Min(area.width*uiScale/bounds.width,area.height*uiScale/bounds.height);
+            // Item art is drawn to about 30 pixels. Sized as one set, a 26 pixel icon cannot come out
+            // twice as large as its 30 pixel neighbour when both round to whole physical pixels.
+            var reference=Mathf.Max(bounds.width,bounds.height)>=SetIconMinimum?SetIconPixels:0;
+            var fit=Mathf.Min(area.width*uiScale/Mathf.Max(bounds.width,reference),area.height*uiScale/Mathf.Max(bounds.height,reference));
             // Integer physical pixels keep a one-pixel contour equally thick on every side.
             var pixels=fit>=1f?Mathf.Floor(fit):fit;
             var width=bounds.width*pixels;var height=bounds.height*pixels;

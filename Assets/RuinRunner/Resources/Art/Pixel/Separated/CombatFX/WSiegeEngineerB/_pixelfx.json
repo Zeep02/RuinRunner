@@ -1,0 +1,28 @@
+{
+  "clip": "WSiegeEngineerB",
+  "ppu": 32,
+  "pivotX": 0.56667,
+  "pivotY": 0.07143,
+  "width": 15,
+  "height": 21,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 62,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 4,
+  "origin": [
+    8,
+    19
+  ],
+  "optionsJson": "{\"palette\":[\"#14141a\",\"#2a2a30\",\"#44444c\",\"#66666e\",\"#8c8c94\",\"#b8b8be\",\"#e8e8ea\"],\"shape\":\"smoke\",\"size\":1}"
+}

@@ -1,0 +1,29 @@
+{
+  "clip": "WGravitySteleCleave",
+  "ppu": 32,
+  "pivotX": 0.36765,
+  "pivotY": 0.4797,
+  "width": 238,
+  "height": 197,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 65,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 166,
+  "origin": [
+    87,
+    102
+  ],
+  "optionsJson": "{\"palette\":[\"#0c0614\",\"#22103c\",\"#3e1a6c\",\"#6a2ca8\",\"#9a48e0\",\"#cc90ff\",\"#f2e0ff\"],\"R\":72,\"W\":46,\"a0\":-170,\"a1\":100,\"over\":0}"
+}

@@ -1,0 +1,29 @@
+{
+  "clip": "WShadowSutureCast",
+  "ppu": 32,
+  "pivotX": 0.50352,
+  "pivotY": 0.20455,
+  "width": 142,
+  "height": 110,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": "0.32",
+  "until": "1.9",
+  "source": "pixelfx",
+  "effect": "shadow/shadow-tendrils",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 47,
+  "durationSeconds": 1.567,
+  "visibleDiameter": 111,
+  "origin": [
+    71,
+    87
+  ],
+  "optionsJson": "{\"palette\":[\"#0c0814\",\"#241638\",\"#3c2460\",\"#5e3290\",\"#8048b8\",\"#a970e0\",\"#e0c8ff\"]}"
+}

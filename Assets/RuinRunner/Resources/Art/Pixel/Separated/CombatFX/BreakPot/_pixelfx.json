@@ -1,0 +1,29 @@
+{
+  "clip": "BreakPot",
+  "ppu": 32,
+  "pivotX": 0.51205,
+  "pivotY": 0.21667,
+  "width": 249,
+  "height": 150,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "0.9",
+  "source": "pixelfx",
+  "effect": "explosions/dirt-explosion",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 27,
+  "durationSeconds": 0.9,
+  "visibleDiameter": 248,
+  "origin": [
+    127,
+    117
+  ],
+  "optionsJson": "{}"
+}

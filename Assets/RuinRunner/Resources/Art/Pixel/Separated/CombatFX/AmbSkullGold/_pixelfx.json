@@ -1,0 +1,29 @@
+{
+  "clip": "AmbSkullGold",
+  "ppu": 32,
+  "pivotX": 0.50962,
+  "pivotY": 0.09167,
+  "width": 52,
+  "height": 60,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "fire/skull-brazier",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 120,
+  "durationSeconds": 4,
+  "visibleDiameter": 43,
+  "origin": [
+    26,
+    54
+  ],
+  "optionsJson": "{\"palette\":[\"#3a1408\",\"#6e2a0c\",\"#a84a10\",\"#d9741a\",\"#f49c2c\",\"#ffc35a\",\"#ffe08c\",\"#fff2c0\",\"#ffffff\"]}"
+}

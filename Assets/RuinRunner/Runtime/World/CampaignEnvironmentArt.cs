@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace RuinRunner
 {
-    /// <summary>Architecture-attached dressing with reserved visual footprints.</summary>
+    /// <summary>The structures on solid islands, wall lamps, and the boss arena's floor mosaic.</summary>
     public static class CampaignEnvironmentArt
     {
-        public const float MonumentWallInset=.375f;
+                // How far along the wall a mounted lamp needs unbroken wall, so it never sits against a corner.
+        const float WallArtClearance=1.5f,LampDropToFace=.75f;
         public static void Build(Transform parent,StageTerrainLayout terrain,int stage,EnvironmentPlacementRules placement=null)
         {
             var steps=BuildSteps(parent,terrain,stage,placement,false);
@@ -30,15 +31,7 @@ namespace RuinRunner
             for(var region=0;region<terrain.Rooms.Length;region++)
             foreach(var obstacle in terrain.Rooms[region].platforms)
             {
-                var bounds=ClosedCells(terrain,terrain.Centers[region]+obstacle.position,obstacle.size);
-                if(bounds.width==0)continue;
-                if(stage==1)Place(root.transform,"FloodedCistern",IndividualArt.Sprite("Campaign/Terrain/Flooded/Cistern"),bounds.center,1,32,false,occupied);
-                else
-                {
-                    // Fixed authored cluster width: 86 pixels at 32PPU. No per-frame inference.
-                    var scale=bounds.width/(86f/32f);
-                    Place(root.transform,theme+"Cluster",IndividualArt.Sprite("Campaign/Environment/"+theme+"Cluster"),bounds.center,scale,32,false,occupied);
-                }
+                StageLandmarks.Place(root.transform,stage,terrain.Centers[region]+obstacle.position,obstacle.size,occupied);
                 if(budget.Exhausted){yield return null;budget.Resume();}
             }
             for(var region=0;region<terrain.Rooms.Length;region++)
@@ -47,26 +40,13 @@ namespace RuinRunner
                 // One ritual floor belongs to the guardian arena, not every combat room.
                 if(stage==1 && room.bossRoom && OpenFootprint(terrain,center,2.1f))
                     Place(root.transform,theme+"Mosaic",IndividualArt.Sprite("Campaign/Environment/"+theme+"Mosaic"),center,1,4,false,occupied);
-                if(region==0 || room.bossRoom)
-                {
-                    for(var attempt=0;attempt<Mathf.FloorToInt(room.Size.x)-3;attempt++)
-                    {
-                        var offset=attempt==0?0:((attempt+1)/2)*(attempt%2==1?1:-1);
-                        if(!NorthWall(terrain,center,room.Size,center.x+offset,1.55f,out var point))continue;
-                        point+=Vector2.down*MonumentWallInset;
-                        if(!Place(root.transform,theme+"Monument",IndividualArt.Sprite("Campaign/Environment/"+theme+"Monument"),point,1,0,true,occupied,placement))continue;
-                        foreach(var side in new[]{-1,1})
-                            if(NorthWall(terrain,center,room.Size,point.x+side*3,.55f,out var relic))
-                                Place(root.transform,theme+"WallRelic",StageTerrainArt.Sprite(stage,"Props/urn",relic),relic,1,24,false,occupied,placement);
-                        break;
-                    }
-                }
-                // Lamps follow architectural bays and avoid the reserved monuments/relics.
+                // Lamps hang on the wall's face, which drops below the wall line over the floor's top half-unit.
                 foreach(var side in new[]{-1,1})
                 for(var attempt=0;attempt<4;attempt++)
                 {
-                    if(!NorthWall(terrain,center,room.Size,center.x+side*(6+attempt),.55f,out var point))continue;
-                    if(Place(root.transform,theme+"WallLamp",StageTerrainArt.Sprite(stage,"Props/lamp",point),point,1,24,false,occupied,placement))break;
+                    if(!NorthWall(terrain,center,room.Size,center.x+side*(6+attempt),WallArtClearance,out var point))continue;
+                    point+=Vector2.down*LampDropToFace;
+                    if(Place(root.transform,theme+"WallLamp",StageTerrainArt.Sprite(stage,"Props/lamp",point),point,1,24,false,occupied,placement)){AmbientFx.Create(root.transform,point,stage==1?"AmbLampTeal":"AmbLampEmber").GetComponent<SpriteRenderer>().sortingLayerName="WorldFloor";break;}
                 }
                 if(budget.Exhausted){yield return null;budget.Resume();}
             }
@@ -88,14 +68,6 @@ namespace RuinRunner
                 if(supported){result=point;return true;}
             }
             result=default;return false;
-        }
-        static Rect ClosedCells(StageTerrainLayout terrain,Vector2 center,Vector2 size)
-        {
-            var min=new Vector2(float.PositiveInfinity,float.PositiveInfinity);var max=new Vector2(float.NegativeInfinity,float.NegativeInfinity);
-            for(var y=Mathf.FloorToInt(center.y-size.y*.5f);y<Mathf.CeilToInt(center.y+size.y*.5f);y++)
-            for(var x=Mathf.FloorToInt(center.x-size.x*.5f);x<Mathf.CeilToInt(center.x+size.x*.5f);x++)
-                if(!terrain.IsOpen(new Vector2(x+.5f,y+.5f))){min=Vector2.Min(min,new Vector2(x,y));max=Vector2.Max(max,new Vector2(x+1,y+1));}
-            return float.IsInfinity(min.x)?default:new Rect(min,max-min);
         }
         static bool OpenFootprint(StageTerrainLayout terrain,Vector2 center,float half)
         {

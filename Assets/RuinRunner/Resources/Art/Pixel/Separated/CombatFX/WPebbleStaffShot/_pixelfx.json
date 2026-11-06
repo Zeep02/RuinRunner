@@ -1,0 +1,28 @@
+{
+  "clip": "WPebbleStaffShot",
+  "ppu": 32,
+  "pivotX": 0.57692,
+  "pivotY": 0.5,
+  "width": 13,
+  "height": 11,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/bolt",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 66,
+  "fps": 15,
+  "loop": true,
+  "frames": 5,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 12,
+  "origin": [
+    7,
+    5
+  ],
+  "optionsJson": "{\"palette\":[\"#0e0e12\",\"#1c1c24\",\"#2c2c38\",\"#42424f\",\"#6a6a78\",\"#9c9caa\",\"#d8d8e0\"],\"kind\":\"shard\",\"size\":1}"
+}

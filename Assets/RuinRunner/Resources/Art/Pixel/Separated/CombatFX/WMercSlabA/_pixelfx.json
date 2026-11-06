@@ -1,0 +1,29 @@
+{
+  "clip": "WMercSlabA",
+  "ppu": 32,
+  "pivotX": 0.50207,
+  "pivotY": 0.2931,
+  "width": 242,
+  "height": 145,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "impacts/ground-slam",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 5,
+  "fps": 30,
+  "loop": false,
+  "frames": 38,
+  "durationSeconds": 1.267,
+  "visibleDiameter": 224,
+  "origin": [
+    121,
+    102
+  ],
+  "optionsJson": "{\"palette\":[\"#0e0e12\",\"#1c1c24\",\"#2c2c38\",\"#42424f\",\"#6a6a78\",\"#9c9caa\",\"#d8d8e0\"]}"
+}

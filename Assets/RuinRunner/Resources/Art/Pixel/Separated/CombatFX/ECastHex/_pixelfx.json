@@ -1,0 +1,29 @@
+{
+  "clip": "ECastHex",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.49265,
+  "width": 69,
+  "height": 68,
+  "premultiplied": true,
+  "canvas": "110x110",
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/ring",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 18,
+  "fps": 30,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 69,
+  "origin": [
+    34,
+    34
+  ],
+  "optionsJson": "{\"palette\":[\"#0c0814\",\"#241638\",\"#3c2460\",\"#5e3290\",\"#8048b8\",\"#a970e0\",\"#e0c8ff\"],\"r\":34,\"squash\":1,\"inward\":true,\"thick\":3}"
+}

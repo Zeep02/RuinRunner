@@ -1,0 +1,28 @@
+{
+  "clip": "WFrostBoltRifleA",
+  "ppu": 32,
+  "pivotX": 0.22414,
+  "pivotY": 0.09375,
+  "width": 29,
+  "height": 16,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/puff",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 12,
+  "fps": 24,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 0.625,
+  "visibleDiameter": 18,
+  "origin": [
+    6,
+    14
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1430\",\"#1f4f94\",\"#2f7fcc\",\"#58b4ec\",\"#9bdcff\",\"#d8f4ff\",\"#ffffff\"],\"kind\":\"smoke\",\"dir\":1,\"n\":5}"
+}

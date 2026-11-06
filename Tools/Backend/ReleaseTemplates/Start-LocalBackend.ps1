@@ -1,4 +1,4 @@
-param([string]$DataRoot,[int]$ApiPort=0,[int]$DatabasePort=0,[switch]$Stop)
+param([string]$DataRoot,[int]$ApiPort=0,[int]$DatabasePort=0,[switch]$Stop,[switch]$Network)
 $ErrorActionPreference='Stop'
 $package=[IO.Path]::GetFullPath($PSScriptRoot)
 $config=Get-Content -LiteralPath (Join-Path $package 'public-config.json') -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -21,9 +21,14 @@ if(Test-Path -LiteralPath $marker){
         if($Stop){Stop-Process -Id $saved.pid}
         else{
             if([int]$saved.apiPort -ne $apiPort -or [int]$saved.databasePort -ne $databasePort){throw 'Stop this backend before changing its ports.'}
-            $health=Invoke-RestMethod -Uri "http://127.0.0.1:$apiPort/health/ready" -TimeoutSec 5
-            if($health.status -eq 'ready'){Write-Output "Local backend already ready: http://127.0.0.1:$apiPort/";return}
-            throw 'Local backend is running but storage is unavailable. Stop and restart it.'
+            if($Network -and $saved.network -ne $true){
+                # Same package, loopback only: reopen the API for the network. The database keeps running.
+                Stop-Process -Id $saved.pid;Wait-Process -Id $saved.pid -Timeout 15 -ErrorAction SilentlyContinue
+            }else{
+                $health=Invoke-RestMethod -Uri "http://127.0.0.1:$apiPort/health/ready" -TimeoutSec 5
+                if($health.status -eq 'ready'){Write-Output "Local backend already ready: http://127.0.0.1:$apiPort/";return}
+                throw 'Local backend is running but storage is unavailable. Stop and restart it.'
+            }
         }
     }
 }
@@ -79,9 +84,10 @@ $env:RR_MIGRATION_DB="Host=127.0.0.1;Port=$databasePort;Database=ruinrunner;User
 $env:RR_CONTENT_VERSION=[string]$config.contentVersion
 try{
     try{& $dotnet $dll '--migrate';if($LASTEXITCODE -ne 0){throw 'Local schema/catalog migration failed'}}finally{Remove-Item Env:RR_MIGRATION_DB -ErrorAction SilentlyContinue}
-    $env:ASPNETCORE_URLS="http://127.0.0.1:$apiPort";$env:ASPNETCORE_ENVIRONMENT='Production'
+    # Only the API opens to the network with -Network. PostgreSQL always stays on 127.0.0.1.
+    $env:ASPNETCORE_URLS=if($Network){"http://0.0.0.0:$apiPort"}else{"http://127.0.0.1:$apiPort"};$env:ASPNETCORE_ENVIRONMENT='Production'
     $api=Start-Process -FilePath $dotnet -ArgumentList ('"'+$dll+'"') -WorkingDirectory (Split-Path $dll) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logs 'api.log') -RedirectStandardError (Join-Path $logs 'api-error.log')
-    @{pid=$api.Id;dll=$dll;apiPort=$apiPort;databasePort=$databasePort;startedUtc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath $marker -Encoding UTF8
+    @{pid=$api.Id;dll=$dll;apiPort=$apiPort;databasePort=$databasePort;network=[bool]$Network;startedUtc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath $marker -Encoding UTF8
 }finally{Remove-Item Env:RR_DB,Env:RR_MIGRATION_DB,Env:RR_CONTENT_VERSION -ErrorAction SilentlyContinue}
 $ready=$false
 for($i=0;$i -lt 30;$i++){

@@ -1,0 +1,28 @@
+{
+  "clip": "WFrostBoltRifleD2",
+  "ppu": 32,
+  "pivotX": 0.54167,
+  "pivotY": 0.45833,
+  "width": 12,
+  "height": 12,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 40,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 11,
+  "origin": [
+    6,
+    6
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1430\",\"#1f4f94\",\"#2f7fcc\",\"#58b4ec\",\"#9bdcff\",\"#d8f4ff\",\"#ffffff\"],\"shape\":\"chip\",\"size\":1.1}"
+}

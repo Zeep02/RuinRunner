@@ -1,0 +1,28 @@
+{
+  "clip": "WardenEntrance",
+  "ppu": 32,
+  "pivotX": 0.43277,
+  "pivotY": 0.08586,
+  "width": 119,
+  "height": 99,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-entrance",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 25,
+  "durationSeconds": 1.667,
+  "visibleDiameter": 106,
+  "origin": [
+    51,
+    90
+  ],
+  "optionsJson": "{}"
+}

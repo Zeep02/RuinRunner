@@ -1,0 +1,29 @@
+{
+  "clip": "WWindCutterB",
+  "ppu": 32,
+  "pivotX": 0.73288,
+  "pivotY": 0.49038,
+  "width": 73,
+  "height": 52,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/bolt",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 8,
+  "fps": 15,
+  "loop": true,
+  "frames": 5,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 66,
+  "origin": [
+    53,
+    26
+  ],
+  "optionsJson": "{\"palette\":[\"#1e2a2e\",\"#3e5258\",\"#6a8488\",\"#9ab4b6\",\"#c8dcdc\",\"#ecf6f6\",\"#ffffff\"],\"kind\":\"crescent\",\"size\":1.8,\"tail\":30}"
+}

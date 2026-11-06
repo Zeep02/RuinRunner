@@ -1,0 +1,14 @@
+{
+  "clip": "PropStumpIvy",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "ad640d43-ffa0-4fcb-b944-b2549049a06d",
+  "fps": 10,
+  "loop": true,
+  "frames": 14
+}

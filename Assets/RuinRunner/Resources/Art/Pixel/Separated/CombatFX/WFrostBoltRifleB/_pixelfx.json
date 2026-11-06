@@ -1,0 +1,29 @@
+{
+  "clip": "WFrostBoltRifleB",
+  "ppu": 32,
+  "pivotX": 0.69149,
+  "pivotY": 0.47917,
+  "width": 47,
+  "height": 24,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/bolt",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": true,
+  "frames": 5,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 47,
+  "origin": [
+    32,
+    12
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1430\",\"#1f4f94\",\"#2f7fcc\",\"#58b4ec\",\"#9bdcff\",\"#d8f4ff\",\"#ffffff\"],\"kind\":\"ice\",\"size\":1.5,\"tail\":22}"
+}

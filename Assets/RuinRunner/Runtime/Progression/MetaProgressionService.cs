@@ -16,13 +16,6 @@ namespace RuinRunner
             Load();
         }
 
-        public int GetRank(MetaUpgradeType type)
-        {
-            return 0; // Old enum values remain reserved; spent legacy is refunded by server migration.
-        }
-
-        public bool TryUnlock(MetaUpgradeDefinition definition) => false;
-
         public int AwardRun(int enemiesDefeated, int roomsReached, bool victory, int stagesCleared = 0)
         {
             var reward = Mathf.Max(1, enemiesDefeated / 4 + roomsReached + (victory ? 6 : 0));

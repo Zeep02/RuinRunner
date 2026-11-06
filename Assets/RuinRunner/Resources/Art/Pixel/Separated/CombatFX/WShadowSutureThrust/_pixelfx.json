@@ -1,0 +1,28 @@
+{
+  "clip": "WShadowSutureThrust",
+  "ppu": 32,
+  "pivotX": 0.00926,
+  "pivotY": 0.48214,
+  "width": 54,
+  "height": 28,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/stab",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 24,
+  "fps": 45,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.222,
+  "visibleDiameter": 45,
+  "origin": [
+    0,
+    14
+  ],
+  "optionsJson": "{\"palette\":[\"#0c0814\",\"#241638\",\"#3c2460\",\"#5e3290\",\"#8048b8\",\"#a970e0\",\"#e0c8ff\"],\"sparks\":[\"#e0c8ff\",\"#a970e0\",\"#8048b8\",\"#5e3290\"]}"
+}

@@ -10,7 +10,6 @@ namespace RuinRunner.Backend
     }
     [Serializable] public sealed class GuestIdentity { public string installationId; public string guestSecret; }
     [Serializable] public sealed class GuestSession { public string playerId; public string accessToken; public string expiresUtc; }
-    [Serializable] public sealed class OperationRequest { public string operationId; }
     [Serializable] public sealed class CreateProfileRequest { public string operationId; public int slot; public string name; }
     [Serializable] public sealed class BeginProfileResetRequest { public string operationId; public long expectedRevision; }
     [Serializable] public sealed class ConfirmProfileResetRequest { public string operationId; public long expectedRevision; public string challengeId; }

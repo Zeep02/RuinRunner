@@ -1,0 +1,14 @@
+{
+  "clip": "PropBush",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "fdf1d839-77b8-47b6-b0b9-357f9732f89f",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

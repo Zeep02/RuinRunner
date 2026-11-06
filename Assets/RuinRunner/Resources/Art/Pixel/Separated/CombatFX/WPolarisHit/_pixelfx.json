@@ -1,0 +1,28 @@
+{
+  "clip": "WPolarisHit",
+  "ppu": 32,
+  "pivotX": 0.51087,
+  "pivotY": 0.48913,
+  "width": 46,
+  "height": 46,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 65,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 24,
+  "origin": [
+    23,
+    23
+  ],
+  "optionsJson": "{\"palette\":[\"#060a20\",\"#10184a\",\"#1e2c80\",\"#3a54c0\",\"#7c9cf0\",\"#c4d8ff\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#c4d8ff\",\"#7c9cf0\",\"#3a54c0\"],\"len\":14}"
+}

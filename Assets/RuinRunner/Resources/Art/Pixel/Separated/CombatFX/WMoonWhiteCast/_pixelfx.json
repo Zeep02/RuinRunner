@@ -1,0 +1,29 @@
+{
+  "clip": "WMoonWhiteCast",
+  "ppu": 32,
+  "pivotX": 0.38158,
+  "pivotY": 0.11538,
+  "width": 114,
+  "height": 91,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "melee/sword-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 22,
+  "fps": 30,
+  "loop": false,
+  "frames": 24,
+  "durationSeconds": 0.8,
+  "visibleDiameter": 95,
+  "origin": [
+    43,
+    80
+  ],
+  "optionsJson": "{\"palette\":[\"#10182c\",\"#26365a\",\"#3e5a88\",\"#6a8cb8\",\"#a0c0e0\",\"#d8e8f6\",\"#ffffff\"]}"
+}

@@ -1,0 +1,28 @@
+{
+  "clip": "ERingStone",
+  "ppu": 32,
+  "pivotX": 0.5024,
+  "pivotY": 0.4976,
+  "width": 208,
+  "height": 208,
+  "premultiplied": true,
+  "canvas": "280x280",
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/ring",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 41,
+  "fps": 30,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 208,
+  "origin": [
+    104,
+    104
+  ],
+  "optionsJson": "{\"palette\":[\"#140e0a\",\"#2a1e14\",\"#47321e\",\"#69492a\",\"#8e6638\",\"#b88a52\",\"#e6c08a\"],\"r\":104,\"squash\":1,\"thick\":5}"
+}

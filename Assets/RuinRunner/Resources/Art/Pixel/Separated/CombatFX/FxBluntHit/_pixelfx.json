@@ -1,0 +1,28 @@
+{
+  "clip": "FxBluntHit",
+  "ppu": 32,
+  "pivotX": 0.51124,
+  "pivotY": 0.17901,
+  "width": 89,
+  "height": 81,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "impacts/blunt-hit",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 1,
+  "visibleDiameter": 83,
+  "origin": [
+    45,
+    66
+  ],
+  "optionsJson": "{\"palette\":[\"#0e0e12\",\"#1c1c24\",\"#2c2c38\",\"#42424f\",\"#5c5c6b\",\"#7d7d8c\",\"#a4a4b2\",\"#d0d0da\"]}"
+}

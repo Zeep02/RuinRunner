@@ -1,0 +1,29 @@
+{
+  "clip": "WSeasonEndF",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.5,
+  "width": 82,
+  "height": 73,
+  "premultiplied": true,
+  "canvas": null,
+  "center": true,
+  "anchor": null,
+  "from": null,
+  "until": "1.95",
+  "source": "pixelfx",
+  "effect": "ice/ice-spikes",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 38,
+  "fps": 30,
+  "loop": false,
+  "frames": 59,
+  "durationSeconds": 1.967,
+  "visibleDiameter": 54,
+  "origin": [
+    23,
+    58
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1430\",\"#1f4f94\",\"#2f7fcc\",\"#58b4ec\",\"#9bdcff\",\"#d8f4ff\",\"#ffffff\"],\"reach\":26,\"height\":34}"
+}

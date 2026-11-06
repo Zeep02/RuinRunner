@@ -6,14 +6,19 @@ namespace RuinRunner
     public sealed class PrototypeAudioController : MonoBehaviour
     {
         private const float CrossfadeSeconds = 2.2f;
-        private const float MusicGain = .65f;
-        private const float AmbienceGain = .075f;
+        // Measured in the recorded mix: the music's loudest passages sit about 9 dB under a sword swing at default settings.
+        private const float MusicGain = .38f;
+        // Measured on the stage files: the tracks sit within 2 dB, their loudest passages within 4 dB, and the ambience beds 27 dB apart.
+        private static readonly float[] MusicStageGain = { 1f, .75f, .95f };
+        private static readonly float[] AmbienceStageGain = { 1f, .6f, .07f };
+        public static float MusicLevel(int stage) => MusicGain * MusicStageGain[stage];
         private static PrototypeAudioController instance;
         private GameSettingsService settings;
         private readonly AudioSource[] musicSources = new AudioSource[2];
         private readonly AudioSource[] ambienceSources = new AudioSource[2];
         private readonly float[] gains = new float[2];
         private readonly float[] startingGains = new float[2];
+        private readonly int[] deckStage = new int[2];
         private int activeDeck = -1;
         private int currentStage = -1;
         private int requestedStage;
@@ -92,6 +97,7 @@ namespace RuinRunner
             ambienceSources[incoming].PlayScheduled(fadeStarted);
             for (var i = 0; i < 2; i++) startingGains[i] = gains[i];
             activeDeck = incoming;
+            deckStage[incoming] = loadingStage;
             currentStage = loadingStage;
             loadingStage = -1;
             loadingMusic = loadingAmbience = null;
@@ -137,8 +143,8 @@ namespace RuinRunner
             }
             for (var i = 0; i < 2; i++)
             {
-                musicSources[i].volume = settings.GetVolume(AudioChannel.Music) * MusicGain * gains[i];
-                ambienceSources[i].volume = settings.GetVolume(AudioChannel.Ambience) * AmbienceGain * gains[i];
+                musicSources[i].volume = settings.GetVolume(AudioChannel.Music) * MusicLevel(deckStage[i]) * gains[i];
+                ambienceSources[i].volume = settings.GetVolume(AudioChannel.Ambience) * AmbienceStageGain[deckStage[i]] * gains[i];
             }
         }
 

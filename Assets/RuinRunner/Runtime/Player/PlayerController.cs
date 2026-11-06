@@ -14,7 +14,7 @@ namespace RuinRunner
         public float Health => Stats == null ? 0f : Stats.Health;
         public float MaxMana => Stats == null ? 0f : Stats.MaxMana;
         public float Mana => Stats == null ? 0f : Stats.Mana;
-        public float Damage => Stats == null || EquippedWeapon == null ? 0f : EquippedWeapon.AttackPower * Stats.WeaponDamageMultiplier;
+        public float Damage => Stats == null || EquippedWeapon == null ? 0f : EquippedWeapon.AttackPower * Stats.WeaponDamageMultiplier * TalentDamage;
         public float AttackDelay => Mathf.Max(.12f, .38f * weaponAttackDelayMultiplier);
         public int Facing => facing;
         public Vector2 AimDirection { get; private set; }
@@ -32,8 +32,9 @@ namespace RuinRunner
         public float MeleeAngleOffset => meleeAngleOffset;
         public bool IsThrustActive => IsMeleeSwingActive && activeMeleeMotion == MeleeAttackMotion.Thrust;
         public MeleeAttackMotion ActiveMeleeMotion => activeMeleeMotion;
-        public Vector2 MeleeAimDirection => IsMeleeSwingActive ? committedMeleeAim : longswordCatching ? longswordCatchAim : AimDirection;
+        public Vector2 MeleeAimDirection => IsMeleeSwingActive ? committedMeleeAim : AimDirection;
         public bool AnimationPaused => dead || (isPaused != null && isPaused());
+        public Vector2 FeetPoint => (Vector2)transform.position + Vector2.down * .28f;
         public bool IsDead => dead;
         public bool ItemEffectsSuspended => AnimationPaused || stageClearSafety;
         public ItemCombatEffects ItemEffects { get; private set; }
@@ -43,12 +44,11 @@ namespace RuinRunner
         public float AttackAnimationProgress => attackPoseDuration <= 0f
             ? 1f
             : Mathf.Clamp01(1f - Mathf.Max(0f, attackPoseTimer) / attackPoseDuration);
-        public bool IsGrounded => true;
         public PlayerMotionState MotionState { get; private set; }
         public int DashCharges => dashCharges;
-        public int MaxDashCharges => MaxStoredDashes;
-        public float DashRechargeProgress => dashCharges >= MaxStoredDashes ? 1f : 1f - dashRechargeTimer / DashRechargeSeconds;
+        public float DashRechargeProgress => dashCharges >= MaxDashes ? 1f : 1f - dashRechargeTimer / DashRecharge;
         public WeaponSlotState ActiveWeaponState => inventory == null ? null : inventory.ActiveSlot;
+        public int DashCapacity => MaxDashes;
         public int WeaponUpgradeLevel => ActiveWeaponState?.Item?.UpgradeLevel ?? 0;
         public bool IsGuarding { get; private set; }
         public bool IsParrying => parryTimer > 0f;
@@ -61,15 +61,13 @@ namespace RuinRunner
         public bool IsGreatswordCharging => greatswordCharging;
         public float GreatswordChargeProgress => Mathf.Clamp01(greatswordChargeTimer/.6f);
         public bool IsWeaponActionActive => IsGuarding || IsParrying || greatswordCharging || weaponActionTimer > 0f;
-        public int ComboStep => comboIndex;
         public int ActiveComboAnimationStep => activeComboAnimationStep;
         public int AttackAnimationSequence => attackAnimationSequence;
-        public bool IsLongswordCatchActive => longswordCatching;
-        public bool LongswordCatchSucceeded => longswordCaught;
         public int InvincibilityTicksRemaining => invincibilityTicks;
         public const int HitInvincibilityTicks = GameTick.TicksPerSecond;
 
         private const int MaxStoredDashes = 2;
+        private const float InputBufferSeconds = .16f;
         private const float DashRechargeSeconds = 1.45f;
         private const float DashDuration = .16f;
         private const float DashDistance = 2.55f;
@@ -90,16 +88,10 @@ namespace RuinRunner
         private float attackPoseTimer;
         private float attackPoseDuration;
         private float attackBuffer;
-        private float longswordActionBuffer;
-        private float longswordCatchTimer;
-        private Vector2 longswordCatchAim;
-        private bool longswordCatching, longswordCaught, longswordRiposte;
         private bool meleeFinisherImpactPlayed;
         private bool combatWasPaused, combatInputNeedsRelease;
         private MeleeAttackStep pendingMeleeStep;
         private int pendingMeleeStroke;
-        private bool meleeManaRecovered;
-        private bool pendingMeleeNova;
         private MeleeAttackMotion activeMeleeMotion;
         private Vector2 committedMeleeAim;
         private Vector2 committedShotAim = Vector2.right;
@@ -111,7 +103,6 @@ namespace RuinRunner
         private float meleeAngleOffset;
         private float brakeTimer;
         private float hurtPoseTimer;
-        private float specialTimer;
         private float comboResetTimer;
         private float dashRechargeTimer;
         private float weaponActionCooldown;
@@ -162,6 +153,7 @@ namespace RuinRunner
 
         public static PlayerController Create(Vector2 position, Func<bool> pauseQuery, Func<bool> outOfCombatQuery, Action deathCallback, CameraFollow camera, InventorySystem playerInventory, GameSettingsService gameSettings)
         {
+            Physics2D.IgnoreLayerCollision(GameLayers.Player, GameLayers.Enemy, true);
             var playerObject = new GameObject("Player");
             playerObject.layer = GameLayers.Player;
             playerObject.transform.position = position;
@@ -170,6 +162,7 @@ namespace RuinRunner
             collider.direction = CapsuleDirection2D.Horizontal;
             collider.size = new Vector2(.68f, .46f);
             collider.offset = new Vector2(0f, -.28f);
+            collider.sharedMaterial = GameLayers.Frictionless;
 
             var rigidbody = playerObject.AddComponent<Rigidbody2D>();
             rigidbody.gravityScale = 0f;
@@ -189,6 +182,7 @@ namespace RuinRunner
             playerObject.AddComponent<PlayerAnimationController>().Initialize(controller, visualRoot.transform, renderer, details);
             playerObject.AddComponent<HeldWeaponView>().Initialize(controller);
             playerObject.AddComponent<DashAfterimageEffect>().Initialize(controller, renderer);
+            playerObject.AddComponent<PlayerFootfalls>().Initialize(controller);
             playerObject.AddComponent<WeaponPreparationEffect>().Initialize(controller);
             playerObject.AddComponent<PlayerResourceDisplay>().Initialize(controller);
             return controller;
@@ -227,7 +221,7 @@ namespace RuinRunner
         }
         void OnDestroy()
         {
-            ActiveCombatants.Remove(this);ClearUniqueSession();
+            ActiveCombatants.Remove(this);
             if(inventory!=null)inventory.ReloadCompleted-=OnCombatReload;
             if (inventory != null) inventory.Changed -= OwnedEquipmentChanged;
             Stats?.Dispose();
@@ -245,7 +239,7 @@ namespace RuinRunner
 
         private void Update()
         {
-            if (dead || (isPaused != null && isPaused()))
+            if (dead || entranceLock || (isPaused != null && isPaused()))
             {
                 if (!combatWasPaused)
                 {
@@ -257,13 +251,13 @@ namespace RuinRunner
                     CancelMeleeAttack();
                     CancelWeaponAction();
                     ItemEffects.CancelTransient();
-                    ClearUniqueSession();
                     if (body != null) LinearVelocity = Vector2.zero;
                 }
                 return;
             }
             combatWasPaused = false;
-            Stats.Tick(Time.deltaTime, isOutOfCombat != null && isOutOfCombat());
+            var outOfCombat = isOutOfCombat != null && isOutOfCombat();
+            if (combatClock >= manaLockUntil && (outOfCombat || !HasTalent(TalentId.HunterBreath))) Stats.Tick(Time.deltaTime, outOfCombat);
             ReadMovementInput();
             ReadAimInput();
             UpdateTimers();
@@ -285,10 +279,8 @@ namespace RuinRunner
             attackPoseTimer -= Time.deltaTime;
             rangedPoseTimer -= Time.deltaTime;
             attackBuffer -= Time.deltaTime;
-            longswordActionBuffer -= Time.deltaTime;
             specialInputBuffer -= Time.deltaTime;
             hurtPoseTimer -= Time.deltaTime;
-            specialTimer -= Time.deltaTime;
             comboResetTimer -= Time.deltaTime;
             weaponActionCooldown -= Time.deltaTime;
             weaponActionTimer -= Time.deltaTime;
@@ -344,8 +336,8 @@ namespace RuinRunner
             }
             if (settings.GetKeyDown(GameAction.Attack) && EquippedWeapon != null &&
                 EquippedWeapon.AttackType == WeaponAttackType.Melee)
-                attackBuffer = LongswordActionRules.InputBufferSeconds;
-            if(settings.GetKeyDown(GameAction.Guard))specialInputBuffer=LongswordActionRules.InputBufferSeconds;
+                attackBuffer = InputBufferSeconds;
+            if(settings.GetKeyDown(GameAction.Guard))specialInputBuffer=InputBufferSeconds;
             if (dashing)
             {
                 CancelWeaponAction();
@@ -364,24 +356,13 @@ namespace RuinRunner
                 greatswordCharging = false;
                 comboIndex = 0;
                 if(TryUniqueInput())return;
-                if(specialInputBuffer>0&&weaponActionCooldown<=0&&CanBeginSpecial()){specialInputBuffer=0;TryRangedWeaponAction();return;}
                 if (settings.GetKey(GameAction.Attack) && attackTimer <= 0f) RangedAttack();
                 return;
             }
             if(TryUniqueInput())return;
 
-            // Sword RMB takes priority over primary on the same frame. Unlike
-            // a held guard, one press buys one catch followed by one real cut.
-            if (EquippedWeapon.Family == WeaponFamily.Longsword)
-            {
-                ReadLongswordAction();
-                if (longswordCatching || weaponActionTimer > 0f) return;
-            }
-            else
-            {
-                ReadMeleeWeaponAction();
-                if(weaponActionTimer>0||greatswordCharging)return;
-            }
+            ReadMeleeWeaponAction();
+            if(weaponActionTimer>0||greatswordCharging)return;
 
             // Holding primary attack repeats the combo; releasing it never schedules another swing.
             // A short click can still use the existing late-input buffer.
@@ -392,48 +373,6 @@ namespace RuinRunner
             }
         }
 
-        private void ReadLongswordAction()
-        {
-            if (settings.GetKeyDown(GameAction.Guard))
-                longswordActionBuffer = LongswordActionRules.InputBufferSeconds;
-            if (longswordCatching)
-            {
-                longswordCatchTimer -= Time.deltaTime;
-                if (longswordCatchTimer > 0f) return;
-                longswordCatching = false;
-                IsGuarding = false;
-                activeComboAnimationStep = 0; // Valid native forward sweep and hand socket.
-                var power = longswordCaught ? LongswordActionRules.CounterDamage : LongswordActionRules.BreakthroughDamage;
-                // Strong contact feedback must not rotate the held blade through
-                // a heavy arc while the body uses the ordinary native wrist clip.
-                PerformMeleeAttack(LongswordActionRules.Riposte, power * Stats.SpecialDamageMultiplier, false);
-                longswordRiposte = true;
-                weaponActionTimer = attackTimer;
-                return;
-            }
-            if (longswordActionBuffer <= 0f || weaponActionCooldown > 0f) return;
-            // Late RMB can replace only an already resolved basic recovery.
-            // Paid cooldowns are retained even when the visible recovery is cut.
-            var canCatch = attackTimer <= 0f || IsMeleeSwingActive && pendingMeleeStep == null &&
-                AttackAnimationProgress >= MeleeMotionTiming.Recovery;
-            if (!canCatch) return;
-            longswordActionBuffer = 0f;
-            var actionSpec=WeaponActionCatalog.Get(EquippedWeapon);
-            if (!Stats.TrySpendMana(actionSpec.Mana)) return;
-            CancelMeleeAttack();
-            longswordCatching = true;
-            longswordCaught = false;
-            longswordCatchAim = AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
-            longswordCatchTimer = LongswordActionRules.CatchSeconds;
-            IsGuarding = true;
-            weaponActionCooldown = actionSpec.Cooldown;
-            weaponActionTimer = LongswordActionRules.CatchSeconds;
-            attackTimer = Mathf.Max(attackTimer, LongswordActionRules.CatchSeconds + AttackDelay * LongswordActionRules.RiposteDelayMultiplier);
-            comboIndex = 0;
-            comboResetTimer = 0f;
-            ItemEffects.OnManaSpent(actionSpec.Mana, longswordCatchAim);
-        }
-
         private void ReadMeleeWeaponAction()
         {
             IsGuarding = false;
@@ -441,7 +380,7 @@ namespace RuinRunner
             switch (EquippedWeapon.Family)
             {
                 case WeaponFamily.Katana:
-                    if (specialInputBuffer>0 && weaponActionCooldown <= 0f&&CanBeginSpecial()&&Stats.TrySpendMana(actionSpec.Mana))
+                    if (specialInputBuffer>0 && weaponActionCooldown <= 0f&&CanBeginSpecial()&&PayForSkill(actionSpec.Mana))
                     {
                         specialInputBuffer=0;ItemEffects.OnManaSpent(actionSpec.Mana,AimDirection);
                         CancelMeleeAttack();
@@ -455,12 +394,8 @@ namespace RuinRunner
                         PrototypeAudio.Play(PrototypeSound.Block, AudioChannel.Player, .45f);
                     }
                     break;
-                case WeaponFamily.Dagger:
-                    if (specialInputBuffer>0 && weaponActionCooldown <= 0f&&CanBeginSpecial()&&Stats.TrySpendMana(actionSpec.Mana))
-                    {specialInputBuffer=0;ItemEffects.OnManaSpent(actionSpec.Mana,AimDirection);StartCoroutine(DaggerLunge());}
-                    break;
                 case WeaponFamily.Greatsword:
-                    if (specialInputBuffer>0&&weaponActionCooldown<=0 && CanBeginSpecial()&&Stats.TrySpendMana(actionSpec.Mana))
+                    if (specialInputBuffer>0&&weaponActionCooldown<=0 && CanBeginSpecial()&&PayForSkill(actionSpec.Mana))
                     {
                         specialInputBuffer=0;ItemEffects.OnManaSpent(actionSpec.Mana,AimDirection);CancelMeleeAttack();weaponActionCooldown=actionSpec.Cooldown;
                         greatswordCharging = true;
@@ -479,15 +414,12 @@ namespace RuinRunner
                         weaponActionTimer = 0f;
                     }
                     break;
-                case WeaponFamily.Mace:
-                    if (specialInputBuffer>0&& weaponActionCooldown <= 0f&&CanBeginSpecial()){specialInputBuffer=0;TryMaceSlam();}
-                    break;
             }
         }
 
         private void UpdateDashCharges()
         {
-            if (dashCharges >= MaxStoredDashes)
+            if (dashCharges >= MaxDashes)
             {
                 dashRechargeTimer = 0f;
                 return;
@@ -495,21 +427,22 @@ namespace RuinRunner
             dashRechargeTimer -= Time.deltaTime;
             if (dashRechargeTimer > 0f) return;
             dashCharges++;
-            dashRechargeTimer = dashCharges < MaxStoredDashes ? DashRechargeSeconds : 0f;
+            dashRechargeTimer = dashCharges < MaxDashes ? DashRecharge : 0f;
         }
 
         private void FixedUpdate()
         {
             if (invincibilityTicks > 0) invincibilityTicks--;
             if (body == null || dashing) return;
-            var inputAllowed = !dead && (isPaused == null || !isPaused());
+            var inputAllowed = !dead && !entranceLock && (isPaused == null || !isPaused());
             // A basic thrust never takes ownership of locomotion. The player can
             // strafe, retreat or stand still throughout anticipation and recovery.
-            var target = inputAllowed ? movementInput * Stats.MoveSpeed : Vector2.zero;
+            var target = inputAllowed && !SigMoveLocked ? movementInput * Stats.MoveSpeed : Vector2.zero;
             knockbackVelocity = Vector2.MoveTowards(knockbackVelocity, Vector2.zero, 22f * Time.fixedDeltaTime);
             var desired = target + knockbackVelocity;
             var acceleration = movementInput.sqrMagnitude > .01f ? 44f : 64f;
             LinearVelocity = Vector2.MoveTowards(LinearVelocity, desired, acceleration * Time.fixedDeltaTime);
+            StopAtEnemyBodies(desired);
         }
 
         private void UpdateMotionState()
@@ -533,30 +466,24 @@ namespace RuinRunner
 
         private IEnumerator Dash()
         {
-            bool remember=HasTalent(TalentId.ComboMemory)&&combatClock-lastDirectHitAt<=.8f;
-            int savedCombo=comboIndex;
             CancelMeleeAttack();
             CancelWeaponAction();
             actionCancelSequence++;
             var sequence = actionCancelSequence;
             dashCharges--;
-            if (dashRechargeTimer <= 0f) dashRechargeTimer = DashRechargeSeconds;
+            if (dashRechargeTimer <= 0f) dashRechargeTimer = DashRecharge;
             dashing = true;
-            int priorInvincibility=invincibilityTicks;
-            invincibilityTicks = Mathf.Max(invincibilityTicks, GameTick.FromSeconds(.24f));
+            invincibilityTicks = Mathf.Max(invincibilityTicks, GameTick.FromSeconds(HasTalent(TalentId.PhantomStep) ? .48f : .24f));
             var direction = movementInput.sqrMagnitude > .01f
                 ? movementInput.normalized
                 : AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
-            bool returning=HasTalent(TalentId.ReturnDash)&&combatClock<returnDashUntil;
-            if(returning)direction=(returnDashPoint-body.position).normalized;
             DashDirection = direction;
-            var distance = GetSafeTravelDistance(direction, returning?Mathf.Min(DashDistance,Vector2.Distance(returnDashPoint,body.position)):DashDistance);
+            var distance = GetSafeTravelDistance(direction, DashDistance);
             var start = body.position;
             var cursor=start;
-            float previousProgress=0;bool turned=false;
-            if(returning)returnDashUntil=0;else {returnDashPoint=start;returnDashUntil=combatClock+1.2f;}
-            if(remember){comboIndex=savedCombo;comboResetTimer=Mathf.Max(comboResetTimer,1f);comboMemoryUntil=combatClock+1;}
+            float previousProgress=0;
             ItemEffects.OnDashStarted(start);
+            TalentOnDashStart(start);
             LinearVelocity = Vector2.zero;
             PrototypeAudio.Play(PrototypeSound.Dash, AudioChannel.Player, .55f);
             // A grounded native dust kick stays behind the body. Foreground
@@ -569,10 +496,6 @@ namespace RuinRunner
             {
                 elapsed += Time.deltaTime;
                 var progress = Mathf.Clamp01(elapsed / DashDuration);
-                if(HasTalent(TalentId.BrakeDash)&&settings.GetKeyUp(GameAction.Dash))
-                {invincibilityTicks=Mathf.Max(0,priorInvincibility-GameTick.FromSeconds(elapsed));break;}
-                if(!turned&&HasTalent(TalentId.TurningDash)&&movementInput.sqrMagnitude>.01f&&Vector2.Dot(direction,movementInput.normalized)<.5f)
-                {turned=true;direction=movementInput.normalized;DashDirection=direction;}
                 float eased=1f-(1f-progress)*(1f-progress);
                 float step=distance*(eased-previousProgress);previousProgress=eased;
                 // Cast from the actual foot collider on every segment; turns cannot cross corners.
@@ -581,7 +504,7 @@ namespace RuinRunner
                 // before a fixed tick would overwrite travel and shorten the dash.
                 body.position=cursor;
                 yield return null;
-                if (sequence == actionCancelSequence && !AnimationPaused) ItemEffects.OnDashMoved(body.position);
+                if (sequence == actionCancelSequence && !AnimationPaused) { ItemEffects.OnDashMoved(body.position); TalentOnDashStep(body.position); }
             }
             dashing = false;
             ItemEffects.OnDashEnded();
@@ -630,35 +553,43 @@ namespace RuinRunner
             if (step == null) return;
             IsGuarding = false;
             heavyAttackPose = isHeavy;
-            longswordRiposte = false;
             meleeFinisherImpactPlayed = false;
             chargedReleasePose = isHeavy && greatswordCharging && EquippedWeapon.Family == WeaponFamily.Greatsword;
             parryPresentation = false;
             attackAnimationSequence++;
-            var actionDuration = AttackDelay * step.DelayMultiplier;
+            comboSwingSequence = isHeavy ? -1 : attackAnimationSequence;
+            attackPoseTimer = 1f;
+            var bodyCombo = IsBodyComboSwing;
+            var actionDuration = AttackDelay * step.DelayMultiplier * SigDelayMult();
             attackTimer = Mathf.Max(attackTimer, actionDuration);
             activeMeleeMotion = step.Motion;
             committedMeleeAim = AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
-            attackPoseDuration = Mathf.Min(isHeavy ? .42f : step.Motion == MeleeAttackMotion.Thrust ? .26f : .30f, actionDuration);
+            // The body throws itself into the swing. Input still steers; walls still stop it.
+            knockbackVelocity += committedMeleeAim * MeleeLunge(EquippedWeapon.Family, isHeavy) * (bodyCombo ? MeleeComboFrames.Lunge(EquippedWeapon.Family, activeComboAnimationStep) : 1f);
+            attackPoseDuration = bodyCombo ? MeleeComboFrames.SwingSeconds(EquippedWeapon.Family, activeComboAnimationStep, actionDuration) : Mathf.Min(isHeavy ? .42f : step.Motion == MeleeAttackMotion.Thrust ? .26f : .30f, actionDuration);
             attackPoseTimer = attackPoseDuration;
             meleeAngleOffset = step.AngleOffset;
             pendingMeleeStep = step;
-            pendingMeleeStroke=0;meleeManaRecovered=false;
-            pendingMeleeNova = false;
+            pendingMeleeStroke=0;
             pendingMeleeCritical = Stats.RollCritical();
-            pendingMeleeDamage = Damage * step.DamageMultiplier * damageMultiplier * (pendingMeleeCritical ? Stats.CriticalDamage : 1f);
-            if(EquippedWeapon.Family==WeaponFamily.Greatsword&&step.Motion==MeleeAttackMotion.Cleave)
+            pendingMeleeDamage = Damage * step.DamageMultiplier * damageMultiplier * SigMeleeMult() * (pendingMeleeCritical ? Stats.CriticalDamage : 1f);
+            // Odd combo steps swing clockwise on screen, the way the trail is drawn; the rest turn the other way.
+            SignatureSlashEffect.Create(this,SignatureMeleeFx.Trail(EquippedWeapon,step.Motion,isHeavy),Mathf.Atan2(committedMeleeAim.y,committedMeleeAim.x)*Mathf.Rad2Deg+step.AngleOffset,
+                step.Motion==MeleeAttackMotion.Sweep&&(bodyCombo?MeleeComboFrames.TrailMirrored(EquippedWeapon.Family,activeComboAnimationStep,committedMeleeAim.x<0):isHeavy||(activeComboAnimationStep&1)==0),
+                step.Motion==MeleeAttackMotion.Thrust?MeleeMotionTiming.ThrustStart:bodyCombo&&step.Motion!=MeleeAttackMotion.CrossCut?.25f:.18f,SignatureMeleeFx.TrailScale(EquippedWeapon,step.Motion),spriteRenderer);
+        }
+
+        private static float MeleeLunge(WeaponFamily family, bool heavy)
+        {
+            float speed;
+            switch (family)
             {
-                var radians=(Mathf.Atan2(committedMeleeAim.y,committedMeleeAim.x)*Mathf.Rad2Deg+step.AngleOffset)*Mathf.Deg2Rad;
-                NativeCombatEffect.CreateCleave(this,new Vector2(Mathf.Cos(radians),Mathf.Sin(radians)),step.HitboxSize,spriteRenderer);
+                case WeaponFamily.Dagger: speed = 4.5f; break;
+                case WeaponFamily.Katana: speed = 6.5f; break;
+                case WeaponFamily.Greatsword: speed = 6f; break;
+                default: speed = 5.5f; break;
             }
-            else if(step.Motion==MeleeAttackMotion.Sweep)
-                MeleeSlashEffect.CreateBound(this,Mathf.Atan2(committedMeleeAim.y,committedMeleeAim.x)*Mathf.Rad2Deg+step.AngleOffset,
-                    step.HitboxSize,isHeavy,pendingMeleeCritical,(activeComboAnimationStep&1)==1,spriteRenderer);
-            else if(step.Motion==MeleeAttackMotion.Thrust)
-                MeleeThrustEffect.CreateBound(this,Mathf.Atan2(committedMeleeAim.y,committedMeleeAim.x)*Mathf.Rad2Deg+step.AngleOffset,pendingMeleeCritical,spriteRenderer);
-            else if(step.Motion==MeleeAttackMotion.CrossCut)
-                MeleeCrossCutEffect.CreateBound(this,Mathf.Atan2(committedMeleeAim.y,committedMeleeAim.x)*Mathf.Rad2Deg+step.AngleOffset,step.HitboxSize,pendingMeleeCritical,spriteRenderer);
+            return heavy ? speed + 2.5f : speed;
         }
 
         private void ResolvePendingMelee()
@@ -682,19 +613,10 @@ namespace RuinRunner
         {
             var profile = MeleeComboCatalog.Get(EquippedWeapon);
             var finisher = activeComboAnimationStep == profile.LightSteps.Length - 1;
-            var isHeavy = heavyAttackPose || longswordRiposte || EquippedWeapon.Family == WeaponFamily.Longsword && finisher;
+            var isHeavy = heavyAttackPose;
             var critical = pendingMeleeCritical;
             MeleeContactsResolved++;
             CombatAudio.PlayWeapon(EquippedWeapon.Family,isHeavy,EquippedWeapon.Id);
-            if(pendingMeleeNova)
-            {
-                pendingMeleeNova=false;
-                SpecialNova(pendingMeleeDamage,critical);
-                CombatPresentation.MaceSlam(transform.position,WeaponUpgradeLevel >= 2 ? 5.8f : 4.8f,spriteRenderer.sortingOrder+2,spriteRenderer);
-                if(cameraFollow!=null)cameraFollow.Shake(.16f);
-                return;
-            }
-
             var baseDirection = committedMeleeAim;
             var baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
             var angle = baseAngle + step.AngleOffset+(step.Motion==MeleeAttackMotion.CrossCut?MeleeMotionTiming.CrossStrikeOffset(stroke):0);
@@ -711,14 +633,20 @@ namespace RuinRunner
             }
             var cross=step.Motion==MeleeAttackMotion.CrossCut;
             var attackDamage=pendingMeleeDamage*(cross?.5f:1f);
+            var signature = SignatureMeleeFx.For(EquippedWeapon);
             var hits = Physics2D.OverlapBoxAll(center, damageSize, angle, (1 << GameLayers.Enemy) | (1 << 10));
             var damagedEnemies = new HashSet<EnemyController>();
             bool hitEnemy = false;
+            SigOnContact(center,angle,step,heavyAttackPose);
             foreach (var hit in hits)
             {
                 var prop = hit.GetComponent<EnvironmentProp>();
-                if (prop != null && Physics2D.Linecast(transform.position, hit.ClosestPoint(transform.position), 1 << GameLayers.Ground).collider == null)
-                    prop.Hit();
+                if (prop != null)
+                {
+                    // A prop's own solid foot stands between the hero and the part of it being swung at. Only something else hides it.
+                    var hiding = Physics2D.Linecast(transform.position, hit.ClosestPoint(transform.position), 1 << GameLayers.Ground).collider;
+                    if (hiding == null || hiding.transform.IsChildOf(prop.transform)) prop.Hit();
+                }
                 var enemy = EnemyController.DamageTarget(hit);
                 if (enemy != null && damagedEnemies.Add(enemy) &&
                     // A tall body's center can project behind the north wall while
@@ -728,26 +656,21 @@ namespace RuinRunner
                 {
                     // The two contacts belong to one action/target for item marks
                     // and shards; preserve its original aggregate source power.
-                    OnDirectCombatHit(enemy, attackAnimationSequence, cross?pendingMeleeDamage:attackDamage,true,finisher,longswordRiposte||katanaCounterSucceeded);
+                    OnDirectCombatHit(enemy, attackAnimationSequence, cross?pendingMeleeDamage:attackDamage,true,finisher,katanaCounterSucceeded);
+                    enemy.MuteNextHitFx();
                     enemy.TakeDamage(attackDamage, attackDirection * step.Knockback*(cross?.5f:1f), critical);
-                    CombatPresentation.MeleeContact(EquippedWeapon.Family,hit.ClosestPoint(center),attackDirection,isHeavy,critical,spriteRenderer.sortingOrder+4,spriteRenderer);
+                    SigFx.Play(signature.Hit, hit.ClosestPoint(center), angle, SignatureMeleeFx.HitLife, false, false, critical ? 1.3f : 1f);
+                    SigOnMeleeHit(enemy, attackDamage, isHeavy, step.Motion);
+                    if (cameraFollow != null) cameraFollow.Kick(attackDirection, isHeavy ? .22f : .1f);
                     hitEnemy = true;
                 }
             }
-            if (hitEnemy && WeaponUpgradeLevel >= 3&&!meleeManaRecovered)
-            {Stats.RestoreMana(2);meleeManaRecovered=true;}
 
-            var color = critical ? new Color(1f, .35f, .15f, .9f) : isHeavy ? new Color(1f, .55f, .16f, .85f) : new Color(1f, .9f, .3f, .72f);
-            var family = EquippedWeapon == null ? WeaponFamily.Longsword : EquippedWeapon.Family;
-            if(step.Motion==MeleeAttackMotion.Impact&&family!=WeaponFamily.Mace)
-                ExternalCombatEffect.Create("Impact",center,0,Mathf.Max(step.HitboxSize.x,step.HitboxSize.y)*1.18f,spriteRenderer.sortingOrder+2,spriteRenderer);
-            else if(step.Motion==MeleeAttackMotion.Cleave&&family!=WeaponFamily.Greatsword)
-                ExternalCombatEffect.Create("Cleave",center,angle+90f,Mathf.Max(step.HitboxSize.x,step.HitboxSize.y)*1.18f,spriteRenderer.sortingOrder+2,spriteRenderer);
-            else if (step.Motion!=MeleeAttackMotion.CrossCut&&step.Motion!=MeleeAttackMotion.Thrust&&step.Motion!=MeleeAttackMotion.Impact&&step.Motion!=MeleeAttackMotion.Cleave&&step.Motion!=MeleeAttackMotion.Sweep&&!MeleeSlashEffect.Create(center, angle, step.HitboxSize, family, isHeavy, critical,
-                    spriteRenderer.sortingOrder + 2, (activeComboAnimationStep & 1) == 1,spriteRenderer))
-                StartCoroutine(SlashFlash(center, angle, step.HitboxSize, color));
-            CombatPresentation.Melee(family,step.Motion,center,angle,step.HitboxSize,isHeavy,
-                finisher,spriteRenderer.sortingOrder+3,spriteRenderer);
+            if (IsBodyComboSwing)
+            {
+                PlayComboStepDust();
+                if (hitEnemy) PlayComboImpact(finisher, attackDirection);
+            }
             if (isHeavy && hitEnemy && !meleeFinisherImpactPlayed && cameraFollow != null)
             {
                 meleeFinisherImpactPlayed = true;
@@ -755,57 +678,12 @@ namespace RuinRunner
             }
         }
 
-        private IEnumerator DaggerLunge()
-        {
-            CancelMeleeAttack();
-            actionCancelSequence++;
-            var sequence = actionCancelSequence;
-            weaponActionCooldown = WeaponActionCatalog.Get(EquippedWeapon).Cooldown;
-            weaponActionTimer = .22f;
-            var direction = AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
-            var distance = GetSafeTravelDistance(direction, WeaponUpgradeLevel >= 2 ? 1.5f : 1.15f);
-            var start = body.position;
-            var target = start + direction * distance;
-            var elapsed = 0f;
-            var struck = false;
-            while (elapsed < .18f && sequence == actionCancelSequence && !dashing && !ItemEffectsSuspended)
-            {
-                elapsed += Time.deltaTime;
-                var progress = Mathf.Clamp01(elapsed / .18f);
-                body.MovePosition(Vector2.Lerp(start, target, progress));
-                if (!struck && progress >= .38f)
-                {
-                    struck = true;
-                    PerformMeleeAttack(MeleeComboCatalog.Get(EquippedWeapon).HeavyStep, .9f, false);
-                }
-                yield return null;
-            }
-        }
-
-        private void TryMaceSlam()
-        {
-            if (!Stats.TrySpendMana(EquippedWeapon.SpecialManaCost))
-            {
-                PrototypeVisuals.Burst(transform.position, new Color(.2f, .35f, .55f), 4);
-                return;
-            }
-            CancelMeleeAttack();
-            weaponActionCooldown = WeaponActionCatalog.Get(EquippedWeapon).Cooldown;
-            activeComboAnimationStep=-1;
-            var heavy=MeleeComboCatalog.Get(EquippedWeapon).HeavyStep;
-            PerformMeleeAttack(heavy,1.45f/ heavy.DamageMultiplier*Stats.SpecialDamageMultiplier,true);
-            ItemEffects.OnManaSpent(EquippedWeapon.SpecialManaCost, committedMeleeAim);
-            pendingMeleeNova=false;weaponActionTimer=attackPoseDuration;
-        }
-
         private void RangedAttack()
         {
-            if (inventory == null || !inventory.TryConsumeAmmo())
-            {
-                PrototypeVisuals.Burst(transform.position, new Color(.7f, .35f, .2f), 3);
-                return;
-            }
-            attackTimer = AttackDelay;
+            if (!SigShotAllowed()) return;
+            // Holding the trigger through a reload asks every frame; the hero's reload motion is the answer.
+            if (inventory == null || !inventory.TryConsumeAmmo()) return;
+            attackTimer = AttackDelay * SigShotDelayMult();
             attackPoseDuration = Mathf.Min(.18f, AttackDelay * .65f);
             attackPoseTimer = attackPoseDuration;
             heavyAttackPose = false;
@@ -814,94 +692,10 @@ namespace RuinRunner
             PrepareRangedShot(direction);
             var critical = Stats.RollCritical();
             var damage = Damage * (critical ? Stats.CriticalDamage : 1f);
-            var color = critical ? new Color(1f, .35f, .15f) : EquippedWeapon.Color;
-            if(EquippedWeapon.Family==WeaponFamily.Shotgun)
-                SpawnFan(direction,3,7f,damage/3f,critical,color,EquippedWeapon.ProjectilePierce);
-            else SpawnProjectile(direction, damage, critical, color, EquippedWeapon.ProjectileSize, EquippedWeapon.ProjectilePierce, EquippedWeapon.ProjectileSpeed);
-            CombatPresentation.Muzzle(EquippedWeapon.Family,committedShotOrigin,direction,false,EquippedWeapon.Id,spriteRenderer.sortingOrder+2,spriteRenderer);
-        }
-
-        private void TryRangedWeaponAction()
-        {
-            if (!Stats.TrySpendMana(EquippedWeapon.SpecialManaCost))
-            {
-                PrototypeVisuals.Burst(transform.position, new Color(.2f, .35f, .55f), 4);
-                return;
-            }
-            weaponActionCooldown = WeaponActionCatalog.Get(EquippedWeapon).Cooldown;
-            weaponActionTimer = .3f;
-            specialTimer = .55f;
-            attackAnimationSequence++;
-            var aim = AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
-            attackPoseDuration = .22f;
-            attackPoseTimer = attackPoseDuration;
-            PrepareRangedShot(aim);
-            ItemEffects.OnManaSpent(EquippedWeapon.SpecialManaCost, aim);
-            heavyAttackPose = false;
-            var critical = Stats.RollCritical();
-            var damage = Damage * 1.35f * Stats.SpecialDamageMultiplier * (critical ? Stats.CriticalDamage : 1f);
-            var color = critical ? new Color(1f, .3f, .15f) : EquippedWeapon.Color;
-
-            switch (EquippedWeapon.Family)
-            {
-                case WeaponFamily.Bow:
-                    int arrows = WeaponUpgradeLevel >= 2 ? 5 : 3;
-                    SpawnFan(aim, arrows, arrows == 5 ? 6f : 8f, damage * 2.4f / arrows, critical, color, 2,true);
-                    break;
-                case WeaponFamily.Crossbow:
-                    SpawnProjectile(aim, damage * 1.35f, critical, color, new Vector2(1.35f, .24f), WeaponUpgradeLevel >= 2 ? 8 : 6, EquippedWeapon.ProjectileSpeed * 1.1f,true);
-                    break;
-                case WeaponFamily.Pistol:
-                    if(EquippedWeapon.SpecialType==WeaponSpecialType.Nova)
-                    {
-                        SpawnProjectile(aim,damage*1.65f,critical,color,EquippedWeapon.ProjectileSize,1,EquippedWeapon.ProjectileSpeed,true);
-                        break;
-                    }
-                    StartCoroutine(PistolBurst(aim,damage,critical,color,EquippedWeapon.Id,actionCancelSequence,attackAnimationSequence,WeaponUpgradeLevel >= 2 ? 4 : 3));
-                    return;
-                case WeaponFamily.Rifle:
-                    StartCoroutine(AimedRifleRelease(aim,damage,critical,color,actionCancelSequence));return;
-                case WeaponFamily.Shotgun:
-                    int pellets = WeaponUpgradeLevel >= 2 ? 9 : 7;
-                    SpawnFan(aim, pellets, pellets == 9 ? 7f : 9f, damage * 2.94f / pellets, critical, color, 1,true);
-                    StartCoroutine(ActionStep(-aim,.65f,.12f,actionCancelSequence));
-                    break;
-                default:
-                    if(!shotObstructed)PlayerMortarShell.Create(this,committedShotOrigin,aim,damage*1.4f);
-                    break;
-            }
-            CombatPresentation.Muzzle(EquippedWeapon.Family,committedShotOrigin,aim,true,EquippedWeapon.Id,spriteRenderer.sortingOrder+2,spriteRenderer);
-            if (cameraFollow != null) cameraFollow.Shake(.16f);
-        }
-
-        private IEnumerator PistolBurst(Vector2 aim,float damage,bool critical,Color color,string weaponId,int sequence,int sourceAction,int count)
-        {
-            for(var i=0;i<count;i++)
-            {
-                if(sequence!=actionCancelSequence||ItemEffectsSuspended||EquippedWeapon==null||EquippedWeapon.Id!=weaponId)yield break;
-                if(i>0){aim=AimDirection;PrepareRangedShot(aim,.13f);}
-                var direction=(Vector2)(Quaternion.Euler(0,0,i==0?-3f:i==1?3f:count==3?0f:i%2==0?-3f:3f)*aim);
-                SpawnProjectile(direction,damage*(2.75f/count),critical,color,EquippedWeapon.ProjectileSize,Mathf.Max(2,EquippedWeapon.ProjectilePierce),EquippedWeapon.ProjectileSpeed,true,sourceAction);
-                CombatPresentation.Muzzle(WeaponFamily.Pistol,committedShotOrigin,aim,i==0,weaponId,spriteRenderer.sortingOrder+2,spriteRenderer);
-                if(i<count-1)yield return new WaitForSeconds(.065f);
-            }
-        }
-
-        private void SpawnFan(Vector2 aim, int count, float stepDegrees, float damage, bool critical, Color color, int pierce,bool special=false)
-        {
-            var middle = (count - 1) * .5f;
-            for (var index = 0; index < count; index++)
-            {
-                var rotated = (Vector2)(Quaternion.Euler(0f, 0f, (index - middle) * stepDegrees) * aim);
-                SpawnProjectile(rotated, damage, critical, color, EquippedWeapon.ProjectileSize, pierce, EquippedWeapon.ProjectileSpeed,special);
-            }
-        }
-
-        private void SpawnProjectile(Vector2 direction, float damage, bool critical, Color color, Vector2 size, int pierce, float speed,bool special=false,int sourceAction=-1)
-        {
-            if(shotObstructed)return;
-            var shot=PlayerProjectile.Create(committedShotOrigin, direction, speed, damage, critical, color, size, pierce, EquippedWeapon.Family,special,EquippedWeapon.Id,this,sourceAction<0?attackAnimationSequence:sourceAction,WeaponUpgradeLevel);
-            if(!special)ConfigureMutatedProjectile(shot);
+            if (sig == null) return;
+            SigBasicShot(direction, damage, critical);
+            SigShotFired(direction);
+            CombatAudio.PlayWeapon(EquippedWeapon.Family, false, EquippedWeapon.Id);
         }
 
         private void PrepareRangedShot(Vector2 aim,float presentationDuration=-1f)
@@ -918,57 +712,36 @@ namespace RuinRunner
             if(shotObstructed)committedShotOrigin=wall.point+wall.normal*.02f;
         }
 
-        private void SpecialNova(float damage, bool critical)
+        public bool SandboxInvulnerable { get; set; }
+        internal void SandboxRefresh() { sigReady = 0; if (sig == null || sig.Id != "siege_engineer" || sig.Stage != 1) sigLockUntil = 0; attackTimer = 0; weaponActionCooldown = 0; Stats.RestoreMana(Stats.MaxMana); }
+
+        // Held still while the ink has them, without pausing the world around them.
+        bool entranceLock;
+        public void SetEntranceLock(bool locked)
         {
-            var hits = Physics2D.OverlapCircleAll(transform.position, WeaponUpgradeLevel >= 2 ? 2.9f : 2.4f, 1 << GameLayers.Enemy);
-            var damaged=new HashSet<EnemyController>();
-            bool hitEnemy = false;
-            foreach (var hit in hits)
-            {
-                var enemy = EnemyController.DamageTarget(hit);
-                if (enemy == null || !damaged.Add(enemy) ||
-                    Physics2D.Linecast(transform.position,hit.ClosestPoint(transform.position),1<<GameLayers.Ground).collider!=null) continue;
-                var direction = ((Vector2)(enemy.transform.position - transform.position)).normalized;
-                ItemEffects.OnOriginalHit(enemy, attackAnimationSequence, damage);
-                enemy.TakeDamage(damage, direction * 7f, critical);
-                hitEnemy = true;
-            }
-            if (hitEnemy && WeaponUpgradeLevel >= 3) Stats.RestoreMana(2);
+            entranceLock = locked;
+            if (!locked) return;
+            movementInput = Vector2.zero;
+            CancelMeleeAttack();
+            CancelWeaponAction();
         }
 
-        private IEnumerator SlashFlash(Vector2 center, float angle, Vector2 size, Color color)
+        /// <summary>Nothing of the hero is drawn while the ink holds them, and their weapon stays gone until it has run off.</summary>
+        public void HideForInk(bool body, bool weapon)
         {
-            var slash = new GameObject("Slash");
-            slash.transform.position = center;
-            slash.transform.rotation = Quaternion.Euler(0f, 0f, angle);
-            slash.transform.localScale = new Vector3(size.x, Mathf.Max(.18f, size.y * .55f), 1f);
-            PrototypeVisuals.AddSprite(slash, color, 15);
-            for (var index = 0; index < 5; index++)
-            {
-                slash.transform.localScale *= .88f;
-                yield return null;
-            }
-            Destroy(slash);
+            var view = GetComponentInChildren<HeldWeaponView>(true);
+            var held = view == null ? null : view.VisualRenderer;
+            foreach (var part in GetComponentsInChildren<Renderer>(true)) part.forceRenderingOff = part == held ? weapon : body;
         }
+
+        public void ApplyPush(Vector2 velocity) { if (!dead && !dashing) knockbackVelocity += velocity; }
 
         public void TakeDamage(float amount, Vector2 direction)
         {
-            if (amount <= 0f || dead || stageClearSafety || invincibilityTicks > 0 || (isPaused != null && isPaused())) return;
-            if (longswordCatching && !longswordCaught && direction.sqrMagnitude > .001f &&
-                Vector2.Dot(longswordCatchAim, -direction.normalized) >= LongswordActionRules.FrontalDot)
-            {
-                longswordCaught = true;
-                IsGuarding = false;
-                longswordCatchTimer = Mathf.Min(longswordCatchTimer, LongswordActionRules.SuccessfulCatchRecovery);
-                invincibilityTicks = Mathf.Max(invincibilityTicks, GameTick.FromSeconds(.12f));
-                OnActiveDefense();
-                PrototypeAudio.Play(PrototypeSound.Block, AudioChannel.Player, .75f);
-                // Existing metal contact only. The actual counter has its own
-                // hand-bound cut and damage clock, never an instant circle hit.
-                CombatPresentation.Defense(transform.position, longswordCatchAim, false,
-                    spriteRenderer.sortingOrder + 3, spriteRenderer, GetComponent<HeldWeaponView>()?.BladePoint(.42f));
-                return;
-            }
+            if (SandboxInvulnerable) return;
+            if (amount > 0f && !dead && dashing && invincibilityTicks > 0) TalentOnDodge();
+            if (amount <= 0f || dead || entranceLock || stageClearSafety || invincibilityTicks > 0 || (isPaused != null && isPaused())) return;
+            if (SigBlocks(direction)) return;
             if (IsParrying && EquippedWeapon != null && EquippedWeapon.Family == WeaponFamily.Katana)
             {
                 parryTimer = 0f;
@@ -977,39 +750,36 @@ namespace RuinRunner
                 invincibilityTicks = Mathf.Max(invincibilityTicks, GameTick.FromSeconds(.22f));
                 katanaAutoTimer=.04f;katanaAutoCutPending=true;katanaCounterSucceeded=true;
                 OnActiveDefense();
-                PrototypeAudio.Play(PrototypeSound.Block, AudioChannel.Player, .85f);
-                CombatPresentation.Defense(transform.position,AimDirection,true,spriteRenderer.sortingOrder+3,spriteRenderer,GetComponent<HeldWeaponView>()?.BladePoint(.42f));
+                PrototypeAudio.Play(PrototypeSound.Block, AudioChannel.Player, .6f);
+                if (sig != null) SigOnParry();
                 if (cameraFollow != null) cameraFollow.Shake(.12f);
                 return;
             }
 
-            var guarded = IsGuarding && EquippedWeapon != null && EquippedWeapon.Family == WeaponFamily.Longsword &&
-                          direction.sqrMagnitude > .001f && Vector2.Dot(AimDirection, -direction.normalized) >= .35f;
-            var guardReduction = guarded ? EquippedWeapon.GuardDamageReduction : 0f;
-            var received = ItemEffects.AbsorbDamage(ItemEffects.AbsorbManaAegis(amount * (1f - guardReduction)));
+            var received = ItemEffects.AbsorbDamage(ItemEffects.AbsorbManaAegis(amount));
             var shielded = received <= 0f;
-            if (received > 0f){Stats.ReceiveDamage(received);Grow(CombatGrowthKind.DamageTaken);}
-            if (guarded) OnActiveDefense();
-            if (StageValidationInput.Enabled) Debug.Log("[Combat Input] Hit raw="+amount+" guarded="+guarded+" hp="+Health.ToString("0.0")+" position="+transform.position+" motion="+MotionState);
+            if (received > 0f){bloodStacks=0;Stats.ReceiveDamage(received);Grow(CombatGrowthKind.DamageTaken);ItemEffects.OnHurt();}
+            if (StageValidationInput.Enabled) Debug.Log("[Combat Input] Hit raw="+amount+" "+" hp="+Health.ToString("0.0")+" position="+transform.position+" motion="+MotionState);
             invincibilityTicks = HitInvincibilityTicks;
-            hurtPoseTimer = guarded || shielded ? 0f : HurtPresentationSeconds;
+            hurtPoseTimer = shielded ? 0f : HurtPresentationSeconds;
             // A shield that fully absorbed the hit holds the character steady.
             // Partial absorption keeps the existing damage/knockback response.
-            knockbackVelocity += !shielded && direction.sqrMagnitude > .01f ? direction.normalized * (guarded ? 1.4f : 5f) : Vector2.zero;
-            if(guarded)CombatPresentation.Defense(transform.position,AimDirection,false,spriteRenderer.sortingOrder+3,spriteRenderer,GetComponent<HeldWeaponView>()?.BladePoint(.42f));
-            else if(!shielded)
+            knockbackVelocity += !shielded && direction.sqrMagnitude > .01f ? direction.normalized * 5f : Vector2.zero;
+            if(!shielded)
             {
                 var towardAttacker = direction.sqrMagnitude > .01f ? -direction.normalized : AimDirection;
                 var contact = (Vector2)transform.position + towardAttacker * .35f + Vector2.up * .08f;
                 NativeCombatEffect.Create("PlayerHit",contact,0,29f/32f,.18f,Color.white,
                     spriteRenderer.sortingOrder-3)?.BelowActor(spriteRenderer,-3);
             }
-            PrototypeAudio.Play(guarded || shielded ? PrototypeSound.Block : PrototypeSound.Hurt,
-                AudioChannel.Player, guarded ? .55f : shielded ? .4f : .7f);
-            if (cameraFollow != null) cameraFollow.Shake(guarded ? .08f : shielded ? .035f : .2f);
+            PrototypeAudio.Play(shielded ? PrototypeSound.Block : PrototypeSound.Hurt,
+                AudioChannel.Player, shielded ? .4f : .6f);
+            if (cameraFollow != null) cameraFollow.Shake(shielded ? .035f : .2f);
             if (damageFlashRoutine != null) StopCoroutine(damageFlashRoutine);
-            var flash = guarded ? new Color(1f,.88f,.58f) : shielded ? new Color(.62f,.9f,1f) : new Color(1f,.62f,.62f);
-            damageFlashRoutine = StartCoroutine(DamageFlash(flash, guarded || shielded ? .06f : .1f));
+            var flash = shielded ? new Color(.62f,.9f,1f) : new Color(1f,.62f,.62f);
+            damageFlashRoutine = StartCoroutine(DamageFlash(flash, shielded ? .06f : .1f));
+            if (Health <= 0f && ItemEffects.TryCheatDeath()) invincibilityTicks = HitInvincibilityTicks * 2;
+            if (Health <= 0f) TalentRevive();
             if (Health <= 0f)
             {
                 dead = true;
@@ -1034,20 +804,6 @@ namespace RuinRunner
                 elapsed+=Time.unscaledDeltaTime;
                 DeathProgress=Mathf.Clamp01(elapsed/.85f);
                 yield return null;
-            }
-        }
-
-        private void ParryCounter()
-        {
-            var aim = AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
-            var hits = Physics2D.OverlapCircleAll(transform.position, 1.65f, 1 << GameLayers.Enemy);
-            var damaged = new HashSet<EnemyController>();
-            foreach (var hit in hits)
-            {
-                var enemy = EnemyController.DamageTarget(hit);
-                if (enemy == null || !damaged.Add(enemy) || enemy.IsDead ||
-                    Physics2D.Linecast(transform.position, hit.ClosestPoint(transform.position), 1 << GameLayers.Ground).collider != null) continue;
-                enemy.TakeDamage(Damage * 1.25f, aim * 7f, false);
             }
         }
 
@@ -1093,7 +849,7 @@ namespace RuinRunner
             observedCancelSequence=actionCancelSequence;
             combatInputNeedsRelease=true;
             CancelMeleeAttack();CancelWeaponAction();
-            ClearUniqueSession();ClearPlantedRound();storedGuardCharges=0;
+            ClearPlantedRound();
             ItemEffects?.CancelTransient();
             GetComponent<DashAfterimageEffect>()?.CancelTransient();
             dashing=false;movementInput=Vector2.zero;knockbackVelocity=Vector2.zero;
@@ -1113,13 +869,6 @@ namespace RuinRunner
             CancelWeaponAction();
         }
 
-        public void ApplyUpgrade(UpgradeType type)
-        {
-            Stats.ApplyTrait(type);
-            PrototypeAudio.Play(PrototypeSound.Upgrade, AudioChannel.Interface, .75f);
-            PrototypeVisuals.Burst(transform.position, new Color(.4f, 1f, .55f), 18);
-        }
-
         public void ApplyBalance(PlayerBalanceData balance)
         {
             if (Stats == null) return;
@@ -1131,14 +880,13 @@ namespace RuinRunner
 
         public void EquipWeapon(WeaponDefinition weapon)
         {
-            previousWeaponFamily=EquippedWeapon==null?WeaponFamily.Longsword:EquippedWeapon.Family;
+            var swappedFrom=EquippedWeapon;
+            previousWeaponFamily=EquippedWeapon==null?WeaponFamily.Katana:EquippedWeapon.Family;
             crossAwakeReady=true;ClearPlantedRound();
-            if(ActiveWeaponState?.Item?.Weapon?.AttackType==WeaponAttackType.Ranged)lastRangedCopy=ActiveWeaponState.Item;
-            ClearUniqueSession();
             actionCancelSequence++;
             CancelMeleeAttack();
             EquippedWeapon = weapon;
-            if(weapon!=null&&weapon.Family==WeaponFamily.Greatsword)NativeCombatEffect.PreloadCleave();
+            SignatureMeleeFx.Preload(weapon);
             weaponAttackDelayMultiplier = weapon == null ? 1f : weapon.AttackDelayMultiplier;
             comboIndex = 0;
             activeComboAnimationStep = -1;
@@ -1147,16 +895,14 @@ namespace RuinRunner
             attackPoseTimer = 0f;
             heavyAttackPose = false;
             CancelWeaponAction();
+            SigOnEquip(weapon);
             Grow(CombatGrowthKind.WeaponSwap);
+            if(swappedFrom!=null&&weapon!=null&&swappedFrom!=weapon&&ItemEffects!=null)ItemEffects.OnWeaponSwapped();
         }
 
         private void CancelWeaponAction()
         {
             katanaAutoCutPending=false;katanaCounterSucceeded=false;specialInputBuffer=0;
-            longswordCatching = false;
-            longswordCaught = false;
-            longswordCatchTimer = 0f;
-            longswordActionBuffer = 0f;
             IsGuarding = false;
             parryTimer = 0f;
             parryPresentation = false;
@@ -1169,25 +915,17 @@ namespace RuinRunner
 
         private void CancelMeleeAttack()
         {
-            NativeCombatEffect.CancelCleave(this);
-            MeleeSlashEffect.CancelBoundSlashes(this);
-            MeleeThrustEffect.CancelBound(this);
-            MeleeCrossCutEffect.CancelBound(this);
             pendingMeleeStep = null;
             pendingMeleeStroke=0;
-            pendingMeleeNova = false;
             activeMeleeMotion = MeleeAttackMotion.Sweep;
             attackPoseTimer = 0f;
             attackBuffer = 0f;
             chargedReleasePose = false;
-            longswordRiposte = false;
             // The attack cooldown is intentionally retained when cancelling.
         }
 
-        public void ApplyPassiveItem(PassiveItemDefinition item) { if (item != null) Stats.ApplyItem(item.Type); }
         public void ApplyAccessory(AccessoryDefinition accessory) { if (accessory != null) Stats.ApplyAccessory(accessory.Type); }
         public void ApplySetBonus(SetBonusDefinition bonus) { if (bonus != null) Stats.ApplySetBonus(bonus.SetType, bonus.RequiredPieces); }
-        public void ApplyMetaProgression(MetaProgressionService progression) { Stats.ApplyMetaProgression(progression); }
-        public void OnEnemyDefeated(EnemyController enemy = null) { Stats.RestoreAfterKill(); ItemEffects.OnEnemyDefeated(enemy); }
+        public void OnEnemyDefeated(EnemyController enemy = null) { Stats.RestoreAfterKill(); ItemEffects.OnEnemyDefeated(enemy); TalentOnKill(enemy); }
     }
 }

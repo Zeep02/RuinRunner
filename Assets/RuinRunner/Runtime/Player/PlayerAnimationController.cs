@@ -13,16 +13,7 @@ namespace RuinRunner
         public const string FrameRoot = ArtRoot + "walk/";
         public const float IdleCycleSeconds = 1.6f;
         public const float WalkCyclesPerSecond = 1.5f;
-        public static readonly string[] SourceDirections = { "up", "right_up", "right_down", "right_down", "down", "left_down", "left_down", "left_up" };
-        public const bool HasAuthoredCombatPoses = true;
-        // Native joint poses retain the approved hero across combat and recoil.
-        public const bool HasAuthoredHurtPoses = true;
-        public const bool HasAuthoredThrustPoses = true;
-        public const bool HasAuthoredSweepPoses = true;
-        public const bool HasAuthoredCleavePoses = true;
-        public const bool HasAuthoredDefensePoses = true;
-        public const bool HasAuthoredRangedPoses = true;
-        public const bool HasAuthoredReloadPoses = true;
+        public static readonly string[] SourceDirections = { "right_up", "right_up", "right_down", "right_down", "left_down", "left_down", "left_up", "left_up" };
         private readonly Sprite[][] idle = new Sprite[8][], move = new Sprite[8][], dash = new Sprite[8][], death = new Sprite[8][];
         private PlayerController player;
         private Rigidbody2D body;
@@ -46,12 +37,10 @@ namespace RuinRunner
         public float AuthoredWeaponRotation { get; private set; }
         public Vector2 HandLocalPosition { get; private set; }
         public bool HandBehindBody { get; private set; }
-        public int FacingDirection { get; private set; } = 4;
+        public int FacingDirection { get; private set; } = DiagonalHeroFacing.SouthEast;
         public int FrameIndex { get; private set; }
         public string PoseName { get; private set; }
         private static readonly Vector3 FootOffset = new Vector3(0,-.28f,0);
-        public static int MoveFrameCount(int direction) => 8;
-        public static string MoveFramePath(int direction) => ArtRoot + "walk/" + SourceDirections[direction];
         static bool artPrepared;
 
         internal static async Task PrepareAsync(CancellationToken cancellation)
@@ -87,8 +76,12 @@ namespace RuinRunner
             foreach (string pose in new[] { "idle", "walk", "dash", "death" })
                 foreach (string direction in SourceDirections)
                     await IndividualArt.PrepareFramesAsync(ArtRoot + pose + "/" + direction, 8, cancellation);
-            MeleeThrustEffect.Preload();
             await Awaitable.NextFrameAsync(cancellation);
+            foreach (var clip in NativeCombatEffect.SharedPixelFxClips())
+            {
+                NativeCombatEffect.Frames(clip);
+                await Awaitable.NextFrameAsync(cancellation);
+            }
             SscaryArmedFrames.Preload();
             await Awaitable.NextFrameAsync(cancellation);
             WeaponStandingFrames.Preload();
@@ -111,15 +104,15 @@ namespace RuinRunner
                 dash[direction]=IndividualArt.Frames(ArtRoot+"dash/"+id,8);
                 death[direction]=IndividualArt.Frames(ArtRoot+"death/"+id,8);
             }
-            MeleeThrustEffect.Preload();
+            foreach (var clip in NativeCombatEffect.SharedPixelFxClips()) NativeCombatEffect.Frames(clip);
             SscaryArmedFrames.Preload();
             WeaponStandingFrames.Preload();
             WeaponReloadFrames.Preload();
             SscaryHurtFrames.Preload();
             if(details!=null)details.SetActive(false);
             visuals.localScale=Vector3.one;visuals.localPosition=FootOffset;visuals.localRotation=Quaternion.identity;
-            spriteRenderer.sprite=idle[4][0];spriteRenderer.flipX=false;
-            PoseName="idle";HandLocalPosition=SourceHand("idle",4,0);
+            spriteRenderer.sprite=idle[FacingDirection][0];spriteRenderer.flipX=false;
+            PoseName="idle";HandLocalPosition=SourceHand("idle",FacingDirection,0);
             var shadow=new GameObject("NativeGroundShadow");shadow.transform.SetParent(visuals,false);
             groundShadow=shadow.AddComponent<SpriteRenderer>();groundShadow.sprite=IndividualArt.Sprite(ArtRoot+"shadow");
             groundShadow.sortingLayerName="WorldFloor";groundShadow.sortingOrder=12;
@@ -192,8 +185,7 @@ namespace RuinRunner
             var aiming=player.EquippedWeapon!=null && player.EquippedWeapon.AttackType==WeaponAttackType.Ranged;
             var direction=currentState==PlayerMotionState.Dash?player.DashDirection:
                 action || player.EquippedWeapon!=null?player.WeaponAimDirection:moving?player.AnimationDirection:player.WeaponAimDirection;
-            var center=new Vector2(Mathf.Sin(FacingDirection*Mathf.PI/4),Mathf.Cos(FacingDirection*Mathf.PI/4));
-            if(action || direction.sqrMagnitude>.001f && Vector2.Angle(center,direction)>26f)FacingDirection=DirectionIndex(direction);
+            FacingDirection=DiagonalHeroFacing.Resolve(direction.x,direction.y,FacingDirection);
             Sprite selected;
             var authoredThrust=false;
             Vector2 thrustHand=Vector2.zero;
@@ -201,6 +193,13 @@ namespace RuinRunner
             if(currentState==PlayerMotionState.Dash)
             {
                 PoseName="dash";FrameIndex=Mathf.Min(7,Mathf.FloorToInt(stateTime/.16f*8));selected=dash[FacingDirection][FrameIndex];
+            }
+            else if(player.IsBodyComboSwing)
+            {
+                int frame;
+                selected=MeleeComboFrames.Sample(player.EquippedWeapon.Family,player.ActiveComboAnimationStep,FacingDirection,player.AttackAnimationProgress,out thrustHand,out var bladeAngle,out frame);
+                FrameIndex=frame;authoredThrust=true;AuthoredWeaponRotationActive=true;AuthoredWeaponRotation=bladeAngle;
+                PoseName=player.EquippedWeapon.Family+"-combo-"+(player.ActiveComboAnimationStep+1);
             }
             else if(player.IsThrustActive)
             {
@@ -391,7 +390,8 @@ namespace RuinRunner
             AdvancePoseClock();
             var moving=body.linearVelocity.sqrMagnitude>.04f;
             var variant=moving?8+Mathf.FloorToInt(stride*8):IdleFrame(idleTime);
-            var direction=DirectionIndex(aim);
+            var direction=DiagonalHeroFacing.Resolve(aim.x,aim.y,FacingDirection);
+            if(player.IsBodyComboSwing)return PixelHand(MeleeComboFrames.HandFor(player.EquippedWeapon.Family,comboStep,direction,progress));
             if(motion==MeleeAttackMotion.CrossCut)
             {
                 Vector2 crossHand;bool crossBehind;
@@ -425,12 +425,12 @@ namespace RuinRunner
             if(player.EquippedWeapon!=null&&player.EquippedWeapon.AttackType==WeaponAttackType.Ranged)
             {
                 Vector2 hand;bool behind;
-                SscaryArmedFrames.Ranged(RangedClip(player.EquippedWeapon.Family),DirectionIndex(aim),variant,0,out hand,out behind);
+                SscaryArmedFrames.Ranged(RangedClip(player.EquippedWeapon.Family),DiagonalHeroFacing.Resolve(aim.x,aim.y,FacingDirection),variant,0,out hand,out behind);
                 return PixelHand(hand);
             }
-            return SourceHand(moving?"walk":"idle",DirectionIndex(aim),moving?Mathf.FloorToInt(stride*8):IdleFrame(idleTime));
+            return SourceHand(moving?"walk":"idle",DiagonalHeroFacing.Resolve(aim.x,aim.y,FacingDirection),moving?Mathf.FloorToInt(stride*8):IdleFrame(idleTime));
         }
-        public static int RangedClip(WeaponFamily family)=>family==WeaponFamily.Bow?0:family==WeaponFamily.Crossbow?1:family==WeaponFamily.Pistol?2:family==WeaponFamily.Rifle?3:family==WeaponFamily.Shotgun?4:5;
+        public static int RangedClip(WeaponFamily family)=>family==WeaponFamily.Staff||family==WeaponFamily.Orb?2:family==WeaponFamily.Bow?0:family==WeaponFamily.Crossbow?1:family==WeaponFamily.Pistol?2:family==WeaponFamily.Rifle?3:family==WeaponFamily.Shotgun?4:5;
         private static string RangedPoseName(int clip)=>clip==0?"bow":clip==1?"crossbow":clip==2?"pistol":clip==3?"rifle":clip==4?"shotgun":"cannon";
         private static float RangedRecoilAngle(int clip,float phase,Vector2 aim)
         {
@@ -441,8 +441,7 @@ namespace RuinRunner
         }
         public static int DirectionIndex(Vector2 direction)
         {
-            if(direction.sqrMagnitude<.001f)return 4;
-            return (Mathf.RoundToInt(Mathf.Atan2(direction.x,direction.y)*Mathf.Rad2Deg/45f)+8)%8;
+            return DiagonalHeroFacing.Resolve(direction.x,direction.y,DiagonalHeroFacing.SouthEast,0);
         }
         public static Vector2 ShootingHandPosition(Vector2 aim,int frame)=>SourceHand("idle",DirectionIndex(aim),frame);
     }

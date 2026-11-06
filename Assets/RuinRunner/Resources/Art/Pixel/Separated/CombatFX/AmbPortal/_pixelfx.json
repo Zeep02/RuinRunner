@@ -1,0 +1,29 @@
+{
+  "clip": "AmbPortal",
+  "ppu": 32,
+  "pivotX": 0.50333,
+  "pivotY": 0.08261,
+  "width": 150,
+  "height": 115,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "arcane/portal",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 72,
+  "durationSeconds": 2.4,
+  "visibleDiameter": 107,
+  "origin": [
+    75,
+    105
+  ],
+  "optionsJson": "{\"palette\":[\"#241006\",\"#52240a\",\"#8e4210\",\"#cc7018\",\"#f4a42c\",\"#ffd878\",\"#fff6d8\"]}"
+}

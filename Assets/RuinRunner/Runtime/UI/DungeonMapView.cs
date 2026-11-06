@@ -10,10 +10,7 @@ namespace RuinRunner
         private Texture2D map;
         private int revealedThrough = -1;
         private static GUIStyle frameStyle;
-        private static GUIStyle markerLabel;
         private FieldServiceObject[] services;
-        private static readonly FieldServiceKind[] LegendKinds = { FieldServiceKind.Merchant, FieldServiceKind.ShapeAnvil, FieldServiceKind.OathStone, FieldServiceKind.ExchangeAltar, FieldServiceKind.Expedition };
-        private static readonly string[] LegendNames = { "상인", "형상 모루", "서약석", "교환 제단", "출구" };
         private static readonly Color PlayerInk = new Color(.45f, 1f, .85f);
 
         public void Dispose()
@@ -68,7 +65,7 @@ namespace RuinRunner
             map.SetPixels32(pixels); map.Apply();
         }
 
-        public void DrawMini(GameController game, float width, GUIStyle label)
+        public void DrawMini(GameController game, float width)
         {
             if (game.DungeonMap == null || game.Player == null) return;
             Prepare(game);
@@ -76,27 +73,22 @@ namespace RuinRunner
             var area = new Rect(panel.x + 5, panel.y + 5, panel.width - 10, panel.height - 10);
             var windowSize = new Vector2(34f, 34f * area.height / area.width);
             var world = new Rect((Vector2)game.Player.transform.position - windowSize * .5f, windowSize);
-            DrawWorld(game, area, world, false, label);
+            DrawWorld(game, area, world, false);
         }
 
-        public void DrawExpanded(GameController game, float width, float height, GUIStyle label, GUIStyle centered)
+        public void DrawExpanded(GameController game, float width, float height)
         {
             if (game.DungeonMap == null || game.Player == null) return;
             Prepare(game);
             var panel = new Rect(width * .08f, height * .1f, width * .84f, height * .8f); Panel(panel, .95f);
-            GUI.Label(new Rect(panel.x + 24, panel.y + 12, panel.width - 48, 40), "탐사 지도", label);
-            var region = new Rect(panel.x + 25, panel.y + 60, panel.width - 50, panel.height - 152);
+            var region = new Rect(panel.x + 25, panel.y + 25, panel.width - 50, panel.height - 50);
             var world = owner.Terrain.Bounds;
             var scale = Mathf.Min(region.width / world.width, region.height / world.height);
             var area = new Rect(region.center - world.size * scale * .5f, world.size * scale);
-            DrawWorld(game, area, world, true, centered);
-            DrawLegend(new Rect(panel.x + 25, panel.yMax - 88, panel.width - 50, 32));
-            GUI.Label(new Rect(panel.x + 25, panel.yMax - 47, panel.width - 50, 36),
-                "회색 시설 · 사용 완료   /   금빛 선 · 봉쇄   /   " + GameSettingsService.GetKeyName(game.Settings.GetBinding(GameAction.Map).primary) + " / " +
-                GameSettingsService.GetKeyName(game.Settings.GetBinding(GameAction.Pause).primary) + " 닫기", centered);
+            DrawWorld(game, area, world, true);
         }
 
-        private void DrawWorld(GameController game, Rect area, Rect world, bool expanded, GUIStyle label)
+        private void DrawWorld(GameController game, Rect area, Rect world, bool expanded)
         {
             var bounds = owner.Terrain.Bounds;
             var uv = new Rect((world.min - bounds.min) / bounds.size, world.size / bounds.size);
@@ -105,24 +97,21 @@ namespace RuinRunner
             for (var i = 0; i < owner.RoomCount; i++)
             {
                 if (owner.Regions[i].Phase == EncounterRegionPhase.Undiscovered)
-                {if(expanded&&game.CanSurveyRegion(i)){var unknown=ToArea(owner.GetRoomCenter(i),world,area.size);GUI.Label(new Rect(unknown.x-70,unknown.y-18,140,36),game.RegionPurpose(i),label);}continue;}
+                    continue;
                 var center = ToArea(owner.GetRoomCenter(i), world, area.size);
                 var role = owner.GetRegionRole(i);
-                if (expanded && role == Generation.RegionRole.Combat)
-                    GUI.Label(new Rect(center.x - 55, center.y - 23, 110, 32),
-                        owner.Regions[i].Phase == EncounterRegionPhase.Cleared ? "전투 완료" : "전투", MapLabel);
+                // A fight still ahead is the only thing a room needs to say.
+                if (owner.Regions[i].Phase != EncounterRegionPhase.Cleared && (role == Generation.RegionRole.Combat || role == Generation.RegionRole.Boss))
+                    Icon(center, role == Generation.RegionRole.Boss ? "Map/Boss" : "Map/Combat", expanded ? 28 : 16, false);
                 if (i == owner.EntranceRoomIndex)
-                    Icon(ToArea(owner.GetSpawnPoint(i), world, area.size), "World/PortalActive", expanded ? 24 : 16, false, expanded ? "입구" : null);
+                    Icon(ToArea(owner.GetSpawnPoint(i), world, area.size), "Map/Portal", expanded ? 26 : 16, false);
                 if (owner.Regions[i].Chest != null && !owner.Regions[i].Chest.IsOpened)
-                    Icon(ToArea(owner.Regions[i].Chest.transform.position, world, area.size), "World/ChestClosed", expanded ? 22 : 14, false, expanded ? "보상" : null);
+                    Icon(ToArea(owner.Regions[i].Chest.transform.position, world, area.size), "Map/Treasure", expanded ? 24 : 14, false);
             }
-            var returnTrail=game.ReturnTrailConnections();
             for (var i = 0; i < owner.ConnectionCount; i++)
             {
                 var connection = owner.GetConnection(i);
                 if (connection == null) continue;
-                if(expanded&&returnTrail.Contains(i)&&i<owner.Terrain.Connections.Length)
-                {var points=owner.Terrain.Connections[i].points;for(int n=1;n<points.Length;n++)for(int step=0;step<=12;step++)Marker(ToArea(Vector2.Lerp(points[n-1],points[n],step/12f),world,area.size),new Color(.5f,.95f,1f),Vector2.one*3);}
                 var delta = connection.ArrivalPosition - connection.DeparturePosition;
                 var vertical = Mathf.Abs(delta.y) > Mathf.Abs(delta.x);
                 var size = vertical ? new Vector2(9, 3) : new Vector2(3, 9);
@@ -134,19 +123,16 @@ namespace RuinRunner
             foreach (var service in services)
             {
                 if (service == null || !RegionDiscovered(service.RegionIndex)) continue;
-                var status = ServiceMapStatus(game, service);
-                Icon(ToArea(service.transform.position, world, area.size), ServiceMapIcon(service.Kind), expanded ? 26 : 18,
-                    service.Used, expanded ? service.Label + "\n" + status : null);
+                Icon(ToArea(service.transform.position, world, area.size), ServiceMapIcon(service.Kind), expanded ? 26 : 16, service.Used);
             }
             foreach (var chest in RuntimeSceneObjects.FindAll<RewardChest>())
                 if (!chest.IsOpened && chest.ExplorationRegion >= 0 && owner.Regions[chest.ExplorationRegion].Phase == EncounterRegionPhase.Cleared)
                 {
                     var point = ToArea(chest.transform.position, world, area.size);
-                    Icon(point,"World/ChestClosed",expanded?22:14,false,expanded?"보급함":null);
+                    Icon(point,"Map/Treasure",expanded?24:14,false);
                 }
             if (RegionDiscovered(owner.BossRoomIndex))
-                Icon(ToArea(game.StageExitPosition,world,area.size),game.IsStageResultReady?"World/PortalActive":"World/PortalLocked",
-                    expanded?26:18,false,expanded?(game.IsStageResultReady?"출구 · 열림":"출구 · 봉인"):null);
+                Icon(ToArea(game.StageExitPosition,world,area.size),game.IsStageResultReady?"Map/Portal":"Map/PortalSealed",expanded?26:16,false);
             if (game.Boss != null) Marker(ToArea(game.Boss.transform.position, world, area.size), new Color(1f, .35f, .35f), Vector2.one * 6);
             Marker(ToArea(game.Player.transform.position, world, area.size), PlayerInk, Vector2.one * (expanded ? 7 : 5));
             GUI.EndGroup();
@@ -156,60 +142,21 @@ namespace RuinRunner
         {
             switch(kind)
             {
-                case FieldServiceKind.Merchant: return "External/TownQuesters/smith/00";
-                case FieldServiceKind.ShapeAnvil: return "External/TownQuesters/anvil";
-                case FieldServiceKind.OathStone: return "External/Cainos/Props/statue";
-                case FieldServiceKind.ExchangeAltar: return "External/Cainos/Props/altar";
-                default: return "World/PortalActive";
+                case FieldServiceKind.Merchant: return "Map/Merchant";
+                case FieldServiceKind.ShapeAnvil: return "Map/Anvil";
+                case FieldServiceKind.OathStone: return "Map/OathStone";
+                case FieldServiceKind.ExchangeAltar: return "Map/Altar";
+                default: return "Map/Portal";
             }
         }
 
-        public static string ServiceMapStatus(GameController game, FieldServiceObject service)
-        {
-            if(service.Used)return "사용 완료";
-            if(service.Kind!=FieldServiceKind.Merchant)return "이용 가능";
-            if(game.BackendEconomy?.shops!=null)
-                foreach(var shop in game.BackendEconomy.shops)
-                    if(shop.stageIndex==game.CurrentStageIndex&&shop.offers!=null)
-                    {
-                        int stock=0;foreach(var offer in shop.offers)stock+=Mathf.Max(0,offer.stock);
-                        return stock>0?"재고 "+stock+" · 구매 / 판매":"재고 없음 · 판매 가능";
-                    }
-            return "상인 · 재고 확인";
-        }
-
-        static GUIStyle MapLabel
-        {
-            get
-            {
-                if(markerLabel==null)
-                {
-                    markerLabel=new GUIStyle{font=GameTypography.Regular,fontSize=12,alignment=TextAnchor.UpperCenter,wordWrap=false};
-                    markerLabel.normal.textColor=new Color(.91f,.94f,.87f);
-                }
-                return markerLabel;
-            }
-        }
-
-        static void Icon(Vector2 point,string id,float size,bool used,string text)
+        static void Icon(Vector2 point,string id,float size,bool used)
         {
             var old=GUI.color;
             var rect=new Rect(Mathf.Round(point.x-size*.5f),Mathf.Round(point.y-size*.5f),size,size);
             GUI.color=used?new Color(.5f,.56f,.53f,.85f):Color.white;
             ItemIconLibrary.DrawGUI(rect,IndividualArt.Texture(id));
             GUI.color=old;
-            if(!string.IsNullOrEmpty(text))GUI.Label(new Rect(rect.center.x-88,rect.yMax+3,176,38),text,MapLabel);
-        }
-
-        static void DrawLegend(Rect rect)
-        {
-            float cell=rect.width/LegendKinds.Length;
-            for(int i=0;i<LegendKinds.Length;i++)
-            {
-                var start=rect.x+i*cell;
-                Icon(new Vector2(start+18,rect.center.y),ServiceMapIcon(LegendKinds[i]),24,false,null);
-                GUI.Label(new Rect(start+38,rect.y+8,cell-42,24),LegendNames[i],MapLabel);
-            }
         }
 
         private static Vector2 ToArea(Vector2 point, Rect world, Vector2 size) =>

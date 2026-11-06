@@ -28,7 +28,7 @@ namespace RuinRunner
             LastMetaReward = checked((int)BackendRun.legacyReward);
             MetaProgression = new MetaProgressionService(SaveSlots);
             projectedSettlementRunId = settlementRunId;
-            SessionMessage = "원정 정산이 서버에 저장되었습니다.";
+            SessionMessage = "";
         }
 
         public void RequestProfileReset(int slot)
@@ -37,7 +37,7 @@ namespace RuinRunner
                 !SaveSlots.GetSummary(slot).IsServerProfile) return;
             backendFlow?.CancelReset();
             ResetProfileSlot = slot;
-            SessionMessage = "이 슬롯의 유산·해금·원정 기록을 초기화합니다.";
+            SessionMessage = "";
         }
 
         public async void PrepareProfileReset()
@@ -49,7 +49,7 @@ namespace RuinRunner
             try
             {
                 if (await backendFlow.BeginResetAsync(slot) && SessionMatches(epoch) && ResetProfileSlot == slot)
-                    SessionMessage = "확인되었습니다. 아래 최종 초기화 버튼으로 확정하세요.";
+                    SessionMessage = "";
             }
             finally { SessionOperationPending = false; }
         }
@@ -65,7 +65,7 @@ namespace RuinRunner
                 if (await backendFlow.ConfirmResetAsync(challenge) && SessionMatches(epoch))
                 {
                     ResetProfileSlot = 0;
-                    SessionMessage = "프로필을 초기화했습니다. 마을에서 다시 시작할 수 있습니다.";
+                    SessionMessage = "";
                 }
             }
             finally { SessionOperationPending = false; }

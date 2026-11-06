@@ -1,0 +1,28 @@
+{
+  "clip": "EShotBoulder",
+  "ppu": 32,
+  "pivotX": 0.58333,
+  "pivotY": 0.5,
+  "width": 18,
+  "height": 15,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/bolt",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 25,
+  "fps": 15,
+  "loop": true,
+  "frames": 5,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 18,
+  "origin": [
+    10,
+    7
+  ],
+  "optionsJson": "{\"palette\":[\"#140e0a\",\"#2a1e14\",\"#47321e\",\"#69492a\",\"#8e6638\",\"#b88a52\",\"#e6c08a\"],\"kind\":\"shard\",\"size\":1.5,\"tail\":12}"
+}

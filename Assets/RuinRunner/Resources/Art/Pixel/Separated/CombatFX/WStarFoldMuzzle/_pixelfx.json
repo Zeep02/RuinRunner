@@ -1,0 +1,28 @@
+{
+  "clip": "WStarFoldMuzzle",
+  "ppu": 32,
+  "pivotX": 0.375,
+  "pivotY": 0.48333,
+  "width": 28,
+  "height": 30,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/flash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 20,
+  "fps": 30,
+  "loop": false,
+  "frames": 6,
+  "durationSeconds": 0.2,
+  "visibleDiameter": 13,
+  "origin": [
+    10,
+    15
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0a24\",\"#191648\",\"#2b2478\",\"#4638b0\",\"#7a6ce0\",\"#b8aaff\",\"#f4eeff\"],\"sparks\":[\"#f4eeff\",\"#b8aaff\",\"#7a6ce0\",\"#4638b0\"],\"len\":9,\"wide\":4}"
+}

@@ -1,0 +1,29 @@
+{
+  "clip": "WTideFangB",
+  "ppu": 32,
+  "pivotX": 0.075,
+  "pivotY": 0.64286,
+  "width": 180,
+  "height": 63,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "0.7",
+  "source": "pixelfx",
+  "effect": "water/water-jet",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 80,
+  "fps": 30,
+  "loop": true,
+  "frames": 21,
+  "durationSeconds": 0.7,
+  "visibleDiameter": 172,
+  "origin": [
+    13,
+    22
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"],\"length\":118}"
+}

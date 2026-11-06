@@ -73,7 +73,7 @@ namespace RuinRunner
                 settle = Time.time + .5f;
                 while (Time.time < settle) yield return null;
                 if (callbacks != 1 || !portal.IsConsumed)
-                    throw new InvalidOperationException(direction + " callbacks=" + callbacks + " lateUnlock=" + unlockLate);
+                    throw new InvalidOperationException(direction + " callbacks=" + callbacks + " lateUnlock=" + unlockLate + " hero=" + player.transform.position + " portal=" + portal.transform.position + " unlocked=" + portal.IsUnlocked);
                 if (portal.IsGateVisible) throw new InvalidOperationException("Unlocked trail still visually obstructed");
                 Debug.Log("[Portal Validation] " + direction + " lateUnlock=" + unlockLate + " accepted once at " + player.transform.position);
                 checks++;

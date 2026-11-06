@@ -37,7 +37,7 @@ namespace RuinRunner
             }
             map = DungeonMap.Build(rooms, room => { current = room; enters++; map.BeginEncounter(room); });
             var follow = CameraFollow.Create(); cameraView = follow.GetComponent<Camera>();
-            var inventory = new InventorySystem(); inventory.AddWeapon(WeaponLootTable.FindFirst(WeaponFamily.Longsword));
+            var inventory = new InventorySystem(); inventory.AddWeapon(WeaponLootTable.FindFirst(WeaponFamily.Katana));
             player = PlayerController.Create(Vector2.zero, () => false, () => true, () => { }, follow, inventory, new GameSettingsService());
             player.EquipWeapon(inventory.EquippedWeapon); previousPosition = player.transform.position;
             follow.Target = player.transform; follow.FocusRoom(map.Terrain.Bounds.center, map.Terrain.Bounds.size, true);

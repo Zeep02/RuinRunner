@@ -1,0 +1,28 @@
+{
+  "clip": "FxHexSigil",
+  "ppu": 32,
+  "pivotX": 0.50309,
+  "pivotY": 0.11508,
+  "width": 162,
+  "height": 126,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "shadow/hex-sigil",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 64,
+  "durationSeconds": 4.267,
+  "visibleDiameter": 100,
+  "origin": [
+    81,
+    111
+  ],
+  "optionsJson": "{}"
+}

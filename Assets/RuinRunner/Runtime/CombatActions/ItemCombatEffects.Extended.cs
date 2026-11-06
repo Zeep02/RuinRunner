@@ -15,13 +15,14 @@ namespace RuinRunner
         float cagedDamage;
         NativeCombatEffect recallView,cageView,focusPrismView;
         public int ExtendedItemProcs {get;private set;}
-        public int CapturedItemBullets=>cagedBullets;
         public void OnCombatContact(EnemyController enemy,int action,float damage,bool melee,bool finisher)
         {
             if(!Active||dealingProc||enemy==null)return;
             if(Copies(AccessoryType.ArcaneLens)>0&&clock<lensArmedUntil)
             {lensArmedUntil=0;echoAim=((Vector2)enemy.transform.position-echoOrigin).normalized;echoAt=clock+Effect(AccessoryType.ArcaneLens,"releaseDelaySeconds");}
             bool first=extendedActions.Add(action);extendedActions.RemoveWhere(a=>a<owner.AttackAnimationSequence-32);
+            OnVineContact(enemy,action);
+            if(first)OnPassiveContact(enemy);
             if(first&&Copies(AccessoryType.CadenceClasp)>0&&clock>=cadenceReady){cadenceStep=1;cadenceUntil=clock+Effect(AccessoryType.CadenceClasp,"windowSeconds");}
             if(first&&Copies(AccessoryType.RecallSpool)>0&&finisher&&clock>=recallReady)
             {
@@ -62,6 +63,7 @@ namespace RuinRunner
         }
         void OnActiveSpecial(float amount,Vector2 aim)
         {
+            OnPassiveSpecial(aim);
             if(Copies(AccessoryType.RecallSpool)>0&&clock<recallUntil&&clock>=recallReady)
             {
                 recallUntil=0;recallReady=clock+Effect(AccessoryType.RecallSpool,"cooldownSeconds");DestroyView(recallView);recallView=null;
@@ -99,6 +101,7 @@ namespace RuinRunner
         }
         void TickExtendedItems()
         {
+            TickPassives();
             if(focusedEnemy==null||focusedEnemy.IsDead){DestroyView(focusPrismView);focusPrismView=null;focusedEnemy=null;focusContacts=0;}
             if(clock>=recallUntil){DestroyView(recallView);recallView=null;}
             if(clock>=cadenceUntil)cadenceStep=0;
@@ -114,9 +117,10 @@ namespace RuinRunner
         }
         void ClearRoute(){foreach(var view in routeViews)DestroyView(view);routeViews.Clear();routeMarks.Clear();}
         void ClearExtendedItems()
-        {ClearRoute();DestroyView(recallView);recallView=null;DestroyView(cageView);cageView=null;DestroyView(focusPrismView);focusPrismView=null;recallUntil=0;cadenceStep=0;cagedBullets=0;cagedDamage=0;focusContacts=0;focusedEnemy=null;lensArmedUntil=0;}
+        {ClearRoute();DestroyView(recallView);recallView=null;DestroyView(cageView);cageView=null;DestroyView(focusPrismView);focusPrismView=null;recallUntil=0;cadenceStep=0;cagedBullets=0;cagedDamage=0;focusContacts=0;focusedEnemy=null;lensArmedUntil=0;passiveQueue.Clear();vineHits.Clear();vineActions.Clear();}
         void ReconcileExtendedItems()
         {
+            ReconcilePassives();
             if(Copies(AccessoryType.RecallSpool)==0){recallUntil=0;DestroyView(recallView);recallView=null;}
             if(Copies(AccessoryType.CadenceClasp)==0)cadenceStep=0;
             if(Copies(AccessoryType.PrismCage)==0){cageUntil=0;cagedBullets=0;cagedDamage=0;DestroyView(cageView);cageView=null;}

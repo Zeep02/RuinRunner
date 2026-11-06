@@ -36,7 +36,10 @@ namespace RuinRunner
         Pistol,
         Rifle,
         Shotgun,
-        Cannon
+        Cannon,
+        Spear,
+        Staff,
+        Orb
     }
 
     public static class WeaponFamilyCatalog
@@ -48,13 +51,16 @@ namespace RuinRunner
                 case WeaponFamily.Dagger: return "단검";
                 case WeaponFamily.Longsword: return "롱소드";
                 case WeaponFamily.Mace: return "철퇴";
-                case WeaponFamily.Katana: return "도(카타나)";
+                case WeaponFamily.Katana: return "도";
                 case WeaponFamily.Greatsword: return "대검";
                 case WeaponFamily.Bow: return "활";
                 case WeaponFamily.Crossbow: return "석궁";
                 case WeaponFamily.Pistol: return "권총";
                 case WeaponFamily.Rifle: return "소총";
                 case WeaponFamily.Shotgun: return "산탄총";
+                case WeaponFamily.Spear: return "창";
+                case WeaponFamily.Staff: return "지팡이";
+                case WeaponFamily.Orb: return "오브";
                 default: return "대포";
             }
         }

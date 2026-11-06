@@ -1,0 +1,29 @@
+{
+  "clip": "StepCore",
+  "ppu": 32,
+  "pivotX": 0.6875,
+  "pivotY": 0.05,
+  "width": 8,
+  "height": 10,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "ink/step",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 7,
+  "origin": [
+    5,
+    9
+  ],
+  "optionsJson": "{\"kind\":\"ash\",\"palette\":[\"#3c2460\",\"#8048b8\",\"#e0c8ff\"]}"
+}

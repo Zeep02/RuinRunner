@@ -1,0 +1,28 @@
+{
+  "clip": "WWhetstoneOrbHit",
+  "ppu": 32,
+  "pivotX": 0.5125,
+  "pivotY": 0.4875,
+  "width": 40,
+  "height": 40,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 14,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 24,
+  "origin": [
+    20,
+    20
+  ],
+  "optionsJson": "{\"palette\":[\"#0e0e12\",\"#1c1c24\",\"#2c2c38\",\"#42424f\",\"#6a6a78\",\"#9c9caa\",\"#d8d8e0\"],\"sparks\":[\"#d8d8e0\",\"#9c9caa\",\"#6a6a78\",\"#42424f\"],\"len\":13}"
+}

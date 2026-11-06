@@ -1,0 +1,29 @@
+{
+  "clip": "WAccGuardianFeather",
+  "ppu": 32,
+  "pivotX": 0.5123,
+  "pivotY": 0.60256,
+  "width": 122,
+  "height": 117,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "holy/feather-burst",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 14,
+  "fps": 30,
+  "loop": false,
+  "frames": 38,
+  "durationSeconds": 1.267,
+  "visibleDiameter": 117,
+  "origin": [
+    62,
+    46
+  ],
+  "optionsJson": "{}"
+}

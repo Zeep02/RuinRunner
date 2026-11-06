@@ -1,0 +1,14 @@
+{
+  "clip": "PropMushrooms",
+  "ppu": 32,
+  "pivotX": 0.48438,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "6485b766-e077-4977-a162-1c1621ba1e67",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

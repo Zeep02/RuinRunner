@@ -1,0 +1,28 @@
+{
+  "clip": "WPebbleStaffA",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.12745,
+  "width": 49,
+  "height": 51,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/spike",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 87,
+  "fps": 30,
+  "loop": false,
+  "frames": 19,
+  "durationSeconds": 0.633,
+  "visibleDiameter": 49,
+  "origin": [
+    24,
+    44
+  ],
+  "optionsJson": "{\"palette\":[\"#0e0e12\",\"#1c1c24\",\"#2c2c38\",\"#42424f\",\"#6a6a78\",\"#9c9caa\",\"#d8d8e0\"],\"h\":30,\"w\":16}"
+}

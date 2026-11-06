@@ -54,6 +54,7 @@ $env:DOTNET_CLI_TELEMETRY_OPTOUT='1';$env:DOTNET_NOLOGO='1';$env:DOTNET_CLI_HOME
 $project=Join-Path $root 'Backend/RuinRunner.Api/RuinRunner.Api.csproj'
 if(!$SkipBuild){& $dotnet 'build' $project '-c' 'Release' '--nologo';if($LASTEXITCODE -ne 0){throw 'API build failed'}}
 $dll=Join-Path $root 'Backend/RuinRunner.Api/bin/Release/net10.0/RuinRunner.Api.dll'
+$env:RR_CONTENT_VERSION='campaign-v5'
 $env:RR_DB="Host=127.0.0.1;Port=55432;Database=ruinrunner;Username=rr_app;Password=$($secrets.app);Timeout=5;Command Timeout=10;Maximum Pool Size=16"
 $env:RR_MIGRATION_DB="Host=127.0.0.1;Port=55432;Database=ruinrunner;Username=postgres;Password=$($secrets.admin)"
 try{& $dotnet $dll '--migrate';if($LASTEXITCODE -ne 0){throw 'Migration failed'}}finally{Remove-Item Env:RR_MIGRATION_DB -ErrorAction SilentlyContinue}

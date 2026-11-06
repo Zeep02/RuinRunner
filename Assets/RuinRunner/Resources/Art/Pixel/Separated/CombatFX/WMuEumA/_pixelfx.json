@@ -1,0 +1,29 @@
+{
+  "clip": "WMuEumA",
+  "ppu": 32,
+  "pivotX": 0.53125,
+  "pivotY": 0.46875,
+  "width": 16,
+  "height": 16,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 12,
+  "origin": [
+    8,
+    8
+  ],
+  "optionsJson": "{\"palette\":[\"#060608\",\"#101014\",\"#1c1c22\",\"#32323a\",\"#5a5a64\",\"#a0a0aa\",\"#f0f0f4\"],\"shape\":\"cross\",\"size\":1.4}"
+}

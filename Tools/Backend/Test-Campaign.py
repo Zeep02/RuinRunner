@@ -27,20 +27,21 @@ def guest():
 def main(restart, expected_version, instance, marker):
     identity,a=guest(); _,b=guest(); at=a['accessToken']; bt=b['accessToken']
     catalog=call('GET','/v1/catalogs/current',token=at); version=catalog['version']
-    check('full published campaign catalog',version==expected_version and len(catalog['items'])==76 and len(catalog['talents'])==12)
-    if version=='campaign-v2':
+    check('full published campaign catalog',version==expected_version and len(catalog['items'])==(107 if expected_version in('campaign-v4','campaign-v5') else 120) and len(catalog['talents'])==(64 if expected_version=='campaign-v5' else 12))
+    if version in('campaign-v2','campaign-v3','campaign-v4','campaign-v5'):
         check('v2 accessory and set numeric data available',catalog['accessoryTuningVersion']==1 and len(catalog['itemSets'])==8 and all(x['stats'].get('effect') is not None for x in catalog['items'] if x['kind']=='accessory'))
     check('published catalog version lookup matches current',call('GET','/v1/catalogs/'+version,token=at)==catalog)
     p=call('POST','/v1/profiles',dict(operationId=uid(),slot=1,name='Campaign integration isolated'),at)
     other_slot=call('POST','/v1/profiles',dict(operationId=uid(),slot=2,name='Unmodified second slot'),at)
     foreign_profile=call('POST','/v1/profiles',dict(operationId=uid(),slot=1,name='Unmodified other guest'),bt)
     profile='/v1/profiles/'+p['profileId']; initial=p
-    check('three free defaults and one starter',len(p['state']['activeTalentIds'])==3 and p['state']['unlockedWeaponIds']==['rust_sword'])
+    check('three free defaults and one starter',len(p['state']['activeTalentIds'])==catalog['maxActiveTalents'] and p['state']['unlockedWeaponIds']==['trainee_blade'])
     call('GET',profile,token=bt,status=404); check('foreign profile denied')
     unlock=lambda id,kind='talent': dict(operationId=uid(),expectedRevision=p['revision'],kind=kind,contentId=id,contentVersion=version)
-    failure=call('POST',profile+'/unlocks',unlock('stored_guard'),at,status=409)
+    call('POST',profile+'/unlocks',unlock('mastery_vigor_2'),at,status=409);check('mastery ranks are bought in order')
+    failure=call('POST',profile+'/unlocks',unlock('last_stand'),at,status=409)
     check('achievement requirement enforced',failure.get('code')=='achievement_required')
-    failure=call('POST',profile+'/unlocks',unlock('iron_mace','weapon'),at,status=409)
+    failure=call('POST',profile+'/unlocks',unlock('merc_slab','weapon'),at,status=409)
     check('insufficient legacy atomic',failure.get('code')=='insufficient_legacy' and call('GET',profile,token=at)==initial)
     old=dict(version=1,slotNumber=1,createdUtc='',lastPlayedUtc='',totalRuns=3,victories=1,campaignVictories=1,bestCampaignStage=3,deepestRoom=12,totalKills=60,legacyShards=100,upgrades=[dict(type=0,rank=2),dict(type=6,rank=1)])
     source=json.dumps(old,ensure_ascii=False,separators=(',',':'))
@@ -50,13 +51,13 @@ def main(restart, expected_version, instance, marker):
     check('old ranks refunded exactly and version marked',p['legacyShards']==112 and p['state']['legacyMigrationVersion']==1 and p['state']['legacyRefundVersion']==1)
     check('same import operation replays exact receipt',call('POST',profile+'/legacy-import',imp,at)==receipt)
     call('POST',profile+'/legacy-import',{**imp,'operationId':uid(),'expectedRevision':p['revision']},at,status=409);check('old save cannot overwrite newer server profile')
-    for tid in ['merchant_barter','stored_guard','turning_dash']:
+    for tid in ['revenant','last_stand','razor_wind']:
         request=unlock(tid); before=p['legacyShards']; result=call('POST',profile+'/unlocks',request,at)
         check('unlock charged once '+tid,call('POST',profile+'/unlocks',request,at)==result and result['legacyShards']<before); p=result
-    config=dict(operationId=uid(),expectedRevision=p['revision'],startingWeaponId='rust_sword',activeTalentIds=['combo_memory','stored_guard'])
+    config=dict(operationId=uid(),expectedRevision=p['revision'],startingWeaponId='trainee_blade',activeTalentIds=['corpse_burst','last_stand'])
     call('PUT',profile+'/configuration',config,at,status=400);check('one talent per branch enforced')
-    call('PUT',profile+'/configuration',{**config,'activeTalentIds':['combo_memory','survey_next','chest_intent','turning_dash']},at,status=400);check('three active talent maximum enforced')
-    config['activeTalentIds']=['combo_memory','survey_next','merchant_barter']; p=call('PUT',profile+'/configuration',config,at)
+    call('PUT',profile+'/configuration',{**config,'activeTalentIds':['corpse_burst','chain_chant','ghost_mine','miser','razor_wind']},at,status=400);check('three active talent maximum enforced')
+    config['activeTalentIds']=['corpse_burst','chain_chant','revenant']; p=call('PUT',profile+'/configuration',config,at)
     call('PUT',profile+'/configuration',{**config,'operationId':uid()},at,status=409);check('stale revision cannot replace loadout')
     start=dict(operationId=uid(),profileId=p['profileId'],expectedProfileRevision=p['revision'],requestedSeed=20261004,contentVersion=version,generatorVersion='modules-v1.0.0',buildId='campaign-integration-isolated')
     run=call('POST','/v1/runs',start,at); path='/v1/runs/'+run['runId']
@@ -87,19 +88,19 @@ def main(restart, expected_version, instance, marker):
     call('POST',path+'/rewards',{**req,'operationId':uid()},at,status=409);check('same world event with a new operation cannot mint gold',call('GET',path+'/economy',token=at)['gold']==balance)
     call('POST',path+'/rewards',{**req,'source':'boss'},at,status=409);check('operation payload cannot change')
     call('POST',path+'/rewards',{**req,'operationId':uid(),'eventId':uid(),'stageIndex':3},at,status=400);check('invalid stage rejected')
-    call('POST',path+'/rewards',{**req,'operationId':uid(),'eventId':uid(),'contentId':'rust_sword'},at,status=400);check('enemy reward cannot mint inventory')
+    call('POST',path+'/rewards',{**req,'operationId':uid(),'eventId':uid(),'contentId':'trainee_blade'},at,status=400);check('enemy reward cannot mint inventory')
     for n in range(18): reward('boss',event='funding:'+str(n))
     # Existing item definitions are immutable; these are real server-owned instances.
-    for content in ['mana_thread','sapphire_flask','guard_bell','guardian_seal','rush_spur','storm_feather','worn_dagger']:
+    for content in ['mana_thread','soul_capacitor','guard_bell','last_light_pendant','rush_spur','cadence_clasp','alley_awl']:
         reward('pickup',content,event='pickup:'+content)
     check('pickup has independent instance identities',len(set(x['instanceId'] for x in econ['items']))==len(econ['items']))
     before=econ
     _,bad=trade('sell',404,shopId='stage-0',instanceId=uid());check('unowned item cannot be sold',call('GET',path+'/economy',token=at)==before)
-    inputs=[x['instanceId'] for x in econ['items'] if x['contentId'] in ['mana_thread','sapphire_flask']]
+    inputs=[x['instanceId'] for x in econ['items'] if x['contentId'] in ['mana_thread','soul_capacitor']]
     exchange,exchanged=trade('exchange',recipeId='mana_aegis',instanceIds=inputs,objectId='s0-r05:exchange-altar')
     check('exact recipe atomically consumes two and grants one',len(exchanged['removedInstanceIds'])==2 and exchanged['grantedItems'][0]['contentId']=='mana_aegis')
     check('exchange operation retry replays same output instance',call('POST',path+'/trades',exchange,at)==exchanged)
-    second=[x['instanceId'] for x in econ['items'] if x['contentId'] in ['guard_bell','guardian_seal']]
+    second=[x['instanceId'] for x in econ['items'] if x['contentId'] in ['guard_bell','last_light_pendant']]
     _,bad=trade('exchange',409,recipeId='prism_cage',instanceIds=second,objectId='s0-r05:exchange-altar');check('altar can only be used once',bad.get('code')=='object_used')
     _,bad=trade('exchange',400,recipeId='mana_aegis',instanceIds=second,objectId='s0-r06:exchange-altar');check('same-kind wrong recipe input rejected',bad.get('code')=='recipe_inputs')
     offer=next(o for o in econ['shops'][0]['offers'] if o['kind']!='heal')
@@ -123,27 +124,22 @@ def main(restart, expected_version, instance, marker):
     req,healed=trade('buy',shopId='stage-0',offerId='heal');check('heal charged once with server amount',healed['healAmount']==catalog['economy']['healAmount'] and healed['goldDelta']==-catalog['economy']['healPrice'])
     call('POST',path+'/trades',{**req,'operationId':uid()},at,status=409);check('stale economy revision rejected')
     healedRequest=req
-    reward('pickup','starbreaker',event='barter-input')
-    barterInput=next(x for x in econ['items'] if x['contentId']=='starbreaker')
+    reward('pickup','last_bell',event='barter-input')
+    barterInput=next(x for x in econ['items'] if x['contentId']=='last_bell')
     targets=[(s,o) for s in econ['shops'] for o in s['offers'] if o['stock']>0 and o['kind']!='heal' and o['price']<=barterInput['sellPrice']*2]
     assert targets,'deterministic fixture requires a valid barter offer'
     shop,offer=targets[0]
-    _,bartered=trade('barter',shopId=shop['shopId'],offerId=offer['offerId'],instanceId=barterInput['instanceId'])
-    check('barter exchanges one item without inventing gold',bartered['goldDelta']==0 and len(bartered['grantedItems'])==1 and bartered['removedInstanceIds']==[barterInput['instanceId']])
-    reward('pickup','starbreaker',event='second-barter-input')
-    barterInput=next(x for x in econ['items'] if x['contentId']=='starbreaker')
-    remaining=next(o for s in econ['shops'] if s['shopId']==shop['shopId'] for o in s['offers'] if o['stock']>0)
-    _,bad=trade('barter',409,shopId=shop['shopId'],offerId=remaining['offerId'],instanceId=barterInput['instanceId'])
-    check('barter is once per merchant',bad.get('code')=='barter_unavailable')
+    _,bad=trade('barter',409,shopId=shop['shopId'],offerId=offer['offerId'],instanceId=barterInput['instanceId'])
+    check('barter needs the retired talent',bad.get('code')=='barter_unavailable')
     while sum(x['kind']=='weapon' for x in econ['items'])>3:
         item=next(x for x in econ['items'] if x['kind']=='weapon' and x['origin']!='starter')
         trade('discard',instanceId=item['instanceId'])
-    while sum(x['kind']=='accessory' for x in econ['items'])<20: reward('pickup','lucky_dice')
+    while sum(x['kind']=='accessory' for x in econ['items'])<20: reward('pickup','cinder_seed')
     before=econ
-    _,bad=reward('pickup','lucky_dice',status=409)
+    _,bad=reward('pickup','cinder_seed',status=409)
     check('server accessory capacity rejects without partial state',bad.get('code')=='inventory_full' and call('GET',path+'/economy',token=at)==before)
-    while len(econ['items'])<23:reward('pickup','worn_dagger')
-    _,bad=reward('pickup','worn_dagger',status=409)
+    while len(econ['items'])<23:reward('pickup','alley_awl')
+    _,bad=reward('pickup','alley_awl',status=409)
     check('server total inventory capacity enforced',bad.get('code')=='inventory_full' and len(econ['items'])==23)
     final=call('GET',path+'/economy',token=at)
     if restart:
@@ -186,7 +182,7 @@ def main(restart, expected_version, instance, marker):
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--restart',action='store_true')
     parser.add_argument('--instance',required=True,help='An existing isolated fixture; normal/default DB is never used')
-    parser.add_argument('--expected-catalog',choices=['campaign-v1','campaign-v2'],default='campaign-v2')
+    parser.add_argument('--expected-catalog',choices=['campaign-v1','campaign-v2','campaign-v3','campaign-v4','campaign-v5'],default='campaign-v5')
     args=parser.parse_args()
     assert args.instance and all(c.isalnum() or c=='-' for c in args.instance)
     isolated=(ROOT/'Backend/.local/isolated'/args.instance).resolve()

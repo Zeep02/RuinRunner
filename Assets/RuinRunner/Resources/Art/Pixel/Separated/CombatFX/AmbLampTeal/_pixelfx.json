@@ -1,0 +1,29 @@
+{
+  "clip": "AmbLampTeal",
+  "ppu": 32,
+  "pivotX": 0.51316,
+  "pivotY": 0.48684,
+  "width": 38,
+  "height": 38,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "fire/lamp-glow",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 90,
+  "durationSeconds": 3,
+  "visibleDiameter": 18,
+  "origin": [
+    19,
+    19
+  ],
+  "optionsJson": "{\"palette\":[\"#0e4a58\",\"#1c8ebc\",\"#36c2d0\",\"#b8f4ee\"]}"
+}

@@ -41,7 +41,7 @@ namespace RuinRunner
             var camera = follow.GetComponent<Camera>();
             camera.enabled = false;
             var inventory = new InventorySystem();
-            inventory.AddWeapon(WeaponLootTable.FindFirst(WeaponFamily.Longsword));
+            inventory.AddWeapon(WeaponLootTable.FindFirst(WeaponFamily.Katana));
             var player = PlayerController.Create(Vector2.zero, () => false, () => true, () => { }, follow, inventory, new GameSettingsService());
             player.EquipWeapon(inventory.EquippedWeapon);
             var room = ScriptableObject.CreateInstance<RoomTemplate>();
@@ -70,8 +70,10 @@ namespace RuinRunner
                         "movement collider does not receive a second hit " + enemy.Type);
                     var hitBounds = enemy.DamageCollider.bounds;
                     var drawnBounds = SpriteVisibleBounds.World(visual);
-                    Require(hitBounds.min.x <= drawnBounds.min.x && hitBounds.min.y <= drawnBounds.min.y &&
-                        hitBounds.max.x >= drawnBounds.max.x && hitBounds.max.y >= drawnBounds.max.y,
+                    // A body bobs a pixel or two around its feet from frame to frame; the hurtbox follows the idle pose as a whole.
+                    const float BobSlack = 2.5f / 32f;
+                    Require(hitBounds.min.x <= drawnBounds.min.x + BobSlack && hitBounds.min.y <= drawnBounds.min.y + BobSlack &&
+                        hitBounds.max.x >= drawnBounds.max.x - BobSlack && hitBounds.max.y >= drawnBounds.max.y - BobSlack,
                         "hurtbox covers rendered body " + enemy.Type + " hit=" + enemy.DamageCollider.bounds + " art=" + visual.bounds);
                     var health = enemy.transform.Find("HealthBack");
                     Require(enemy.Type == EnemyType.Boss ? !health.gameObject.activeSelf : health.GetComponent<SpriteRenderer>().bounds.min.y > drawnBounds.max.y,
@@ -86,7 +88,9 @@ namespace RuinRunner
         private void CheckIcon(string id, InventoryIconKind kind)
         {
             var texture = ItemIconLibrary.Get(id, kind);
-            Require(texture != null && texture.isReadable && texture.width == texture.height, "individual square PNG " + kind + "/" + id);
+            // Signature weapon and accessory icons are cut to their art, not to a square; DrawGUI keeps their proportions.
+            Require(texture != null && texture.isReadable, "individual PNG " + kind + "/" + id);
+            if (kind != InventoryIconKind.Weapon || SignatureWeaponCatalog.Has(id)) return;
             var bounds = ItemIconLibrary.ContentBounds(texture);
             Require(bounds.width > 0 && bounds.xMin > 2 && bounds.yMin > 2 && bounds.xMax < texture.width - 2 && bounds.yMax < texture.height - 2,
                 "transparent padding / no clipping " + id);

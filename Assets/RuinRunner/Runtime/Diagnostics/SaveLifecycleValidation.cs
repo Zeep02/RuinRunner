@@ -107,19 +107,9 @@ namespace RuinRunner
             game.ShowStageResult();
             game.ShowStageResult();
             Require(data.totalRuns == runs && data.victories == victories && data.legacyShards == shards, "result cannot award twice");
-            game.OpenPostRunLegacy();
-            Require(game.IsUnlockOpen && game.IsPaused, "post-result legacy page opens paused");
-            var definition = Array.Find(MetaUpgradeCatalog.Definitions, item => item.Type == MetaUpgradeType.VitalLegacy);
-            var cost = definition.GetCost(0);
-            Require(game.UnlockMetaUpgrade(definition), "earned shards purchase permanent health rank");
-            Require(game.MetaProgression.GetRank(definition.Type) == 1 && data.legacyShards == shards - cost, "rank and exact cost recorded");
-            game.ClosePostRunLegacy();
-            var expectedStats = new PlayerStats();
-            expectedStats.ApplyMetaProgression(game.MetaProgression);
             game.RestartRun();
             for (var i = 0; i < 12; i++) yield return null;
             Require(game.IsRunActive && !game.IsGameOver && game.CurrentRoom == 0, "retry starts first room");
-            Require(Mathf.Approximately(game.Player.MaxHealth, expectedStats.MaxHealth), "permanent bonus applied once to fresh retry stats");
             Require(RuntimeSceneObjects.FindAll<PlayerController>().Length == 1 && RuntimeSceneObjects.FindAll<PrototypeAudioController>().Length == 1,
                 "retry has one player and one audio controller");
             Require(data.totalRuns == runs && data.victories == victories, "starting retry does not settle another run");
@@ -131,7 +121,7 @@ namespace RuinRunner
                 "defeat event records a loss without an extra victory");
             var lossShards = data.legacyShards;
             var beforeLoss = JsonUtility.FromJson<SaveSlotData>(File.ReadAllText(Path.Combine(game.SaveSlots.SaveDirectory, "save1.json.bak")));
-            Require(beforeLoss.totalRuns == runs && beforeLoss.legacyShards == shards - cost,
+            Require(beforeLoss.totalRuns == runs && beforeLoss.legacyShards == shards,
                 "defeat reward and counters persisted as one atomic snapshot");
             game.PlayerDied();
             Require(data.totalRuns == runs + 1 && data.legacyShards == lossShards && data.totalKills == kills, "duplicate defeat event cannot duplicate reward/statistics");
@@ -139,7 +129,7 @@ namespace RuinRunner
             {
                 runs = data.totalRuns, victories = data.victories, kills = data.totalKills, shards = data.legacyShards,
                 campaignVictories=data.campaignVictories, bestCampaignStage=data.bestCampaignStage,
-                upgrade = definition.Type, rank = 1, retryMaxHealth = expectedStats.MaxHealth,
+                retryMaxHealth = game.Player.MaxHealth,
                 firstProcess = System.Diagnostics.Process.GetCurrentProcess().Id
             };
             Require(File.Exists(Path.Combine(game.SaveSlots.SaveDirectory, "save1.json")) &&
@@ -156,7 +146,7 @@ namespace RuinRunner
         private void VerifyReload(Proof proof)
         {
             Require(game.SaveSlots.ActiveData.totalRuns == proof.runs && game.SaveSlots.ActiveData.totalKills == proof.kills &&
-                game.MetaProgression.LegacyShards == proof.shards && game.MetaProgression.GetRank(proof.upgrade) == proof.rank &&
+                game.MetaProgression.LegacyShards == proof.shards &&
                 game.SaveSlots.ActiveData.campaignVictories==proof.campaignVictories && game.SaveSlots.ActiveData.bestCampaignStage==proof.bestCampaignStage,
                 "loaded run preserves progression and counters");
             Require(Mathf.Approximately(game.Player.MaxHealth, proof.retryMaxHealth), "relaunch applies persistent bonus exactly once");

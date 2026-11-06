@@ -153,62 +153,17 @@ namespace RuinRunner
             for(int i=0;i<exits.Length;i++)
             {
                 var edge=graph.Connections[i];travelDirections[i]=(RoomTravelDirection)edge.FromPort;
-                exits[i]=RoomExit.CreateGraphConnection(Root.transform,edge,Terrain,entered);
+                exits[i]=RoomExit.CreateGraphConnection(Root.transform,edge,StageTerrainArt.Theme(StageIndex),entered);
             }
             ResetExits();
             Debug.Log("[Generated Stage] version="+graph.GeneratorVersion+" seed="+seed+" stage="+StageIndex+" signature="+graph.StructureSignature+
                 " regions="+graph.Regions.Length+" attempts="+graph.Diagnostics.Attempts+" fallback="+graph.Diagnostics.UsedFallback);
         }
 
-        // Old geography remains explicitly available for asset/geometry fixtures, never for a normal new expedition.
-        public static DungeonMap BuildAuthoredStageForValidation(RoomTemplate[] encounters, Action<int> entered, int seed = 0, int stageIndex = 0)
-        {
-            var definition = StageLayoutDefinition.Load(stageIndex);
-            var templates = definition.CreateEncounterRooms(encounters, seed, stageIndex);
-            var root = new GameObject("Stage_" + stageIndex + "_" + CampaignStage.Get(stageIndex).Resource);
-            root.AddComponent<StageRuntimeOwnership>().Rooms = templates;
-            var centers = new Vector2[templates.Length]; var grid = new Vector2Int[templates.Length];
-            for (var i = 0; i < centers.Length; i++) { centers[i] = definition.regions[i].center; grid[i] = Vector2Int.RoundToInt(centers[i]); }
-            var exits = new RoomExit[templates.Length - 1]; var directions = new RoomTravelDirection[exits.Length];
-            var terrain = new StageTerrainLayout(templates, centers, definition.connections, definition.trails, definition.exploration);
-            terrain.SnapToDungeonTiles();
-            DungeonTilesetRenderer.Build(root.transform, terrain, stageIndex);
-            for (var i = 0; i < exits.Length; i++)
-            {
-                var path = definition.connections[i]; var delta = path.points[1] - path.points[0];
-                directions[i] = Mathf.Abs(delta.x) > Mathf.Abs(delta.y) ? (delta.x > 0 ? RoomTravelDirection.Right : RoomTravelDirection.Left) :
-                    delta.y > 0 ? RoomTravelDirection.Up : RoomTravelDirection.Down;
-                exits[i] = RoomExit.CreateConnection(root.transform, path.points[0], path.points[path.points.Length - 1], directions[i], i + 1, entered,
-                    path.width, false, (path.points[path.points.Length - 1] - path.points[path.points.Length - 2]).normalized);
-            }
-            return new DungeonMap(templates, root, exits, centers, grid, directions) { Terrain = terrain, IsAuthored = true, Definition = definition, StageIndex = stageIndex };
-        }
-
         public RoomExit GetConnection(int index) => index >= 0 && index < exits.Length ? exits[index] : null;
         public string GetRegionId(int index) => Graph == null ? rooms[index].roomId : Graph.Regions[index].Id;
         public RegionRole GetRegionRole(int index) => Graph == null ? (rooms[index].bossRoom?RegionRole.Boss:RegionRole.Combat) : Graph.Regions[index].Role;
         public bool RequiresCombat(int index) => GetRegionRole(index)==RegionRole.Combat||GetRegionRole(index)==RegionRole.Boss;
-        public string GetObjectiveText(int regionIndex, bool stageExitReady = false, bool rewardPending = false)
-        {
-            if (rewardPending) return "보상을 회수한 뒤 열린 길로";
-            if (stageExitReady) return "봉인석으로 이동";
-            if (regionIndex < 0 || regionIndex >= RoomCount) return "길을 따라 다음 구역 탐사";
-            var role = GetRegionRole(regionIndex);
-            var phase = Regions[regionIndex].Phase;
-            if (phase == EncounterRegionPhase.Combat)
-                return role == RegionRole.Boss ? "수호자를 쓰러뜨려 봉인 해제" : "적을 처치해 봉인 해제";
-            switch (role)
-            {
-                case RegionRole.Entrance: return "길을 따라 유적 탐사";
-                case RegionRole.Merchant: return "상인에게 보급하거나 탐험 계속";
-                case RegionRole.FieldUpgrade: return "유적 시설을 살펴보고 탐험 계속";
-                case RegionRole.Reward: return Regions[regionIndex].ChestOpened ? "열린 길로 탐험 계속" : "보급함을 확인하고 탐험 계속";
-                case RegionRole.Boss: return phase == EncounterRegionPhase.Cleared ? "보상을 확인하고 봉인석으로" :
-                    BossPrerequisitesCleared ? "수호자의 영역으로 진입" : "남은 전투 구역을 정리해 봉인 해제";
-                default: return phase == EncounterRegionPhase.Cleared ?
-                    (BossPrerequisitesCleared ? "열린 길을 따라 수호자의 봉인으로" : "열린 길과 갈림길 탐사") : "구역 안으로 들어가 전투 시작";
-            }
-        }
         public IEnumerable<int> GetNeighbors(int index)
         {
             if(Graph==null){if(index>0)yield return index-1;if(index+1<RoomCount)yield return index+1;yield break;}
@@ -282,11 +237,6 @@ namespace RuinRunner
             var delta=GetRoomCenter(next)-GetRoomCenter(roomIndex);
             return Mathf.Abs(delta.x)>Mathf.Abs(delta.y)?(delta.x>0?RoomTravelDirection.Right:RoomTravelDirection.Left):(delta.y>0?RoomTravelDirection.Up:RoomTravelDirection.Down);
         }
-        public Vector2 GetExitPosition(int roomIndex)
-        {
-            if(Graph!=null){int next=NextUnclearedCombat(roomIndex);return next>=0&&next!=roomIndex?GetEntryPosition(roomIndex,next):GetRoomCenter(roomIndex);}
-            return roomIndex>=0&&roomIndex<exits.Length?(Vector2)exits[roomIndex].transform.position:GetRoomCenter(roomIndex);
-        }
 
         public bool HasUniqueRooms()
         {
@@ -318,10 +268,11 @@ namespace RuinRunner
             for (var i = 0; i < RoomCount; i++)
             {
                 if (StageTerrainLayout.ContainsRoom(rooms[i], position - centers[i])) physical = i;
+                if (Regions[i].Phase != EncounterRegionPhase.Undiscovered) continue;
                 bool nearEntrance=false;
                 if(Graph!=null){foreach(var gate in exits)if((gate.SourceRoom==i||gate.TargetRoom==i)&&Vector2.Distance(position,gate.GetEntryPoint(i))<7f){nearEntrance=true;break;}}
                 else nearEntrance=i>0&&Vector2.Distance(position,exits[i-1].ArrivalPosition)<7f;
-                if (Regions[i].Phase == EncounterRegionPhase.Undiscovered && (physical == i || nearEntrance))
+                if (physical == i || nearEntrance)
                 { Regions[i].Phase = EncounterRegionPhase.Discovered; MapRevision++; }
             }
             if (physical != PhysicalRegion) { PhysicalRegion = physical; MapRevision++; }

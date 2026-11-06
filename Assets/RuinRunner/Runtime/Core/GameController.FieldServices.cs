@@ -8,9 +8,6 @@ namespace RuinRunner
 {
     public sealed partial class GameController
     {
-        public bool SupplyUsesMana { get; set; }
-        public bool ChestPrefersAccessories { get; set; }
-        public bool IsRewardReserved { get; private set; }
         public string PendingExchangeRecipe { get; private set; }
         readonly HashSet<string> usedServices=new HashSet<string>();
         public IReadOnlyList<PinnedExchangeRecipe> ExchangeRecipes { get; private set; }=Array.Empty<PinnedExchangeRecipe>();
@@ -38,7 +35,36 @@ namespace RuinRunner
                 if(!StageNavigation.IsClear(DungeonMap.Terrain,position))throw new InvalidOperationException("Blocked service anchor: "+r.Id);
                 var obj=FieldServiceObject.Create(DungeonMap.Root.transform,r.Id+":"+r.Service,kind,label,position,r.Index,art,animation);
                 obj.Used=usedServices.Contains(obj.StableId);
+                if(kind==FieldServiceKind.Merchant)SetUpMerchantGoods(r,position);
             }
+        }
+        // The wagon and the pack go where there is floor to spare on every side, so neither can narrow a way through the room.
+        void SetUpMerchantGoods(GeneratedRegion region,Vector2 merchant)
+        {
+            var spots=new[]{new Vector2(-1.9f,.5f),new Vector2(1.9f,.5f),new Vector2(-2.3f,-.5f),new Vector2(2.3f,-.5f),new Vector2(-1.2f,1.5f),new Vector2(1.2f,1.5f),new Vector2(0f,1.8f)};
+            var taken=new List<Vector2>();
+            foreach(var clip in new[]{"PropWagon","PropBundle"})
+                foreach(var spot in spots)
+                {
+                    var feet=merchant+spot;
+                    if(!MerchantGoodsFit(region,clip,feet,taken))continue;
+                    LivingProp.Create(DungeonMap.Root.transform,clip,feet,"Merchant "+clip);
+                    taken.Add(feet);
+                    break;
+                }
+        }
+        bool MerchantGoodsFit(GeneratedRegion region,string clip,Vector2 feet,List<Vector2> taken)
+        {
+            var size=LivingProp.Footprint(clip);
+            var center=feet+Vector2.up*(size.y*.5f-.1f);
+            var clear=size*.5f+Vector2.one*.85f;
+            for(int x=-2;x<=2;x++)for(int y=-2;y<=2;y++)
+                if(!DungeonMap.Terrain.IsOpen(center+new Vector2(clear.x*x*.5f,clear.y*y*.5f)))return false;
+            if(Physics2D.OverlapBox(center,size+Vector2.one*.3f,0,1<<GameLayers.Ground)!=null)return false;
+            foreach(var keep in new[]{region.PlayerPosition,region.RewardPosition,region.ExitPosition})
+                if((feet-GeneratedStageUnityAdapter.Vector(keep)).sqrMagnitude<2.25f)return false;
+            foreach(var other in taken)if((feet-other).sqrMagnitude<2.25f)return false;
+            return true;
         }
         public void ApplyFieldMutation(EquipmentMutation mutation)
         {
@@ -59,7 +85,7 @@ namespace RuinRunner
         {
             if(OpenService==null||OpenService.Kind!=FieldServiceKind.OathStone||OpenService.Used||EnemiesAlive>0||EconomyOperationPending||BackendHasPending)return;
             if(!CanBeginOath(Inventory.FindOwned(ServiceSelectedEquipment) as OwnedWeapon,oath)||!Inventory.TrySwear(ServiceSelectedEquipment,oath)){SessionMessage="진행 중인 서약 또는 호환 장비를 확인하세요.";return;}
-            UseService();SessionMessage="서약을 새겼습니다.";
+            UseService();
         }
         void UseService(){usedServices.Add(OpenService.StableId);OpenService.Used=true;PrototypeAudio.Play(PrototypeSound.Upgrade,AudioChannel.Interface,.55f);}
         public void PreviewExchange(string id)
@@ -81,39 +107,9 @@ namespace RuinRunner
             {
                 var receipt=await TradeBackendAsync(new TradeRequest{operationId=operation,action="exchange",recipeId=PendingExchangeRecipe,
                     instanceIds=new[]{ingredients[0].ServerInstanceId,ingredients[1].ServerInstanceId},objectId=OpenService.StableId});
-                if(receipt!=null){ApplyEconomyReceipt(receipt);PrototypeAudio.Play(PrototypeSound.Upgrade,AudioChannel.Interface,.55f);SessionMessage="유물이 깨어났습니다.";PendingExchangeRecipe=null;}
+                if(receipt!=null){ApplyEconomyReceipt(receipt);PrototypeAudio.Play(PrototypeSound.Upgrade,AudioChannel.Interface,.55f);PendingExchangeRecipe=null;}
             }
             finally{EconomyOperationPending=false;}
-        }
-        public void ResolveReservedReward()
-        {
-            if(!IsRewardReserved||EnemiesAlive>0||IsPaused)return;
-            IsRewardReserved=false;CurrentAccessoryChoices=RunContent.Choices(RunSeed,accessoryOfferIndex++,Player.Stats.Luck);IsChoosingAccessory=true;RefreshTimeScale();
-        }
-        public bool CanSurveyRegion(int region)
-        {
-            if(!ActiveTalents.Has(TalentId.SurveyNext)||DungeonMap?.Graph==null)return false;
-            foreach(var edge in DungeonMap.Graph.Connections)
-                if(edge.FromIndex==CurrentRoom&&edge.ToIndex==region||edge.ToIndex==CurrentRoom&&edge.FromIndex==region)return true;
-            return false;
-        }
-        public string RegionPurpose(int region)
-        {
-            if(DungeonMap?.Graph==null)return "미지";
-            switch(DungeonMap.Graph.Regions[region].Role)
-            {case RegionRole.Boss:return "수호자";case RegionRole.Merchant:return "상인";case RegionRole.FieldUpgrade:return "유적 시설";case RegionRole.Reward:return "보급함";case RegionRole.Entrance:return "입구";default:return "전투";}
-        }
-        public HashSet<int> ReturnTrailConnections()
-        {
-            var result=new HashSet<int>();var graph=DungeonMap?.Graph;if(graph==null||!ActiveTalents.Has(TalentId.ReturnTrail))return result;
-            var queue=new Queue<int>();var seen=new HashSet<int>{CurrentRoom};var parents=new Dictionary<int,int>();var used=new Dictionary<int,int>();queue.Enqueue(CurrentRoom);
-            while(queue.Count>0)
-            {
-                int from=queue.Dequeue();if(from==DungeonMap.EntranceRoomIndex)break;
-                for(int i=0;i<graph.Connections.Length;i++){var edge=graph.Connections[i];int to=edge.FromIndex==from?edge.ToIndex:edge.ToIndex==from?edge.FromIndex:-1;if(to<0||!DungeonMap.Regions[to].Visited||!seen.Add(to))continue;parents[to]=from;used[to]=i;queue.Enqueue(to);}
-            }
-            int at=DungeonMap.EntranceRoomIndex;while(parents.TryGetValue(at,out int from)){result.Add(used[at]);at=from;}
-            return result;
         }
     }
 }

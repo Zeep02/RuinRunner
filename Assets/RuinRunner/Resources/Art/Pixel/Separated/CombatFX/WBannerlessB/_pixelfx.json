@@ -1,0 +1,29 @@
+{
+  "clip": "WBannerlessB",
+  "ppu": 32,
+  "pivotX": 0.07264,
+  "pivotY": 0.41,
+  "width": 296,
+  "height": 50,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "holy/light-spear",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 14,
+  "fps": 30,
+  "loop": false,
+  "frames": 20,
+  "durationSeconds": 0.667,
+  "visibleDiameter": 278,
+  "origin": [
+    21,
+    29
+  ],
+  "optionsJson": "{\"palette\":[\"#180a0a\",\"#3c1412\",\"#6c1e18\",\"#a03020\",\"#d0502c\",\"#f09050\",\"#ffe0b0\"],\"L\":256,\"W\":7,\"stars\":10}"
+}

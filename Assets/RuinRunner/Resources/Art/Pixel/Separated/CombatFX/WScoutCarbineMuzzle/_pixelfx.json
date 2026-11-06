@@ -1,0 +1,28 @@
+{
+  "clip": "WScoutCarbineMuzzle",
+  "ppu": 32,
+  "pivotX": 0.36207,
+  "pivotY": 0.48333,
+  "width": 29,
+  "height": 30,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/flash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 25,
+  "fps": 30,
+  "loop": false,
+  "frames": 6,
+  "durationSeconds": 0.2,
+  "visibleDiameter": 18,
+  "origin": [
+    10,
+    15
+  ],
+  "optionsJson": "{\"palette\":[\"#14161c\",\"#2c3038\",\"#4a4f5a\",\"#70757f\",\"#9ea3ac\",\"#d0d4da\",\"#f6f7f8\"],\"sparks\":[\"#f6f7f8\",\"#d0d4da\",\"#9ea3ac\",\"#70757f\"],\"len\":9,\"wide\":3}"
+}

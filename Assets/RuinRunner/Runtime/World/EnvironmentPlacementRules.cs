@@ -11,6 +11,7 @@ namespace RuinRunner
         readonly StageTerrainLayout terrain;
         readonly GeneratedStage graph;
         readonly List<Rect> reservations = new List<Rect>();
+        const float DoorwayDepth = 4f;
 
         public EnvironmentPlacementRules(StageTerrainLayout terrain, GeneratedStage graph)
         {
@@ -30,11 +31,17 @@ namespace RuinRunner
             {
                 var from = graph.Regions[connection.FromIndex];
                 var to = graph.Regions[connection.ToIndex];
-                ReserveLane(GeneratedStageUnityAdapter.Vector(from.Center), GeneratedStageUnityAdapter.Vector(connection.Points[0]), connection.Width);
+                ReserveDoorway(GeneratedStageUnityAdapter.Vector(from.Center), GeneratedStageUnityAdapter.Vector(connection.Points[0]), connection.Width);
                 for (int i = 1; i < connection.Points.Length; i++)
                     ReserveLane(GeneratedStageUnityAdapter.Vector(connection.Points[i - 1]), GeneratedStageUnityAdapter.Vector(connection.Points[i]), connection.Width);
-                ReserveLane(GeneratedStageUnityAdapter.Vector(connection.Points[connection.Points.Length - 1]), GeneratedStageUnityAdapter.Vector(to.Center), connection.Width);
+                ReserveDoorway(GeneratedStageUnityAdapter.Vector(to.Center), GeneratedStageUnityAdapter.Vector(connection.Points[connection.Points.Length - 1]), connection.Width);
             }
+        }
+
+        // The way in stays free; beyond it the room is there to be filled.
+        void ReserveDoorway(Vector2 roomCenter, Vector2 door, float width)
+        {
+            ReserveLane(door, door + (roomCenter - door).normalized * DoorwayDepth, width);
         }
 
         void Reserve(MapPoint point, float radius)
@@ -120,6 +127,8 @@ namespace RuinRunner
                     if(budget.Exhausted){yield return null;budget.Resume();}
                 }
             }
+            var dressing=StageDressing.Scatter(parent,terrain,graph,this,stageIndex,occupied,budget);
+            while(dressing.MoveNext())yield return dressing.Current;
         }
     }
 

@@ -1,0 +1,28 @@
+{
+  "clip": "WardenHit",
+  "ppu": 32,
+  "pivotX": 0.48131,
+  "pivotY": 0.01648,
+  "width": 107,
+  "height": 91,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-hit",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 25,
+  "durationSeconds": 1.667,
+  "visibleDiameter": 103,
+  "origin": [
+    51,
+    89
+  ],
+  "optionsJson": "{}"
+}

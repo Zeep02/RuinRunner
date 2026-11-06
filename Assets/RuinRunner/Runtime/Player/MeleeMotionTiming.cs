@@ -5,12 +5,11 @@ namespace RuinRunner
     /// <summary>Shared phase boundaries for the body, held blade and damage contact.</summary>
     public static class MeleeMotionTiming
     {
-        public const float Contact = .42f;
-        public const float Recovery = .68f;
+        public const float Contact = .3f;
+        public const float Recovery = .58f;
         public const float ThrustStart = .20f;
         public const float ThrustContact = .34f;
         public const float ThrustEnd = .56f;
-        public const float ThrustDistance = .68f;
         public const float CrossFirstContact=.22f;
         public const float CrossSwitch=.34f;
         public const float CrossSecondContact=.52f;
@@ -33,33 +32,7 @@ namespace RuinRunner
             return BladeAngle(phase,false,stroke)+CrossStrikeOffset(stroke)*weight;
         }
 
-        public static int AuthoredBodyFrame(float progress, bool thrust)
-        {
-            if(progress<.08f)return 0;
-            if(progress<(thrust?ThrustStart:.26f))return 1;
-            if(progress<(thrust?ThrustContact:Contact))return 2;
-            if(progress<(thrust?ThrustEnd:.55f))return 3;
-            return progress<.8f?4:5;
-        }
 
-        public static float ThrustTravel(float progress) => Ease(Mathf.InverseLerp(ThrustStart, ThrustEnd, progress));
-
-        public static float ThrustHandOffset(float progress)
-        {
-            if (progress < .16f) return Mathf.Lerp(0f, -.24f, Ease(progress / .16f));
-            if (progress < ThrustStart) return -.24f; // Hold a readable, drawn-back stance.
-            if (progress < ThrustEnd) return Mathf.Lerp(-.24f, .48f, ThrustTravel(progress));
-            return Mathf.Lerp(.48f, 0f, Ease((progress - ThrustEnd) / (1f - ThrustEnd)));
-        }
-
-        public static int ThrustBodyFrame(float progress) => progress < .16f ? 0 : progress < ThrustStart ? 1 : progress < ThrustEnd ? 2 : 3;
-
-        public static int BodyFrame(float progress)
-        {
-            if (progress < .18f) return 0;
-            if (progress < Contact) return 1;
-            return progress < Recovery ? 2 : 3;
-        }
 
         public static float BladeAngle(float progress, bool heavy, int comboStep)
         {

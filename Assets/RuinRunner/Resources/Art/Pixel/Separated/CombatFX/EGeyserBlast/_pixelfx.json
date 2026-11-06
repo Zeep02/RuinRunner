@@ -1,0 +1,29 @@
+{
+  "clip": "EGeyserBlast",
+  "ppu": 32,
+  "pivotX": 0.51183,
+  "pivotY": 0.13312,
+  "width": 169,
+  "height": 154,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": "1.9",
+  "until": "3.3",
+  "source": "pixelfx",
+  "effect": "water/geyser",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 8,
+  "fps": 30,
+  "loop": false,
+  "frames": 42,
+  "durationSeconds": 1.4,
+  "visibleDiameter": 164,
+  "origin": [
+    86,
+    133
+  ],
+  "optionsJson": "{}"
+}

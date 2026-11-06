@@ -1,0 +1,29 @@
+{
+  "clip": "WSwampLanternCast",
+  "ppu": 32,
+  "pivotX": 0.52045,
+  "pivotY": 0.14706,
+  "width": 220,
+  "height": 85,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "nature/poison-cloud",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 21,
+  "fps": 30,
+  "loop": true,
+  "frames": 38,
+  "durationSeconds": 1.267,
+  "visibleDiameter": 193,
+  "origin": [
+    114,
+    72
+  ],
+  "optionsJson": "{\"palette\":[\"#0d1a0c\",\"#173a14\",\"#265e18\",\"#3f8a1e\",\"#6cb82a\",\"#a8e04a\",\"#e0ff8a\"]}"
+}

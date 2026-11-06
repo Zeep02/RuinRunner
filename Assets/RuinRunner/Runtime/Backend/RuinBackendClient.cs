@@ -25,7 +25,6 @@ namespace RuinRunner.Backend
         GuestSession session;
         bool disposed;
         public BackendConnectionState ConnectionState { get; private set; }
-        public string PlayerId => session?.playerId;
         public string ApiOrigin => origin;
         public event Action<BackendConnectionState> ConnectionChanged;
         public RuinBackendClient(BackendClientOptions options)
@@ -34,10 +33,17 @@ namespace RuinRunner.Backend
             context = SynchronizationContext.Current ?? throw new InvalidOperationException("Construct the backend client on the Unity main thread.");
             mainThread = Thread.CurrentThread.ManagedThreadId;
             baseUri = new Uri(options.ApiBaseUri.TrimEnd('/') + "/", UriKind.Absolute);
-            if (baseUri.UserInfo.Length != 0 || baseUri.Query.Length != 0 || baseUri.Fragment.Length != 0 || (baseUri.Scheme != "https" && !(baseUri.Scheme == "http" && baseUri.IsLoopback)))
-                throw new ArgumentException("Use HTTPS for remote API addresses; credentials must not be placed in URLs.");
+            if (baseUri.UserInfo.Length != 0 || baseUri.Query.Length != 0 || baseUri.Fragment.Length != 0 || (baseUri.Scheme != "https" && !(baseUri.Scheme == "http" && (baseUri.IsLoopback || IsPrivateNetwork(baseUri)))))
+                throw new ArgumentException("Use HTTPS for public API addresses; plain HTTP is for private networks only, and credentials must not be placed in URLs.");
             origin = baseUri.AbsoluteUri; timeout = Math.Max(2, Math.Min(60, options.TimeoutSeconds));
             store = new BackendPrivateStore(options.StorageDirectory);
+        }
+        // A server on the same LAN or VPN (10/8, 172.16/12, 192.168/16, link-local, 100.64/10). Addresses only: a name could resolve anywhere.
+        static bool IsPrivateNetwork(Uri uri)
+        {
+            if (!System.Net.IPAddress.TryParse(uri.Host, out var ip) || ip.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
+            var b = ip.GetAddressBytes();
+            return b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31) || (b[0] == 192 && b[1] == 168) || (b[0] == 169 && b[1] == 254) || (b[0] == 100 && b[1] >= 64 && b[1] <= 127);
         }
         void AssertMainThread()
         {
@@ -206,10 +212,6 @@ namespace RuinRunner.Backend
         }
         public async Task<PendingOperation[]> GetPendingOperationsAsync(CancellationToken cancellation = default)
         { AssertMainThread(); await Authenticate(false, cancellation); return await Disk(() => store.Pending(session.playerId, origin)); }
-        public Task<PendingOperation[]> GetPendingOperationsOfflineAsync()
-        {
-            AssertMainThread(); return Disk(() => { var binding = store.Read<PlayerBinding>("bindings", origin); return binding == null ? Array.Empty<PendingOperation>() : store.Pending(binding.playerId, origin); });
-        }
         public async Task<T> RetryOperationAsync<T>(string operationId, CancellationToken cancellation = default)
         {
             AssertMainThread(); Id(operationId); await Authenticate(false, cancellation);
@@ -243,12 +245,6 @@ namespace RuinRunner.Backend
         { AssertMainThread(); return Disk(() => store.Read<QueuedEconomyOperation>("economy-queue", origin + ":" + id)); }
         internal Task<bool> SaveEconomyCommandAsync(QueuedEconomyOperation command)
         { AssertMainThread(); return Disk(() => { store.Write("economy-queue", origin + ":" + command.operationId, command); return true; }); }
-        public Task<bool> RestoreLegacyBackupToNewFileAsync(LegacyBackup backup, string destination)
-        { AssertMainThread(); return Disk(() => { store.RestoreLegacyToNewFile(backup, destination); return true; }); }
-        public Task<ProfileView> ReadLastConfirmedProfileAsync(string profileId)
-        { AssertMainThread(); return Disk(() => store.Read<ProfileView>("profiles", origin + ":" + Id(profileId))); }
-        public Task<RunView> ReadConfirmedRunAsync(string runId)
-        { AssertMainThread(); return Disk(() => store.Read<RunView>("runs", origin + ":" + Id(runId))); }
         public async Task<CatalogSnapshot> GetPinnedCatalogAsync(RunView run, CancellationToken cancellation = default)
         {
             AssertMainThread(); if (run == null || string.IsNullOrEmpty(run.contentVersion)) throw new ArgumentException("A server-created run with a pinned content version is required.");

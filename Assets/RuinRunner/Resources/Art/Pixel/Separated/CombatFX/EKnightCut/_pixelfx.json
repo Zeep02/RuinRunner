@@ -1,0 +1,29 @@
+{
+  "clip": "EKnightCut",
+  "ppu": 32,
+  "pivotX": 0.00379,
+  "pivotY": 0.56897,
+  "width": 132,
+  "height": 29,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "enemies/cut",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 8,
+  "fps": 30,
+  "loop": false,
+  "frames": 14,
+  "durationSeconds": 0.467,
+  "visibleDiameter": 132,
+  "origin": [
+    0,
+    12
+  ],
+  "optionsJson": "{\"palette\":[\"#201406\",\"#4a300c\",\"#7e5414\",\"#b8821c\",\"#e4ae34\",\"#f8d878\",\"#fff6d0\"],\"L\":122,\"W\":10,\"sparksN\":4}"
+}

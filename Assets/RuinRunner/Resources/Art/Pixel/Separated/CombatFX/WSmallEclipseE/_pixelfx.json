@@ -1,0 +1,29 @@
+{
+  "clip": "WSmallEclipseE",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.49699,
+  "width": 167,
+  "height": 166,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/zone",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 44,
+  "fps": 30,
+  "loop": true,
+  "frames": 30,
+  "durationSeconds": 1,
+  "visibleDiameter": 167,
+  "origin": [
+    83,
+    83
+  ],
+  "optionsJson": "{\"palette\":[\"#2a1c08\",\"#5a3e10\",\"#9a6c18\",\"#d8a428\",\"#ffd84a\",\"#fff09a\",\"#fffbe6\"],\"R\":83}"
+}

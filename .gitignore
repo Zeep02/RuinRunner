@@ -61,3 +61,7 @@ __pycache__/
 # 루트의 참고 영상·캡처
 /*.gif
 /*.png
+
+# 아트 작업 중간 산출물 (로컬 전용)
+/Tools/Art/Staging/
+/Tools/Art/HeroPixels/out/

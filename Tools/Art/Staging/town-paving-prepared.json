@@ -1,8 +1,0 @@
-{
-  "status": "PREPARED OUTSIDE ASSETS; not applied or Play verified",
-  "source": "Assets/RuinRunner/Runtime/World/TownWorld.cs",
-  "sourceSha256": "d6ebb7d5aad358b086c0b02991b5d1f30d1b3e82e21c72b52f01dbb364b5316f",
-  "candidate": "Tools/Art/Staging/TownWorld.Paving.cs",
-  "candidateSha256": "b8638c8efe7b4ae8e6b9b2c783f89a464abffe3a7e3ea8ac94b7aa30e24d4780",
-  "scope": "Court rendering only; service positions, props, floor, collider, generator and seed contracts unchanged"
-}

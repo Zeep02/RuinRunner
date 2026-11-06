@@ -1,0 +1,29 @@
+{
+  "clip": "FxPropBubbles",
+  "ppu": 32,
+  "pivotX": 0.55263,
+  "pivotY": -0.01515,
+  "width": 19,
+  "height": 33,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "water/prop-bubbles",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 120,
+  "durationSeconds": 4,
+  "visibleDiameter": 15,
+  "origin": [
+    10,
+    33
+  ],
+  "optionsJson": "{}"
+}

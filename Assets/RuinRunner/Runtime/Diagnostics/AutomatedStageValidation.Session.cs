@@ -32,7 +32,7 @@ namespace RuinRunner
         void AdvanceJourney(int step,string value=null)
         {
             StageValidationInput.ReleaseAll();attackHeld=false;
-            journeyStep=step;journeyActionAt=Time.unscaledTime+.25f;
+            journeyStep=step;journeyActionAt=Time.unscaledTime+MenuPause(.25f);
             if(value!=null)JourneyEvent(value);
         }
         // Menu/service actions call the exact public button handlers. Movement, combat,
@@ -86,13 +86,13 @@ namespace RuinRunner
                     if(WalkToService(FieldServiceKind.StartingGear))AdvanceJourney(4,"walked to equipment NPC and interacted");break;
                 case 4:
                     // A fresh mobility build spends its normal starting legacy
-                    // on TurningDash; dagger/katana copies are earned in the run.
-                    string weapon=preferSkills||preferRanged?"scrap_pistol":"rust_sword";
+                    // on RazorWind; dagger/katana copies are earned in the run.
+                    string weapon=preferSkills||preferRanged?"scrap_revolver":"trainee_blade";
                     if(Array.IndexOf(game.SaveSlots.ActiveData.unlockedWeaponIds,weapon)<0)
-                    {game.UnlockTownChoice("weapon",weapon);journeyActionAt=Time.unscaledTime+.5f;break;}
+                    {game.UnlockTownChoice("weapon",weapon);journeyActionAt=Time.unscaledTime+MenuPause(.5f);break;}
                     if(game.SaveSlots.ActiveData.startingWeaponId!=weapon)
-                    {game.ChooseStartingWeapon(weapon);journeyActionAt=Time.unscaledTime+.5f;break;}
-                    game.CloseService();trainingUntil=Time.unscaledTime+5f;AdvanceJourney(5,"starting weapon selected with normal legacy budget: "+weapon);break;
+                    {game.ChooseStartingWeapon(weapon);journeyActionAt=Time.unscaledTime+MenuPause(.5f);break;}
+                    game.CloseService();trainingUntil=Time.unscaledTime+(demoRun?1.5f:5f);AdvanceJourney(5,"starting weapon selected with normal legacy budget: "+weapon);break;
                 case 5:
                     var delta=TownWorld.TrainingPosition-(Vector2)game.Player.transform.position;
                     SetMove(delta.magnitude>1.7f?delta.normalized:Vector2.zero);StageValidationInput.SetAim(delta);
@@ -101,22 +101,21 @@ namespace RuinRunner
                 case 6:
                     if(WalkToService(FieldServiceKind.Talents))AdvanceJourney(7,"walked to talent NPC and interacted");break;
                 case 7:
-                    if(PrepareAdversityTalent())break;
-                    if(preferMobility&&!game.ActiveTalents.Has(TalentId.TurningDash))
+                    if(preferMobility&&!game.ActiveTalents.Has(TalentId.RazorWind))
                     {
-                        if(Array.IndexOf(game.SaveSlots.ActiveData.unlockedTalentIds,"turning_dash")<0)
+                        if(Array.IndexOf(game.SaveSlots.ActiveData.unlockedTalentIds,"razor_wind")<0)
                         {
-                            var definition=Array.Find(game.BackendCatalog.talents,t=>t.id=="turning_dash");
+                            var definition=Array.Find(game.BackendCatalog.talents,t=>t.id=="razor_wind");
                             if(definition==null||definition.unlockCost>game.BackendProfile.legacyShards)
                             {
-                                JourneyEvent("turning_dash unlock deferred; starting weapon spent the normal legacy budget");
+                                JourneyEvent("razor_wind unlock deferred; starting weapon spent the normal legacy budget");
                                 game.CloseService();AdvanceJourney(8,"talent loadout checked: "+string.Join(",",game.ActiveTalents.Ids));break;
                             }
-                            game.UnlockTownChoice("talent","turning_dash");
+                            game.UnlockTownChoice("talent","razor_wind");
                         }
-                        else if(game.ActiveTalents.Ids.Length>=TalentLoadout.MaximumActive)game.ToggleTalent("survey_next");
-                        else game.ToggleTalent("turning_dash");
-                        journeyActionAt=Time.unscaledTime+.5f;break;
+                        else if(game.ActiveTalents.Ids.Length>=TalentLoadout.MaximumActive)game.ToggleTalent("ghost_mine");
+                        else game.ToggleTalent("razor_wind");
+                        journeyActionAt=Time.unscaledTime+MenuPause(.5f);break;
                     }
                     game.CloseService();AdvanceJourney(8,"talent loadout checked: "+string.Join(",",game.ActiveTalents.Ids));break;
                 case 8:
@@ -126,13 +125,14 @@ namespace RuinRunner
                 case 9:
                     if(!game.IsVictory&&game.Player!=null&&game.Player.DeathProgress<1f)break;
                     if(!game.ResultSettlementConfirmed){game.RetrySessionConnection();journeyActionAt=Time.unscaledTime+2f;break;}
-                    if(HoldAdversityDefeatResult())break;
+                    if(HoldAdversityDefeatResult()||HoldDemoResult())break;
                     journeyWon=game.IsVictory&&game.StagesCleared==CampaignStage.Count;
                     JourneyEvent((journeyWon?"three guardians and ending":"normal defeat")+"; server settlement confirmed, legacy="+game.BackendProfile.legacyShards);
                     game.ReturnToTown();AdvanceJourney(10);break;
                 case 10:
                     if(!game.IsTown){Finish(false,"settled result failed to return to town");break;}
                     JourneyEvent("returned to town with totalRuns="+game.BackendProfile.state.totalRuns);
+                    if(demoRun){Finish(journeyWon,"presentation run: invulnerable, not evidence of balance");break;}
                     if(ContinueAdversityAfterTown())break;
                     AdvanceJourney(11);break;
                 case 11:
@@ -179,7 +179,7 @@ namespace RuinRunner
                 foreach(var candidate in RuntimeSceneObjects.FindAll<FieldServiceObject>())
                     if(candidate.RegionIndex==game.CurrentRoom&&!visitedFacilities.Contains(candidate.StableId)&&
                         (!deferredFacilities.TryGetValue(candidate.StableId,out var state)||state!=FacilityInventoryState())){service=candidate;break;}
-            if(service==null)
+            if(service==null&&!demoRun)
                 foreach(var candidate in RuntimeSceneObjects.FindAll<FieldServiceObject>())
                     if(game.DungeonMap.Regions[candidate.RegionIndex].Visited&&!visitedFacilities.Contains(candidate.StableId)&&
                         deferredFacilities.TryGetValue(candidate.StableId,out var state)&&state!=FacilityInventoryState()&&CanUseDeferredFacility(candidate))
@@ -191,6 +191,7 @@ namespace RuinRunner
             if(game.OpenService==null){WalkToService(service.Kind);return true;}
             StageValidationInput.ReleaseAll();attackHeld=false;
             if(game.BackendBusy||game.EconomyOperationPending||game.BackendHasPending||Time.unscaledTime<journeyActionAt)return true;
+            if(demoRun&&demoFacilityShown!=service.StableId){demoFacilityShown=service.StableId;journeyActionAt=Time.unscaledTime+DemoMenuSeconds;return true;}
             ConfirmFacilityAction(service);
             if(service.Used){EndFacility(service,"already used");return true;}
             switch(service.Kind)
@@ -207,7 +208,7 @@ namespace RuinRunner
                             if(offer.kind!="heal"&&!game.Inventory.HasRoomFor(offer.kind=="weapon"?InventoryEntryKind.Weapon:InventoryEntryKind.Accessory))continue;
                             if(selected==null||ShopOfferRank(offer)>ShopOfferRank(selected))selected=offer;
                         }
-                        if(selected!=null){pendingFacilityAction="buy";pendingOffer=selected.offerId;pendingStock=selected.stock;pendingRevision=game.BackendEconomy.revision;game.BuyShopOffer(selected.offerId);purchases++;JourneyEvent("merchant purchase requested: "+selected.contentId+" price="+selected.price);journeyActionAt=Time.unscaledTime+.5f;return true;}
+                        if(selected!=null){pendingFacilityAction="buy";pendingOffer=selected.offerId;pendingStock=selected.stock;pendingRevision=game.BackendEconomy.revision;game.BuyShopOffer(selected.offerId);purchases++;JourneyEvent("merchant purchase requested: "+selected.contentId+" price="+selected.price);journeyActionAt=Time.unscaledTime+MenuPause(.5f);return true;}
                     }
                     if(facilityStep==1)
                     {
@@ -215,7 +216,7 @@ namespace RuinRunner
                         if(adversityScenario&&adversityRetried)break;
                         foreach(var item in game.Inventory.OwnedWeapons)
                             if(!item.IsStartingEquipment&&item.Oath==EquipmentOath.None&&game.Inventory.CanDisassemble(item.Identity))
-                            {pendingFacilityAction="sell";pendingInstance=item.ServerInstanceId;pendingRevision=game.BackendEconomy.revision;game.SellShopItem(item.Identity);sales++;JourneyEvent("merchant sale requested: "+item.Name);journeyActionAt=Time.unscaledTime+.5f;return true;}
+                            {pendingFacilityAction="sell";pendingInstance=item.ServerInstanceId;pendingRevision=game.BackendEconomy.revision;game.SellShopItem(item.Identity);sales++;JourneyEvent("merchant sale requested: "+item.Name);journeyActionAt=Time.unscaledTime+MenuPause(.5f);return true;}
                     }
                     EndFacility(service,"merchant decisions finished");break;
                 case FieldServiceKind.ShapeAnvil:
@@ -320,7 +321,7 @@ namespace RuinRunner
         void WriteJourneyEvidence(bool passed,string reason)
         {
             if(string.IsNullOrEmpty(captureDirectory))return;
-            var evidence=new JourneyEvidence{serverJourneyPassed=passed,screenshotsEnabled=captureScreenshots,reason=reason,build=preferMobility?"mobility":preferSkills?"skill":preferRanged?"ranged":"melee",
+            var evidence=new JourneyEvidence{serverJourneyPassed=passed,cheatsOrSuppliedState=demoRun,screenshotsEnabled=captureScreenshots,reason=reason,build=preferMobility?"mobility":preferSkills?"skill":preferRanged?"ranged":"melee",
                 profileId=game.BackendProfile?.profileId,runId=game.BackendRun?.runId,purchasesRequested=purchases,salesRequested=sales,mutationsApplied=mutations,
                 oathsAccepted=oaths,awakenedCopies=awakenedCopies.Count,awakenedCopiesUsed=awakenedCopiesUsed.Count,exchangesRequested=exchanges,
                 purchasesConfirmed=purchasesConfirmed,salesConfirmed=salesConfirmed,exchangesConfirmed=exchangesConfirmed,events=journeyEvents.ToArray()};

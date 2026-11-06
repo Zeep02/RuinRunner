@@ -1,0 +1,28 @@
+{
+  "clip": "FxHitRing",
+  "ppu": 32,
+  "pivotX": 0.50568,
+  "pivotY": 0.49432,
+  "width": 88,
+  "height": 88,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "game/hit-ring",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 9,
+  "durationSeconds": 0.3,
+  "visibleDiameter": 70,
+  "origin": [
+    44,
+    44
+  ],
+  "optionsJson": "{}"
+}

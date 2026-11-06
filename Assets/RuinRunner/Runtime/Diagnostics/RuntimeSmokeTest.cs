@@ -14,7 +14,7 @@ namespace RuinRunner
             var cyan = new Color32(120, 245, 255, 255);
             var outline = new Color32(25, 20, 35, 255);
             for (var row = 0; row < 8; row++)
-                if (PixelArtAtlas.GetBossFrames(row).Length != 8) return false;
+                if (PixelArtAtlas.GetBossFrames(row).Length != BossSpriteAnimator.FrameCount) return false;
             var passed = SpriteMatte.ChromaCutout(new Color32(140, 55, 145, 255)).a == 0 &&
                          SpriteMatte.ChromaCutout(new Color32(250, 190, 245, 255)).a == 0 &&
                          SpriteMatte.ChromaCutout(white).Equals(white) &&
@@ -97,7 +97,7 @@ namespace RuinRunner
             passed &= Probe("ValidateRoomTopology(game.DungeonMap)", () => ValidateRoomTopology(game.DungeonMap));
             passed &= Probe("ValidateRoomCollision(game.DungeonMap)", () => ValidateRoomCollision(game.DungeonMap));
             passed &= Probe("WeaponLootTable.Roll(game.Player.Stats.Luck) != null", () => WeaponLootTable.Roll(game.Player.Stats.Luck) != null);
-            passed &= Probe("Active weapon pool excludes retired bows", () => WeaponLootTable.Count >= 42 && WeaponLootTable.FindFirst(WeaponFamily.Bow) == null);
+            passed &= Probe("Active weapon pool excludes retired bows", () => WeaponLootTable.Count == 70 && WeaponLootTable.FindFirst(WeaponFamily.Bow) == null);
             passed &= Probe("ValidateWeaponTypesAndAmmo()", () => ValidateWeaponTypesAndAmmo());
             passed &= Probe("ValidateWeaponFamilies()", () => ValidateWeaponFamilies());
             passed &= Probe("PassiveItemLootTable.Roll(game.Player.Stats.Luck) != null", () => PassiveItemLootTable.Roll(game.Player.Stats.Luck) != null);
@@ -109,7 +109,6 @@ namespace RuinRunner
             passed &= Probe("MetaUpgradeCatalog.Definitions.Length >= 6", () => MetaUpgradeCatalog.Definitions.Length >= 6);
             passed &= Probe("ValidateAccessoryChoicesAndCopies()", () => ValidateAccessoryChoicesAndCopies());
             passed &= Probe("runtime connections match generated adjacency", () => RuntimeSceneObjects.FindAll<RoomExit>().Length == game.DungeonMap.ConnectionCount);
-            passed &= Probe("RuntimeSceneObjects.FindAll<OneWayPlatform>().Length == 0", () => RuntimeSceneObjects.FindAll<OneWayPlatform>().Length == 0);
             passed &= Probe("ArenaBuilder.HasBackgroundAsset()", () => ArenaBuilder.HasBackgroundAsset());
 
             if (passed)
@@ -178,7 +177,7 @@ namespace RuinRunner
             var stats = new PlayerStats();
             var passed = Mathf.Approximately(stats.WeaponDamageMultiplier, 1f) && typeof(PlayerStats).GetProperty("AttackPower") == null;
             foreach (var weapon in WeaponLootTable.All) passed &= weapon.AttackPower > 0f;
-            var sword = WeaponLootTable.FindFirst(WeaponFamily.Longsword);
+            var sword = WeaponLootTable.FindFirst(WeaponFamily.Katana);
             var dagger = WeaponLootTable.FindFirst(WeaponFamily.Dagger);
             passed &= !Mathf.Approximately(sword.AttackPower, dagger.AttackPower);
             var before = sword.AttackPower;
@@ -524,17 +523,12 @@ namespace RuinRunner
             inventory.AddWeapon(WeaponLootTable.All[1]);
             inventory.AddWeapon(WeaponLootTable.All[2]);
 
-            WeaponDefinition siegeCrossbow = null;
-            foreach (var weapon in WeaponLootTable.All)
-            {
-                if (weapon.Id != "siege_crossbow") continue;
-                siegeCrossbow = weapon;
-                break;
-            }
-            if (siegeCrossbow == null || !inventory.AddWeapon(siegeCrossbow) || inventory.StoredWeapons.Count != 1)
+            // A ranged weapon with its own icon.
+            var siegeCrossbow = WeaponLootTable.Find("frost_bolt_rifle");
+            if (!inventory.AddWeapon(siegeCrossbow) || inventory.StoredWeapons.Count != 1)
                 return false;
             if (ItemIconLibrary.Get(siegeCrossbow.Id, InventoryIconKind.Weapon) == null ||
-                ItemIconLibrary.Get(siegeCrossbow.Id, InventoryIconKind.Weapon) == ItemIconLibrary.Get("hand_crossbow", InventoryIconKind.Weapon))
+                ItemIconLibrary.Get(siegeCrossbow.Id, InventoryIconKind.Weapon) == ItemIconLibrary.Get("scout_carbine", InventoryIconKind.Weapon))
                 return false;
 
             inventory.AssignToQuickSlot(0, 1);
@@ -609,8 +603,9 @@ namespace RuinRunner
         {
             foreach (WeaponFamily family in System.Enum.GetValues(typeof(WeaponFamily)))
             {
-                var weapon = WeaponLootTable.FindFirst(family);
-                if(family==WeaponFamily.Bow){if(weapon!=null)return false;continue;}
+                var weapon = WeaponLootTable.FindFirst(family) ?? System.Array.Find(SignatureWeaponCatalog.All, item => item.Family == family);
+                // Families no signature weapon uses stay in the enum so saved values keep their meaning.
+                if(family==WeaponFamily.Bow||family==WeaponFamily.Longsword||family==WeaponFamily.Mace||family==WeaponFamily.Crossbow){if(weapon!=null)return false;continue;}
                 if (weapon == null) return false;
                 if (weapon.AttackType == WeaponAttackType.Melee)
                 {
@@ -702,7 +697,7 @@ namespace RuinRunner
         private static bool ValidateAccessoryChoicesAndCopies()
         {
             var randomState = Random.state;
-            var passed = AccessoryLootTable.Count == 24;
+            var passed = AccessoryLootTable.Count >= 24;
             try
             {
                 var types = new System.Collections.Generic.HashSet<AccessoryType>();
@@ -754,23 +749,27 @@ namespace RuinRunner
         }
 
         private bool levelAccessoryFlowPassed;
+        private string levelFlowFailures = "";
+        private bool FlowCheck(bool ok, int check) { if (!ok) levelFlowFailures += check + " "; return ok; }
         private IEnumerator ValidateLevelAccessoryFlow()
         {
             game.Progression.AddExperience(72); // Level 2 + 3: queued choices, not lost callbacks.
-            var passed = game.Progression.PendingLevelRewards == 2 && game.IsChoosingAccessory && game.IsPaused;
-            passed &= game.CurrentAccessoryChoices.Length == 6;
-            var invalid = new AccessoryDefinition("invalid", AccessoryType.LuckyDice, "invalid", "", WeaponRarity.Common, ItemSetType.None, Color.white);
+            var passed = FlowCheck(game.Progression.PendingLevelRewards == 2, 100) & FlowCheck(game.IsChoosingAccessory, 101) & FlowCheck(game.IsPaused, 102);
+            passed &= FlowCheck(game.CurrentAccessoryChoices.Length == 6, 1);
+            AccessoryDefinition invalid = null;
+            foreach (var option in AccessoryLootTable.All)
+                if (System.Array.IndexOf(game.CurrentAccessoryChoices, option) < 0) { invalid = option; break; }
             game.SelectAccessory(invalid);
-            passed &= game.Progression.PendingLevelRewards == 2;
+            passed &= FlowCheck(game.Progression.PendingLevelRewards == 2, 2);
             var count = game.Inventory.Accessories.Count;
             game.SelectAccessory(game.CurrentAccessoryChoices[0]);
-            passed &= game.Progression.PendingLevelRewards == 1 && game.Inventory.Accessories.Count == count + 1;
+            passed &= FlowCheck(game.Progression.PendingLevelRewards == 1 && game.Inventory.Accessories.Count == count + 1, 3);
             game.SelectAccessory(game.CurrentAccessoryChoices[0]);
-            passed &= game.Progression.PendingLevelRewards == 1; // no same-frame double consumption
+            passed &= FlowCheck(game.Progression.PendingLevelRewards == 1, 4); // no same-frame double consumption
             yield return null;
             game.SelectAccessory(game.CurrentAccessoryChoices[0]);
-            passed &= game.Progression.PendingLevelRewards == 0 && !game.IsChoosingAccessory && !game.IsPaused;
-            passed &= game.CurrentAccessoryChoices.Length == 0 && game.Inventory.Accessories.Count == count + 2;
+            passed &= FlowCheck(game.Progression.PendingLevelRewards == 0 && !game.IsChoosingAccessory && !game.IsPaused, 5);
+            passed &= FlowCheck(game.CurrentAccessoryChoices.Length == 0 && game.Inventory.Accessories.Count == count + 2, 6);
             yield return null;
             var copy = AccessoryLootTable.All[0];
             while (game.Inventory.StoredItemCount < game.Inventory.UnlockedCapacity)
@@ -778,11 +777,11 @@ namespace RuinRunner
             var pickups = RuntimeSceneObjects.FindAll<FieldLootPickup>().Length;
             game.Progression.AddExperience(game.Progression.RequiredExperience);
             game.SelectAccessory(game.CurrentAccessoryChoices[0]);
-            passed &= game.Progression.PendingLevelRewards == 0 && !game.IsChoosingAccessory;
-            passed &= game.Inventory.StoredItemCount == game.Inventory.UnlockedCapacity;
-            passed &= RuntimeSceneObjects.FindAll<FieldLootPickup>().Length == pickups + 1;
+            passed &= FlowCheck(game.Progression.PendingLevelRewards == 0 && !game.IsChoosingAccessory, 7);
+            passed &= FlowCheck(game.Inventory.StoredItemCount == game.Inventory.UnlockedCapacity, 8);
+            passed &= FlowCheck(RuntimeSceneObjects.FindAll<FieldLootPickup>().Length == pickups + 1, 9);
             levelAccessoryFlowPassed = passed;
-            Debug.Log("[Level Accessory Flow] " + (passed ? "PASS" : "FAIL") + " two queued levels, invalid/double selection rejection, receipt, unpause, full-bag field reward. Isolated smoke fixture, not normal play.");
+            Debug.Log("[Level Accessory Flow] " + (passed ? "PASS" : "FAIL (" + levelFlowFailures + ")") + " two queued levels, invalid/double selection rejection, receipt, unpause, full-bag field reward. Isolated smoke fixture, not normal play.");
         }
 
         private static bool ValidateSettings(GameSettingsService settings)

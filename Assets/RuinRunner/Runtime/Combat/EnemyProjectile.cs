@@ -2,8 +2,6 @@ using UnityEngine;
 
 namespace RuinRunner
 {
-    public enum EnemyProjectileArt { Plain, BossRadial, BossAimed }
-
     public sealed class EnemyProjectile : MonoBehaviour
     {
         private Vector2 velocity;
@@ -13,18 +11,20 @@ namespace RuinRunner
         private Sprite[] frames;
         private float animationTime;
         private bool consumed;
-        public EnemyProjectileArt Art { get; private set; }
+        private string impactClip;
         public int FrameIndex { get; private set; }
         public Vector2 TravelDirection => velocity.normalized;
 
+        private float frameRate = 15f;
+
         public static EnemyProjectile Create(Vector2 position, Vector2 direction, float speed, float damage, Color color,
-            float size = .22f, EnemyProjectileArt art = EnemyProjectileArt.Plain)
+            float size = .22f, string clip = null)
         {
             var shot = new GameObject("EnemyProjectile");
             shot.layer = GameLayers.Projectile;
             shot.transform.position = position;
             var renderer = PrototypeVisuals.AddSprite(shot, Color.white, 2000);
-            if(art==EnemyProjectileArt.Plain)renderer.sprite=IndividualArt.Sprite("Campaign/Projectiles/EnemyOrb");
+            renderer.sprite=IndividualArt.Sprite("Campaign/Projectiles/EnemyOrb");
 
             var collider = shot.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
@@ -37,14 +37,15 @@ namespace RuinRunner
             var projectile = shot.AddComponent<EnemyProjectile>();
             projectile.velocity = direction.normalized * speed;
             projectile.damage = damage;
-            projectile.Art = art;
             projectile.visual = renderer;
-            if (art != EnemyProjectileArt.Plain)
+            if (clip != null)
             {
-                projectile.frames = IndividualArt.Frames("UserBossProjectiles/" + (art == EnemyProjectileArt.BossRadial ? "Radial" : "Aimed"), 8);
+                projectile.frames = NativeCombatEffect.Frames(clip);
+                if (NativeCombatEffect.TryTiming(clip, out var drawnRate, out _)) projectile.frameRate = drawnRate;
+                PixelFxMaterial.Apply(renderer, clip);
+                projectile.impactClip = clip + "Hit";
                 renderer.sprite = projectile.frames[0];
-                if (art == EnemyProjectileArt.BossAimed)
-                    shot.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+                shot.transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
             }
             return projectile;
         }
@@ -53,7 +54,7 @@ namespace RuinRunner
         {
             if (frames == null) return;
             animationTime += Time.deltaTime;
-            FrameIndex = Mathf.FloorToInt(animationTime * 12f) % frames.Length;
+            FrameIndex = Mathf.FloorToInt(animationTime * frameRate) % frames.Length;
             visual.sprite = frames[FrameIndex];
         }
 
@@ -61,8 +62,10 @@ namespace RuinRunner
         {
             if(consumed)return;
             var step = velocity * Time.fixedDeltaTime;
-            if (Physics2D.Raycast(transform.position, step.normalized, step.magnitude, 1 << GameLayers.Ground))
+            var wall = Physics2D.Raycast(transform.position, step.normalized, step.magnitude, 1 << GameLayers.Ground);
+            if (wall.collider != null)
             {
+                Impact(wall.point);
                 Destroy(gameObject);
                 return;
             }
@@ -83,12 +86,17 @@ namespace RuinRunner
                 consumed=true;
                 if(player.TryCatchHostileProjectile(transform.position,velocity.normalized,damage)){Destroy(gameObject);return;}
                 player.TakeDamage(damage, velocity.normalized);
-                PrototypeVisuals.Burst(transform.position, new Color(1f, .3f, .2f), 5);
+                Impact(transform.position);
                 Destroy(gameObject);
                 return;
             }
 
-            if (other.gameObject.layer == GameLayers.Ground) Destroy(gameObject);
+            if (other.gameObject.layer == GameLayers.Ground) { Impact(transform.position); Destroy(gameObject); }
+        }
+
+        private void Impact(Vector2 point)
+        {
+            if (impactClip != null) BossNativeEffect.CreateOverActors(null, impactClip, point, .24f, Mathf.Atan2(-velocity.y, -velocity.x) * Mathf.Rad2Deg);
         }
     }
 }

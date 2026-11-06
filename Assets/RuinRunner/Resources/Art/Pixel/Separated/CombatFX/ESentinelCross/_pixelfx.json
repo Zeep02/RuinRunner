@@ -1,0 +1,29 @@
+{
+  "clip": "ESentinelCross",
+  "ppu": 32,
+  "pivotX": -0.01056,
+  "pivotY": 0.62,
+  "width": 142,
+  "height": 25,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "enemies/cut",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 7,
+  "fps": 30,
+  "loop": false,
+  "frames": 14,
+  "durationSeconds": 0.467,
+  "visibleDiameter": 142,
+  "origin": [
+    -2,
+    9
+  ],
+  "optionsJson": "{\"palette\":[\"#14161c\",\"#2c3038\",\"#4a4f5a\",\"#70757f\",\"#9ea3ac\",\"#d0d4da\",\"#f6f7f8\"],\"L\":134,\"W\":8,\"sparksN\":4}"
+}

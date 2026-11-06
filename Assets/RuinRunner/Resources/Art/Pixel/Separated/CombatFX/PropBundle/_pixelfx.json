@@ -1,0 +1,14 @@
+{
+  "clip": "PropBundle",
+  "ppu": 32,
+  "pivotX": 0.4875,
+  "pivotY": 0.15,
+  "width": 40,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "e3e4d8c7-010f-4f31-9612-29c3fe00cb7e",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

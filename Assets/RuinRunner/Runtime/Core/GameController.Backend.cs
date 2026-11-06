@@ -19,7 +19,6 @@ namespace RuinRunner
         public ContentCatalog BackendCatalog => backendFlow?.Catalog;
         public EconomyView BackendEconomy => backendFlow?.Economy;
         public bool BackendHasUnfinishedRun => BackendRun != null && BackendRun.status == "active";
-        public long BackendLastReward => backendFlow?.LastReward ?? 0;
 
         void EnsureBackend()
         {

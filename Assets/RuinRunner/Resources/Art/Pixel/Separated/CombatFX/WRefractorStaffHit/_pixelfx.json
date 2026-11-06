@@ -1,0 +1,28 @@
+{
+  "clip": "WRefractorStaffHit",
+  "ppu": 32,
+  "pivotX": 0.4625,
+  "pivotY": 0.48611,
+  "width": 40,
+  "height": 36,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 40,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 22,
+  "origin": [
+    18,
+    18
+  ],
+  "optionsJson": "{\"palette\":[\"#2a2c36\",\"#50566a\",\"#8088a0\",\"#b0b8cc\",\"#d8dee8\",\"#f4f6fa\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#f4f6fa\",\"#d8dee8\",\"#b0b8cc\"],\"len\":11}"
+}

@@ -38,8 +38,8 @@ namespace RuinRunner
             for (var type = 0; type < 4; type++)
             for (var state = 0; state < 3; state++)
                 AddFrames(((EnemyType)type) + "/" + state, PixelArtAtlas.GetEnemyFrames((EnemyType)type, state), true);
-            for (var state = 0; state < 8; state++) AddFrames(BossSpriteAnimator.FrameRoot + state.ToString("D2"), PixelArtAtlas.GetBossFrames(state), true);
-            AddFrames(BossSpriteAnimator.FrameRoot + "entrance", IndividualArt.Frames(BossSpriteAnimator.FrameRoot + "entrance", 8), true);
+            for (var state = 0; state < 8; state++) AddFrames(BossSpriteAnimator.RowId(state), PixelArtAtlas.GetBossFrames(state), true);
+            AddFrames(BossSpriteAnimator.EntranceId, IndividualArt.Frames(BossSpriteAnimator.EntranceId, BossSpriteAnimator.FrameCount), true);
             foreach (var family in new[] { WeaponFamily.Dagger, WeaponFamily.Longsword, WeaponFamily.Mace, WeaponFamily.Katana, WeaponFamily.Greatsword })
                 AddFrames("Slash/" + family, PixelArtAtlas.GetMeleeSlashFrames(family, false), true);
             AddFrames("Slash/Critical", PixelArtAtlas.GetMeleeSlashFrames(WeaponFamily.Longsword, true), true);

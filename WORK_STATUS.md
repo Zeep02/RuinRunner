@@ -1,3 +1,148 @@
+## 2026-11-05 새 패키지와 실제 서버 교체
+
+- 패키지: `deliverables/RuinRunner-Candidate-20261105-092227`(campaign-v5). `Builds/Windows`(11-05 08:30)로 만들었고 "유산과 해금은 서버에 보존됩니다." 문구가 없다. 보관 규칙으로 20261026 패키지가 지워졌다. `Test-LocalRelease.py` 16개 항목 통과.
+- 실제 서버: 사용자 승인으로 20261104 패키지(campaign-v3)에서 새 패키지로 교체했다. 아래의 "지금 도는 로컬 서버는 옛 패키지" 기록은 이 교체로 끝났다. 마이그레이션 `007_talent_rework.sql` 적용, 카탈로그 campaign-v4·v5와 integration-v1 추가. 그 밖의 테이블 행 수는 교체 전과 같다(프로필 11, 원정 22). 이 마이그레이션으로 모든 프로필의 재능이 새 기본 세트로 초기화됐다. `currency_ledger` 행 수가 그대로이므로 유산 환불 대상은 없었다.
+- 되돌림용 백업: `%LOCALAPPDATA%\RuinRunner\LocalBackend\backups\pre-campaign-v5-20261105-101132`(서버를 끄고 복사한 DB 폴더, 해시 일치).
+- 미확인: 새 패키지로 게임 화면을 띄운 실제 원정, 사람의 플레이.
+
+## 2026-11-05 전체 버그 점검, 몸 충돌, 보스 대기술, 회복 포션, NPC 소품
+
+요청: 전체 버그 확인, 플레이어가 몸으로 적을 밀어 벽 밖으로 내보내는 문제, 상인·특성 NPC 옆 움직이는 소품, 보스 패턴과 이펙트 강화, 회복 포션, 획득 UI 축소.
+
+- 몸 충돌: 플레이어와 적이 같은 무게의 물리 몸체라 서로 밀렸고, 벽에 눌린 적이 벽을 뚫었다. 두 레이어의 물리 충돌을 끄고(`PlayerController.Create`) 서로 발 앞에서 스스로 멈춘다(`Runtime/Combat/BodyContact.cs`, `PlayerController.BodyContact.cs`, `EnemyController.StopAtPlayerBody`). 대시는 통과한다. 살아 있는 적에게 .5초 막히면 .45초 빠져나갈 수 있어 몰려도 갇히지 않는다. 그래도 바닥 밖에 나간 적은 .2초 뒤 마지막 바닥 위치로 돌아온다(`KeepOnFloor`). 측정: 달려 들어도, 대시로 지나가도 적 이동 0.000.
+- 충돌 변경의 효과로 돌진기(`Rush`)와 플레이어가 물리적으로 부딪히지 않는다. 판정은 원래 거리 검사라 그대로다.
+- 보스: `Runtime/Enemies/BossGrandMoves.cs`, `BossSweepBeam.cs`. 파수꾼 4종(연속 도약, 균열, 가시 우리, 바위 부채), 수호자 4종(소용돌이, 파도 벽, 잠수 기습, 간헐천 추격), 봉인 심장 4종(회전 광선, 순간이동 베기, 심판 번개, 대마법진). 2페이즈는 수와 속도가 늘어난다. 페이즈 전환 연출을 보스별로 나누고, 수호자·심장의 회복을 .75배(2페이즈 .55배)로 줄였다. 화면 기록 `Logs/Validation/2026-11-05-boss-moves/`, 시험은 `--combat-sandbox --boss-move-tour <폴더> [--contact-only]`. 난이도는 사람이 플레이해 보지 않았다.
+- 클립을 더하면 `Tools/Art/list_blank_fx_frames.py`로 `BlankFrames.txt`를 다시 만들어야 한다. 표에 없으면 재생 속도를 몰라 일회성 클립이 첫 프레임에서 사라진다. 이번에 그렇게 심판 번개가 안 보였다.
+- 회복 포션: 상자 30%, 잡몹 4%, 최대 체력의 25%. `GameController.DropHealthPotion`. E로 바로 먹는다. 체력이 가득해도 먹어진다.
+- UI: 바닥 아이템 안내는 "E 획득하기", 상자는 "E 열기"로 작게. 획득 알림은 좌하단, 1.8초.
+- NPC 소품: 마을 로안 옆에 짐마차·보따리, 미라 옆에 훈련 더미, 필드 상인 옆에 짐마차·보따리(`LivingProp`, `CombatFX/PropDummy|PropWagon|PropBundle`). 필드 상인 소품은 사방에 바닥 여유가 있는 자리에만 놓인다. 자리가 없으면 빠진다.
+- 버그 점검에서 고친 것: 다시 그린 적·보스보다 작던 피격 범위를 측정값으로 교체(`ExternalCreatureArt.BodySize`, `BodyCenterY`), 공격 속도가 높을 때 콤보 자세가 공격 타이머를 넘어 타격이 사라지던 문제, 낡은 `Tools/Play-Sandbox.cmd` 경로, 검사의 거짓 실패들. 피격 범위가 넓어져 적이 조금 더 잘 맞는다.
+- 알려진 한계: `--portal-validation`은 실제 플레이가 쓰지 않는 `RoomExit.Create` 시험 장면에서 실패한다. 원거리·이동기 빌드 봇은 일부 시드에서 죽는다(예외는 없음).
+
+## 2026-11-05 근접 무기군 전용 콤보: 몸 전체 동작
+
+무기만 흔들리면 액션감이 부족하다는 지적에 일반 플레이의 근접 무기군 넷을 모두 바꿨다. 몸은 맨손 동작으로 그려 같은 무기군의 어떤 무기든 쥘 수 있다. 무거운 공격과 스킬, 원거리 무기는 그대로다.
+
+- 카타나 4타: 올려 베기, 내려 베기, 회전 베기, 파고드는 십자 베기. 단검 4타: 빠른 베기, 되베기, 회전 베기, 돌진 찌르기. 창 4타: 찌르기, 자루 휘두르기, 돌진 찌르기, 뛰어 내리찍기. 대검 3타: 무거운 베기, 되베기, 뛰어 내려찍기.
+- 그림: PixelLab `animate_image`, `CombatFX/HeroCombo<동작><방향>`. 왼쪽은 오른쪽의 좌우 반전. 원본과 요청은 `Tools/Art/Staging/PixelLab/20261105-melee-combo/`.
+- 코드: `MeleeComboFrames`(손 위치 표는 생성물), `PlayerController.MeleeCombo.cs`, `CameraFollow.MeleeHitStop`, `MeleeComboCatalog`. `KatanaComboFrames`는 잔상 스킬이 쓰는 카타나 전달용이다. 초당 피해는 기존 콤보와 비슷하게 맞췄고, 플레이로 밸런스를 보지는 않았다.
+- 확인: `--combat-sandbox --melee-trail-tour <폴더> Combo`(`Logs/Validation/2026-11-05-melee-combo/`). 네 무기군 모두 실제 적에게 타수 순서, 멈춤, 피해가 기록된다. 사람이 직접 플레이로 확인하지는 않았다.
+- 남은 것: 검로가 칼날보다 훨씬 크게 그려진다. 뒤쪽 방향 동작이 약하다. 원거리 무기 30종은 몸 동작을 바꾸지 않았다. 장검·둔기는 일반 플레이 70종에 없어 `MeleeComboCatalog.Get`이 단검 콤보로 돌려보내도 플레이에 영향이 없다.
+
+## 2026-11-05 세 스테이지 소품에 움직임과 이펙트 추가
+
+세 스테이지의 소품이 움직인다. 기존 소품을 첫 프레임으로 PixelLab `animate_image`에 넣어 그림체를 유지했고, 움직이면 안 되는 부분은 원본으로 되돌렸다. 화로는 심부 벽 소품 묶음에 새로 들어갔다.
+
+- 외곽: 버섯(`FxPropSpores`), 풀·덤불(`FxPropPollen`), 담쟁이 기둥. 회랑: 갈대·산호(`FxPropBubbles`), 술통(`FxPropEmbersTeal`), 파이프(그림은 그대로, `FxPropPipeDrip`). 심부: 화로·촛대(`FxPropEmbers`), 수정(`FxPropCrystalGlints`), 쇠사슬 기둥.
+- 코드: `StageDressing.LivingPieces`, `EnvironmentProp.CreateDressing`의 재생 속도 인자와 `AttachAmbient`.
+- 확인: `--stage-art-tour <폴더> 4242 --living-props`로 실제 빌드 화면을 찍었다(`Logs/Validation/2026-11-05-living-props/`). HUD가 없는 촬영 모드이고, 플레이로는 확인하지 않았다. `Tools/Build-Clean.ps1` 스모크 통과.
+- 남은 것: 항아리, 바위, 작은 기둥 등 움직일 이유가 없는 소품은 정지 그림이다. 움직이는 소품의 투명 여백 때문에 투어의 "on a wall" 보고가 49건 늘었다. 배치는 여전히 여백 없는 정지 그림 크기로 검사하므로 해골 화로와 같은 여백 오탐으로 보지만, 한 건씩 확인하지는 않았다.
+
+## 2026-11-04 패시브 장신구 20종과 프로젝트 정리
+
+"장신구를 더 신박하게", "pixelfx로 패시브, 공격에 추가타 같은 방식"을 처리했다. 그 전에 받은 "몸에서 터지는 이펙트 전부 수정", "불필요한 파일과 코드 정리"도 함께 기록한다.
+
+- 장신구: 30종에 20종을 더해 50종이다. 일반 3, 고급 5, 희귀 6, 영웅 4, 전설 2. 수치는 `Tools/Backend/PassiveAccessories.py` 한 곳에 있고, 이 스크립트가 enum·드롭 표·수치 스키마를 다시 쓴다. 효과는 `CombatActions/ItemCombatEffects.Passives.cs`, 아이콘은 PixelLab, 이펙트 25클립은 `Tools/Art/accessories-fx.mjs`(`WAcc*`)다. 추가 피해는 공격으로 세지 않아 패시브끼리 연쇄하지 않고, 패시브로 처치해도 불씨 씨앗·넋 등불은 터지지 않는다.
+- 서버: `catalog.campaign-v3.json`을 120개(무기 70, 장신구 50)로 다시 만들었다. 실제 DB에 올린 적 없는 판이라 덮어썼다. 옛 카탈로그를 고정한 원정은 새 장신구 없이 그대로 돈다(`AccessoryLootTable.Known`). 임시 서버의 `Test-Campaign.py` 57개 항목 통과.
+- 이펙트 위치: `SigFx.OffBody`가 공중 이펙트와 선을 몸 반경 0.55 밖 무기 끝으로 밀고, `SkillOrigin`이 스킬 시작점을 무기 끝으로 잡는다. 주인공을 덮을 만큼 큰 이펙트는 `ClearOfHero`가 최소 0.45배까지 줄인다. 일부러 발밑에 까는 바닥 표식은 예외다(side_blade_pike 고리, hour_minute 표식, ember_claw 자국 등). 70종 재촬영 1084개 중 공중 이펙트의 최단 거리는 0.56이다.
+- 정리: 재생성 가능한 산출물 5.8 GB, 쓰지 않는 코드(베이크 9개, DungeonGathering 씬, OneWayPlatform, 웹 초안, BossSpriteValidation)를 지웠다. 소스는 git `1a03e9a9a`에서 되살릴 수 있다. 문서가 인용하는 `Logs/Validation` 34.87 GB, `Sep/`, `CheckImagegen`, `Backups`, 루트 참고 gif는 사용자 결정 전까지 그대로 둔다.
+- 도구 수정: `Start-IsolatedBackend.ps1`이 처음 만드는 인스턴스에서 PowerShell 5.1의 빈 ExitCode 때문에 실패하던 것을 고쳤다.
+- 패키지: `deliverables/RuinRunner-Candidate-20261104-025521`(campaign-v3). 보관 규칙으로 직전 후보 1개가 지워졌다.
+- 확인: 빌드와 스모크 통과. `--combat-sandbox --sandbox-passives <폴더>`로 20종 모두 실제로 발동해 찍었고 예외 0건. 무기 재촬영 예외 0건. 갤러리: https://claude.ai/artifact/CGzDYwe73CogyxTSkqTmsu
+- **아직 안 된 것: 지금 도는 로컬 서버는 옛 패키지(20261026)와 campaign-v2다. 교체 전까지 일반 플레이에는 옛 무기 46종과 장신구 30종만 나온다. 저장 DB를 건드리는 서버 교체는 사용자 승인을 기다린다.**
+- 미확인: 사람의 플레이, 새 장신구의 밸런스(수치는 첫 추정), 가방·상점 툴팁에 긴 설명이 들어가는 화면, 패키지 실행(`Test-LocalRelease.py` 미실행), 드롭 표 전체 도달 검사(`RunContentValidation`) 재실행. 투어는 표적을 주인공 곁에 붙잡아 두고 찍었으므로 실제 전투의 발동 빈도와 다를 수 있다.
+- 남은 약점: 스킬이 약한 편인 mirror_eye, refractor_staff, novice_branch, scout_carbine, 중간 빈 프레임이 있는 좌클릭 클립 5개(`WBloodBankSlash`, `WExecutionerScaleCleave`, `WPolarisSlash`, `WSawFangSlash`, `WThunderNeedleSlash`). 오래되어 실패하는 검사: motion, portal, ui, presentation.
+
+## 2026-11-03 무기 70종으로 교체와 우클릭 연출
+
+"기존 무기를 빼고 새 무기로 다 교체", "우클릭은 복붙 말고 화려하게", "총은 개머리판을 쥐지 말 것", "70종 이펙트 전부 확인"을 처리했다.
+
+- 게임: `WeaponLootTable.Weapons`가 `SignatureWeaponCatalog.All`이다. 기존 46종은 `Retired`에 남겨 옛 카탈로그로 시작한 원정과 옛 검증 픽스처에서 찾기만 한다. 70종에 Uncommon 등급이 없어 `EligibleNearest`가 가까운 등급으로 대신한다.
+- 서버: `Backend/Content/catalog.campaign-v3.json`(`Tools/Backend/PublishSignatureWeaponCatalog.py`). 등급 비율은 약 60/30/8/2%다. 시작 무기 8종은 무기 종류별 일반 등급이다. `Migrations/006_signature_weapons.sql`이 옛 시작 무기 해금을 가까운 새 무기로 옮긴다(표본 데이터로 시험, 되돌림). 임시 서버의 `Test-Campaign.py` 57개 항목 통과. 새 패키지는 `deliverables/RuinRunner-Candidate-20261103-234242`다.
+- **아직 안 된 것: 지금 도는 로컬 서버는 옛 패키지(20261026)와 campaign-v2다. 실제 저장 DB를 바꾸는 서버 교체는 권한 검사에서 막혀 하지 않았다. 교체 전까지 일반 플레이에는 옛 46종이 나온다.**
+- 이펙트 결함: 프레임 1408장의 `.meta`에 `alphaIsTransparency: 1`이 남아 투명 픽셀로 색이 번져 네모로 보였다. 전부 고치고 `Tools/Art/audit_fx_import.py`를 추가했다.
+- 우클릭: 스킬 클립 192개가 범용 부품 12종의 재탕이었다. `Tools/Art/weapons70-skillfx.mjs`로 무기마다 pixelfx 완성 이펙트를 골라 `W<Id>Cast`를 만들고 충돌 클립도 바꿨다. `SigFlourish`가 시전과 재시전 때 재생한다. UFO, 테슬라 코일, POW 글자처럼 무기와 맞지 않는 것은 바꿨다.
+- 총: 손잡이를 자동 계산해 개머리판 끝을 쥐었다. `build_weapons70.py`의 `GUN_GRIP`에 그림 보고 정한 위치를 넣었다.
+- 확인: `--combat-sandbox --sandbox-tour <폴더> 0 70`이 표적을 고정하고 좌클릭·우클릭을 따로 찍는다. 140개 GIF를 갤러리로 올렸다: https://claude.ai/artifact/CGzDYwe73CogyxTSkqTmsu
+- 알려진 문제: (2026-11-04 해결) `night_thread`는 표식을 쌓지 못해 우클릭 GIF에 스킬이 나오지 않았다(촬영 순서 문제). `WBloodBankSlash` 등 좌클릭 5개 클립에 중간 빈 프레임이 있다. 스킬이 약한 편: mirror_eye, refractor_staff, novice_branch, scout_carbine.
+- 미확인: 사람의 플레이, 서버 연결 상태의 실제 원정, 시작 무기 8종의 밸런스, 스킬 판정과 새 이펙트 크기의 일치.
+
+## 2026-11-03 코드 전체 점검
+
+전투·진행·길찾기·HUD를 읽어 확인된 문제를 고쳤다. 새 `--route-check`(`--stage-art-tour`에 덧붙임)가 방마다 실제 적을 전부 세워 주인공까지 시야가 열리는지 잰다. 이 검사로 끼임을 처음 찾았다.
+
+- 적 끼임: 첫 측정에서 시드 2개 적 약 250마리 중 17마리가 공격하지 못했다. 시야를 몸 중심에서 재서, 벽을 등지면 벽 안에서 시작한 것으로 판정됐다. 주인공이 벽에 붙으면 적이 공격하지 않는 문제도 같은 원인이다. 이제 발에서 발로 잰다(`EnemyController.HasLaneToPlayer`). 기본 마찰로 모서리에 달라붙던 것은 `GameLayers.Frictionless`로 없앴고, 주인공에게도 적용했다. 길찾기는 항아리·봉인·시설 같은 충돌체와 적의 넓은 발을 함께 본다. 진행이 멈추면 옆으로 비켜 간다. 결과: 시드 4242·777은 0마리, 시드 31337은 149마리 중 2마리. 이 검사는 모든 웨이브를 한 번에 세워 실제 플레이보다 붐빈다.
+- 길찾기 낭비: 호출마다 스테이지 크기 배열을 새로 잡고 봉인을 전부 찾았다. 격자를 재사용하고 적별 검색 시점을 나눴다. 측정한 가장 느린 검색은 약 3 ms다.
+- 보스: 처치 후 쓰러지는 1초 동안 이미 쏜 탄에 맞아 죽을 수 있었다. 치명타 순간 탄을 지운다.
+- 장전 중 발사 키를 누르고 있으면 프레임마다 네모 입자가 생겼다. 임시 네모 입자(`PrototypeVisuals.Burst`, `FadingSpark`)를 전부 없앴다. 레벨업은 `FxManaBurst`, 마나 부족은 작은 소리다.
+- 대시 잔상이 두 벌 돌던 것을 풀을 쓰는 `DashAfterimageEffect` 하나로 합쳤다. 무기 스킬 이동도 이것을 쓴다.
+- HUD·프레임 낭비: `PendingStageRewards`와 시설 탐색이 매 프레임 씬 전체를 뒤졌다. 레이아웃 단계를 쓰지 않으므로 `useGUILayout`을 껐다. 열린 봉인은 다시 그리지 않는다.
+- 경험치: 방을 비운 뒤 멀리 남은 구슬이 어디서든 주인공에게 온다. 빈손일 때 주운 무기는 바로 손에 든다.
+- 소품 난수: `StageDressing`도 `GenerationRandom`을 값으로 복사해 바닥 무늬가 같은 방향으로 뒤집혔다. `ref`로 고쳤다.
+- 테스트 소리: `--` 인자로 시작한 실행은 `MasterLimiter.SilentRun`이 최종 출력을 0으로 만든다(측정 최대 표본 0). `--combat-sandbox` 단독 실행은 소리가 난다. `CampaignAudioCapture`는 녹음한 뒤 출력을 지운다.
+- 오래된 검사: 맵·UI 검사가 스테이지 로딩 완료를 기다리게 했고, 모션 검사의 일시정지 항목을 현재 설계(일시정지가 공격을 취소)에 맞췄다. 맵 검사는 통과한다.
+- 확인: 빌드와 스모크, 시드 200개 생성, `--room-traversal-validation` 113경로, `--feedback-validation`, `--map-validation` 통과. UI 촬영으로 HUD·가방·툴팁·지도 표시 확인.
+- 남은 실패: `--motion-validation`은 "돌진 중 flipX" 항목에서, `--ui-validation`은 이미 없는 `legacyScroll` 필드에서 멈춘다. 후자의 필드는 커밋 시점에도 없었다. 그 뒤 항목은 실행되지 않았다.
+- 미확인: 사람의 플레이, 실제 마우스 클릭, 마찰 제거 후 주인공 조작감, 서버 연결 원정.
+
+## 2026-11-03 pixelfx 이펙트 재정비와 검로
+
+"이펙트가 pixelfx 갤러리보다 짜치다", "검로가 휘두르는 방향과 맞아야 하고 끊기면 안 된다"는 지적을 처리했다.
+
+- 빛: 내보내기가 빛을 알파에 구워 밝은 바닥에서 옅은 막처럼 보였다. 프리멀티플라이드 PNG와 `Resources/Shaders/PixelFxPremultiplied.shader`(`PixelFxMaterial`)로 바꿔 빛이 바닥에 더해진다. `Fx*`, `W*`, `Warden*`, `E*` 전부 다시 내보냈다(`Tools/Art/reexport_pixelfx_clips.mjs`).
+- 재생 시간: 0.5~5초짜리 원본을 0.2~0.4초로 눌러 틀던 것을 멈췄다. `BossNativeEffect`는 pixelfx 단발 클립을 그려진 속도로 끝까지 틀고, 반복 클립은 요청 시간만큼 돌린 뒤 사라지게 한다. 속도와 반복 여부는 `CombatFX/BlankFrames.txt`(`clip head tail fps loop`)에 있다. 내보내기의 `--from`, `--until`이 앞 동작과 오래 남는 잔해를 잘라 낸다.
+- 위계: 주인공 공격이 몬스터보다 화려해야 한다는 지시를 받았다. 몬스터 이펙트에는 흰 섬광, 겹잔상, 강한 빛을 넣지 않는다.
+- 몬스터 공격: 표(`Tools/Art/enemy-attack-fx.mjs`)를 수수하게 맞췄다. 탄은 plasma-shot·laser-bolt·energy-disc, 명중은 hit-spark, 충격은 heavy-landing(큰 충격도 같은 그림), 저주·포자 폭발은 앞 섬광을 자른 poof, 기 모으기는 안쪽으로 닫히는 고리다. 휘두르기·직선 베기·광선은 `Tools/pixelfx/src/fx/enemies/{sweep,cut,beam}.js`이고 판정 크기로 그려 늘리지 않는다.
+- 멧돼지: 횡베기를 없앴다. `ChargerTusk`는 앞쪽 70도·반지름 2.2 범위로 좁히고 0.7칸 돌진하며 `enemies/gore`(짧은 엄니 찌르기 두 줄)를 낸다. 판정이 좁아졌으므로 밸런스 변경이다.
+- 주인공 베기: 기본 무기가 4~6프레임 옛 초승달(`MeleeSlashEffect`, `MeleeCrossCutEffect`, `MeleeThrustEffect`, 대검 `CreateCleave`)을 쓰던 것을 지우고 `FxTrail<무기군><동작>` 클립(`Tools/Art/hero-trail-fx.mjs`, 60fps)으로 통일했다. `weapons/hero-slash`는 넓은 초승달에 흰 섬광, 안쪽 잔상, 빛 테두리, 불꽃을 얹고, 칼끝 시간표가 `MeleeMotionTiming.BladeAngle`과 같아 칼날과 같은 방향으로 돈다. 시그니처 무기 70종의 Slash·Cleave·Cross도 같은 효과로 다시 내보냈다(`weapons70-fx.mjs --force roles:...`). 공격이 끝나거나 다음 공격이 시작돼도 지우지 않고 그 자리에서 끝까지 재생한다(`SignatureSlashEffect`). 방향이 고정돼 짝수 콤보에서 어긋나던 `FxCutFlash`를 뺐다. 찌르기(`weapons/stab`)는 키웠지만 베기만큼 화려하지 않다.
+- 베기 폭: "60도만 나오고 끝난다"는 지적에 `weapons/hero-slash`를 기본 270도(강공격 310도)로 넓히고 두께를 약 30% 키웠다. 칼날은 그대로 돌고 베기만 더 넓게 펼쳐지며, 접촉 순간에 칼날과 만난다. 판정은 바꾸지 않아 뒤쪽 이펙트에는 판정이 없다.
+- 맵: 사용자가 "랜덤 유지, 방 채우기"를 골랐다. `GenerationRandom`이 값으로 복사돼 이웃 방이 거의 같은 난수를 쓰던 것을 `ref`로 고쳤다. `SpatialModuleCatalog`는 네 모서리를 유지·절단·계단으로 조합한 윤곽 8종에 내부 구성 6종(기둥 두 줄 2방향, 중앙 구조물, 깨진 고리, 엇갈린 블록, 어긋난 긴 벽)을 얹고, 시작·보상·출구 위치와 적 출현 지점은 남은 바닥에서 찾는다. 적은 문 앞 5칸 안에 나오지 않는다. 보상 상자는 `GameController`가 방의 `RewardPosition`을 쓴다.
+- 장애물 그림: 물 잠긴 층은 어떤 크기의 장애물에도 같은 2×5.5칸 수조를 그려 충돌과 그림이 어긋났다. `StageLandmarks`가 칸 크기(2×2, 3×3, 5×2, 2×4, 4×4)에 맞는 PixelLab 그림 27장(`Campaign/Landmark/<테마>`)에서 고른다. 첫 판(`create_map_object`)은 음영이 과하고 비스듬해 "오브젝트만 다른 그래픽"이라는 지적을 받아, 기존 소품과 같은 묶음 생성에 테마 팔레트를 주어 다시 만들었다. 벽 띠로 두른 받침은 "벽 위에 겹쳐 올렸다"는 지적을 받아 지웠고, 그림 폭에 맞춰 막히는 칸 크기를 다시 정했다.
+- 벽 겹침: 북쪽 벽면은 아래 바닥의 위쪽 0.5칸을 덮는데, 소품이 발밑만 검사해 벽면과 벽 위에 겹쳤다. `StageDressing.OnBareFloor`가 그림 전체를 검사하고, `--stage-art-tour`가 겹친 수를 센다(시드 4242 세 스테이지 0개). 벽 줄에 서 있거나 벽 너머에 뜨던 석상·등불·기념물·유물을 없애고, 벽등은 벽면에 건다.
+- 사운드: 원본 음량이 20 dB 넘게 달라 총이 칼보다 약 10 dB 컸고, 적 탄의 삐 소리가 주인공 공격보다 컸다. `CombatAudio`가 클립을 처음 쓸 때 가장 큰 50 ms 기준으로 맞추고, 주인공을 앞에 두는 채널 보정을 건다. 같은 소리는 0.045초 안에 다시 내지 않고 최대 3개만 겹친다. 리스너의 `MasterLimiter`가 동시 타격을 눌러 준다. 스테이지별 음악·환경음 차이를 측정값으로 맞췄다(환경음은 27 dB 차이). `--audio-level-tour`로 실제 믹스를 녹음해 측정했다. 귀로 듣는 확인은 도구로 할 수 없다.
+- 소품: 벽 묶음, 바닥 묶음, 바닥 무늬 밀도를 약 1.5~3배로 올리고, 통로 제한을 문 앞 4칸으로 줄였다.
+- 검사: `--stage-art-tour`에 생성 검사를 넣었다. 시드 200개×3스테이지에서 대체 맵 0, 재시도 0, 봉인까지 검증 오류 0, 전투 방 2090개 중 2088개가 서로 다르고 장애물은 1~10개, 평균 4.2개다.
+- 확인: 빌드와 스모크 통과, `--melee-trail-tour`(`MeleeTrailTour`)로 무기군별 검로 프레임 확인, `--enemy-art-tour`로 전 몬스터 공격 촬영, 수정 전 빌드와 비교.
+- 미확인: 사람의 플레이, 실제 재생 속도의 움직임, 서버 연결 원정, 시그니처 무기 70종 검로 화면, 새 방에서 실제 전투의 적 이동, `--room-traversal-validation` 전체(4분 제한으로 중단, 그때까지 실패 없음, 고정 검증 방 기준). 방 생성 결과가 바뀌었으므로 서버 패키지를 새로 빌드해야 지형 서명이 맞는다.
+
+## 2026-11-03 몬스터 공격·맵·연출 전면 손질
+
+사용자 지적(공격 예고와 실제가 다름, 이펙트 빈약, Warden 그림, 맵이 넓고 단조로움, 소품 부족, 동작 연결 튐, 설명 문구, 포탈, 잠금 연출)을 차례로 처리했다.
+
+- 공격: 위험 범위를 붉은색으로 통일하고 시간이 차면 범위가 끝까지 차오른다. 원·부채꼴·직선·돌진 경로의 판정을 주인공 발 위치로 맞췄고, 돌진 판정 반경은 몸집별로 줄였다. 조준선은 벽까지 실제 탄 경로를 그린다.
+- 공격 이펙트: `Tools/Art/enemy-attack-fx.mjs`로 `CombatFX/E*` 클립을 만들었다. 적별 탄과 명중, 판정 크기에 맞춘 베기·빔·충격 고리, 돌 던지기, 돌진 먼지가 있다. 타격과 동시에 끝나던 공격은 타격 자세를 0.2초 유지한다.
+- Wisp 순간이동 뒤 예고선이 옛 위치에서 나오던 버그, 토템 빔에 그림이 없던 문제, Sentinel 베기가 45도 틀어져 범위의 1/4 크기였던 문제를 고쳤다.
+- Warden: PixelLab 새 캐릭터 `522d4fe2…`로 교체했다(`Pilot/Warden`). 등장은 사망 클립을 거꾸로 재생한다. 옛 `Pilot/Warden/00~07`과 `CombatFX/Warden{Idle,Walk,...}`는 더 쓰지 않지만 지우지 않았다.
+- 일반 적 8종(Grunt, Charger, Sporeling, RuneTotem, TideCrab, Wisp, SealKnight, Hexer): 모든 동작이 같은 기준 그림에서 시작하고 끝나도록 재생성했다. `Tools/Art/audit_clip_alignment.py` 기준 첫 프레임이 어긋난 클립이 94개에서 24개로 줄었고, 남은 것은 대부분 일부러 움찔하는 피격 동작이다. Wisp·Hexer 키에 맞춰 피격 범위와 체력바 높이를 올렸다.
+- 맵: 고정 방 24종을 없애고 `SpatialModuleCatalog.Compose`가 시드마다 방을 조합한다. 일반 전투 방은 22~28×16~20칸(이전 32~42×22~28칸), 시설 방은 더 작다. 장애물과 적 출현 지점도 방 모양에 맞춰 시드별로 놓는다. 생성기 문자열은 `modules-v1.0.0`을 유지했으므로 서버 패키지를 새로 빌드해야 서버가 같은 지형 서명을 계산한다.
+- 소품: `Tools/Art/generate_stage_dressing_20261103.py` 시트로 스테이지별 소품을 만들고 `StageDressing`이 벽·모서리에 묶음으로 놓는다. 항아리류는 공격하면 깨진다. 보상 상자와 헷갈리는 상자·궤짝은 쓰지 않는다.
+- 포탈: `Campaign/Gate` 새 그림과 `ProximityGate`. 상호작용 거리에 들어오면 열리고 벗어나면 닫힌다. 스테이지 출구도 같은 문을 쓴다.
+- 방 잠금: `EncounterBarrier`를 스테이지별 돌기둥이 솟는 연출로 교체했다. 번개 줄과 등불은 제거했다.
+- 장전: "재장전 중..." 문구, 슬롯의 R 표시, 게이지 진행 표시를 없앴다. 게이지는 남은 탄만 보여 준다.
+- 설명: 장신구·세트·재능의 내부 용어를 플레이어 말로 고치고 "무기 스킬"로 통일했다. 보스 이름을 한글로 바꿨다. 코드에서 설정만 하고 그리지 않던 화면 안내 배너를 다시 그린다.
+- 코드 정리: 참조 없는 멤버 약 50개, `ExternalHeroArt`, `AuthoredPlayerWalk`, `MeadowTrail`, 적의 픽셀 아트 없는 경우 분기를 지웠다.
+- 공용 이펙트: `Slug` 탄이 경로 옆으로 떠 있던 피벗, 번개 프레임의 검은 프레임, 적이 죽은 뒤 남던 표식, 반복 재생 때 빈 프레임으로 깜빡이던 문제를 고쳤다(`CombatFX/BlankFrames.txt`).
+- 확인: 최신 빌드 스모크 통과, `--combat-sandbox --enemy-art-tour`로 전 몬스터 공격 촬영, `--stage-art-tour`로 스테이지·포탈·잠금 촬영. 기록은 `Tools/Art/Staging/PixelLab/20261103-remaining/attack-sheets/`.
+- 남긴 문제: 빠른 무기의 일반 적 경직 잠금(밸런스 판단 필요), `ChargeAttack`·`BossRadialBurst`·`BossAimedVolley`와 `DungeonGatheringTest`는 옛 검증 코드가 쓰고 있어 남겼다. 무기 70종 스킬 코드는 자세히 보지 못했다.
+- 미확인: 사람의 플레이, 연속 재생 움직임(프레임 캡처만 봄), 소리, 서버 연결 상태의 원정, `Backend/RuinRunner.Generation` 컴파일(이 PC에 .NET SDK 없음), `UiValidation` 전체.
+
+## 2026-11-03 남은 적 6종 리스프라이트
+
+일반 적 Shooter·Leaper·Tidecaller·Sentinel과 보스 Tidekeeper·SealHeart를 PixelLab으로 다시 만들어 `Pilot/`에 연결했다. 판정·패턴 수치는 그대로이고, 체력바 높이(`VisualTop`)만 새 그림에 맞췄다. Warden은 이미 pixelfx 리그 클립을 쓰므로 대상이 아니다. 비교 시트와 캡처는 `Tools/Art/Staging/PixelLab/20261103-remaining/{compare,game-captures}`, 실행 기록은 `Logs/Validation/2026-11-03-enemy-resprite`에 있다.
+
+- 확인: `--combat-sandbox --enemy-art-tour`로 실제 게임 창에서 6종을 소환했다. 화면의 스프라이트가 모두 새 프레임 목록에 들어 있었고, 등록되지 않은 프레임은 0개였다.
+- 보스 피격 범위: 사용자 결정으로 새 그림에 맞춰 넓혔다. Tidekeeper 2.5×2.4(중심 1.44), SealHeart 2.25×2.45(중심 1.2). 일반 적 범위와 보스 체력은 그대로이므로 보스가 맞기 쉬워졌다. 실제 광선 검사 결과는 `<적>-hurtbox.txt`.
+- 보스 동작: Tidekeeper·SealHeart의 대기·이동·시전·피격을 `Tools/Art/author_boss_rigs_20261103.py` 리그로 교체해 15프레임 재생한다. 사망은 PixelLab 클립이다. Warden 피격은 끊기지 않게 갔다가 돌아오도록 고쳤다.
+- 장신구: 30종을 PixelLab 새 아이콘으로 교체했다. 가방에서 아이콘 배율이 제각각이던 문제는 `ItemIconLibrary`에서 세트 기준 30픽셀로 맞췄다.
+- 코드 점검으로 고친 것: 가방이 찼을 때 레거시 경로에서 레벨 보상이 사라지던 버그(이것이 `Level Accessory Flow` 실패의 원인), 포효 중 보스가 사라지면 카메라가 묶이는 문제, 카메라 킥 누적, 대시 잔상 잔류, 공격 뒤로 밀린 경직.
+- 스모크: 처음으로 전체 PASS. 빌드가 `Builds/Windows`로 승격되면서 보관 규칙에 따라 `GoalCandidate-20261026-001708`이 정리됐다.
+- 남긴 문제: 빠른 무기로 일반 적을 계속 경직시킬 수 있다(밸런스 판단 필요). `ChargeAttack` 등 옛 보스 패턴은 옛 검증 코드에서만 쓰인다. `Signature` 계열 70종 무기 코드는 이번 점검에서 자세히 보지 못했다.
+- 미확인: 연속 재생으로 본 움직임(정지 캡처만 봄), 2·3스테이지 배경 위 모습, 보스 등장 연출, 수정한 `UiValidation` 보스 검사 실행, 사람의 플레이.
+
+## 2026-11-03 주인공 몸동작 시안 임시 보관
+
+사용자 요청으로 7개 무기군·4방향 몸동작 수정본을 **임시 / 사용 보류 / 미채택**으로 분류했다. 보관 위치와 재검토 범위는 [시안 README](Tools/Art/Staging/NativeHero/20261103-body-fourdir/README.md)에 기록했다. 정식 에셋 적용 완료로 취급하지 않는다.
+
 ## 2026-10-26 마감 완료
 
 각성 배지의 누락 글리프로 발생하던 Player UI 지연을 실제 프로파일로 좁혀 수정했다. 동일 시드의 정상 Release 원정에서 전환 최대1,362.62→83.34ms, 가방 최대12.51ms, 전투 p95약4.17ms. 산탄/관통/대포의 동일 공격 표식 중복 처리와 이동 후 균열 피해 구간을 수정했고, 가방/상점/교환의 그림·정보 배치와 실제 키 표시를 개선했다. 기존 마을·3지역·보스·엔딩·성장·API/DB·응답 유실 복구·원본 아트는 보존했다.

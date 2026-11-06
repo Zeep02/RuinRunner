@@ -1,0 +1,28 @@
+{
+  "clip": "WNoviceBranchMuzzle",
+  "ppu": 32,
+  "pivotX": 0.375,
+  "pivotY": 0.48333,
+  "width": 28,
+  "height": 30,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/flash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 3,
+  "fps": 30,
+  "loop": false,
+  "frames": 6,
+  "durationSeconds": 0.2,
+  "visibleDiameter": 14,
+  "origin": [
+    10,
+    15
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0f2e\",\"#172a78\",\"#2550d0\",\"#3f8cff\",\"#7cc8ff\",\"#c8f0ff\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#c8f0ff\",\"#7cc8ff\",\"#3f8cff\"],\"len\":9,\"wide\":4}"
+}

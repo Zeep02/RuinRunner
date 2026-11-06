@@ -1,0 +1,29 @@
+{
+  "clip": "WTwinStarD",
+  "ppu": 32,
+  "pivotX": 0.00781,
+  "pivotY": 0.475,
+  "width": 64,
+  "height": 20,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/line-loop",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 12,
+  "loop": true,
+  "frames": 6,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 64,
+  "origin": [
+    0,
+    10
+  ],
+  "optionsJson": "{\"palette\":[\"#2a2c36\",\"#50566a\",\"#8088a0\",\"#b0b8cc\",\"#d8dee8\",\"#f4f6fa\",\"#ffffff\"],\"style\":\"beam\",\"W\":4}"
+}

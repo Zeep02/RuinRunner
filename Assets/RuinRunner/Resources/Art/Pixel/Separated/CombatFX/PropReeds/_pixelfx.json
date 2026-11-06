@@ -1,0 +1,14 @@
+{
+  "clip": "PropReeds",
+  "ppu": 32,
+  "pivotX": 0.48438,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "b934106a-ed0a-4d6a-b6af-c550ef6c717c",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

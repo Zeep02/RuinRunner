@@ -1,0 +1,29 @@
+{
+  "clip": "WLumberBladeCleave",
+  "ppu": 32,
+  "pivotX": 0.36266,
+  "pivotY": 0.49471,
+  "width": 233,
+  "height": 189,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 92,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 174,
+  "origin": [
+    84,
+    95
+  ],
+  "optionsJson": "{\"palette\":[\"#160c06\",\"#2e1a0c\",\"#4a2c14\",\"#6a421e\",\"#8e5c2c\",\"#b47c40\",\"#e0b478\"],\"R\":72,\"W\":46,\"a0\":-170,\"a1\":100,\"over\":0}"
+}

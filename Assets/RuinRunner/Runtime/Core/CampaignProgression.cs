@@ -11,7 +11,8 @@ namespace RuinRunner
         public CampaignStage CurrentStage => CampaignStage.Get(CurrentStageIndex);
         public bool IsStageTransitioning { get; private set; }
         public Vector2 StageExitPosition => DungeonMap == null ? Vector2.zero : DungeonMap.StageExitPosition;
-        public bool IsNearStageExit => Player != null && Vector2.Distance(Player.transform.position, StageExitPosition) <= 1.8f;
+        private const float StageExitReach = 1.8f;
+        public bool IsNearStageExit => Player != null && Vector2.Distance(Player.transform.position, StageExitPosition) <= StageExitReach;
         private int stageEpoch;
         private float leaveEquipmentHeld;
         public float LeaveEquipmentProgress => Mathf.Clamp01(leaveEquipmentHeld / 1.2f);
@@ -23,16 +24,7 @@ namespace RuinRunner
             leaveEquipmentHeld += Time.unscaledDeltaTime;
             if (leaveEquipmentHeld >= 1.2f) { LeaveUncollectedStageEquipment(); leaveEquipmentHeld = 0; }
         }
-        public int PendingStageRewards
-        {
-            get
-            {
-                var count = 0;
-                foreach (var item in RuntimeSceneObjects.FindAll<FieldLootPickup>())
-                    if (item.RequiresStageDecision) count++;
-                return count;
-            }
-        }
+        public int PendingStageRewards => FieldLootPickup.PendingDecisions;
         private Action<EnemyController> CaptureEnemyDeathCallback()
         {
             var epoch = stageEpoch;
@@ -43,8 +35,6 @@ namespace RuinRunner
         {
             if (!IsStageResultReady || !IsNearStageExit || IsPaused) return;
             foreach (var item in RuntimeSceneObjects.FindAll<FieldLootPickup>()) item.RequiresStageDecision = false;
-            LootMessage = "장비를 두었습니다 · 봉인석으로 이동";
-            LootMessageUntil = Time.unscaledTime + 4f;
         }
         private void CreateStageExit()
         {
@@ -52,10 +42,15 @@ namespace RuinRunner
             portal.transform.SetParent(DungeonMap.Root.transform, false);
             portal.transform.position = StageExitPosition;
             var view = portal.AddComponent<SpriteRenderer>();
-            view.sprite = PixelWorldArt.GetSprite(WorldInteractionArt.PortalActive);
             view.sortingOrder = 900 - Mathf.RoundToInt(StageExitPosition.y * 100);
-            portal.transform.localScale = Vector3.one * 1.6f;
+            ProximityGate.Attach(portal, view, StageExitReach);
+            // The way on opens with something to see from across the room.
+            SigFx.Play("LootBeam", StageExitPosition, 0, -1, true, false, 1.4f);
+            SigFx.Play("RoomClearRing", StageExitPosition, 0, -1, true, false, .9f);
+            CameraFollow.Shake(.25f, .2f);
+            AmbientFx.Create(portal.transform, StageExitPosition, "AmbPortal", .62f).GetComponent<SpriteRenderer>().sortingOrder = view.sortingOrder + 1;
         }
+        const float MinimumTitleSeconds = 1.3f;
         private void BeginNextStage()
         {
             priorStageVisitedRegions+=DungeonMap==null?0:DungeonMap.VisitedRegionCount;
@@ -63,13 +58,22 @@ namespace RuinRunner
             stageEpoch++;
             StopAllCoroutines();
             ResetTimeEffect();
-            sessionPhase = GameSessionPhase.Transition;
-            IsStageTransitioning = true;
             IsStageResultReady = false;
-            IsMapOpen = IsInventoryOpen = IsStatsOpen = IsUnlockOpen = false;
+            IsMapOpen = IsInventoryOpen = IsStatsOpen = false;
             waveTransition = true;
             Player.SetStageClearSafety(true);
+            Player.SetEntranceLock(true);
+            RefreshTimeScale();
+            StartCoroutine(LoadNextStage());
+        }
+        private IEnumerator LoadNextStage()
+        {
+            // The stage stays up and moving until the ink has swallowed it.
+            yield return InkTransition.Cover(Player.FeetPoint, CampaignStage.Get(CurrentStageIndex + 1).Name);
+            sessionPhase = GameSessionPhase.Transition;
+            IsStageTransitioning = true;
             RuntimeSceneObjects.ClearSession();
+            CombatStain.ClearAll();
             if (DungeonMap?.Root != null)
             {
                 DungeonMap.Root.SetActive(false);
@@ -77,11 +81,8 @@ namespace RuinRunner
             }
             Boss = null; ActiveChest = null; EnemiesAlive = 0;
             RefreshTimeScale();
-            StartCoroutine(LoadNextStage());
-        }
-        private IEnumerator LoadNextStage()
-        {
-            yield return new WaitForSecondsRealtime(.65f);
+            var titleSince = Time.unscaledTime;
+            yield return new WaitForSecondsRealtime(.3f);
             CurrentStageIndex++;
             WeaponLootTable.SetDropStage(CurrentStageIndex);AccessoryLootTable.SetDropStage(CurrentStageIndex);
             PrototypeAudioController.SetStage(CurrentStageIndex);
@@ -99,10 +100,14 @@ namespace RuinRunner
             IsExitOpen = false;
             rewardSpawnedForRoom = false;
             Player.SetStageClearSafety(false);
+            var titleLeft = MinimumTitleSeconds - (Time.unscaledTime - titleSince);
+            if (titleLeft > 0f) yield return new WaitForSecondsRealtime(titleLeft);
             IsStageTransitioning = false;
             sessionPhase = GameSessionPhase.Expedition;
             StageIntroUntil = Time.unscaledTime + 5.5f;
             RefreshTimeScale();
+            yield return InkTransition.Reveal(Player);
+            Player.SetEntranceLock(false);
             Debug.Log("[Campaign] Enter stage=" + (CurrentStageIndex + 1) + " seed=" + RunSeed + " level=" + Progression.Level + " kills=" + Stats.EnemiesDefeated);
             yield return BeginCurrentRoom();
         }
@@ -132,8 +137,7 @@ namespace RuinRunner
                     map.Regions[reward.region].ChestOpened = true;
                     accessory = ResolveAccessory();
                     SpawnEquipmentPickup(reward.position,null,accessory,0,false,"exploration:"+CurrentStageIndex+":"+rewardIndex);
-                    if(ActiveTalents.Has(TalentId.SupplyChoice)&&SupplyUsesMana)Player.Stats.RestoreMana(Player.MaxMana*.5f);
-                    else Player.Stats.Heal(Player.MaxHealth*.10f);
+                    Player.Stats.Heal(Player.MaxHealth*.10f);
                     LootMessage = "보급함 발견";
                     LootMessageUntil = Time.unscaledTime + 4;
                     Debug.Log("[Campaign] Exploration reward stage=" + CurrentStageIndex + " id=" + rewardIndex);

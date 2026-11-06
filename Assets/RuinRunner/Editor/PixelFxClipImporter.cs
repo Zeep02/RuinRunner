@@ -46,7 +46,8 @@ namespace RuinRunner.EditorTools
             importer.filterMode = FilterMode.Point;
             importer.wrapMode = TextureWrapMode.Clamp;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
-            importer.alphaIsTransparency = true;
+            // Light is stored in RGB under zero alpha; dilating transparent pixels would erase it.
+            importer.alphaIsTransparency = false;
             importer.maxTextureSize = 4096;
 
             var settings = new TextureImporterSettings();

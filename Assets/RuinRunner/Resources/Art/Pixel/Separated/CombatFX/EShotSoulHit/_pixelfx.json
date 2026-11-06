@@ -1,0 +1,28 @@
+{
+  "clip": "EShotSoulHit",
+  "ppu": 32,
+  "pivotX": 0.43125,
+  "pivotY": 0.29592,
+  "width": 80,
+  "height": 49,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "impacts/hit-spark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 15,
+  "fps": 30,
+  "loop": false,
+  "frames": 16,
+  "durationSeconds": 0.533,
+  "visibleDiameter": 53,
+  "origin": [
+    34,
+    34
+  ],
+  "optionsJson": "{\"palette\":[\"#0a1c20\",\"#123c40\",\"#1c6868\",\"#34a0a0\",\"#68d8d0\",\"#b0f4ec\",\"#f4fffc\"],\"height\":0}"
+}

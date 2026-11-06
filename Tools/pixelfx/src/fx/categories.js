@@ -10,6 +10,8 @@ export const categories = [
   { id: "scifi", name: "sci-fi", blurb: "holograms, shields, scanners, warps" },
   { id: "melee", name: "melee", blurb: "slashes, smears, cleaves, combos" },
   { id: "impacts", name: "impacts", blurb: "hit sparks, shockwaves, landings" },
+  { id: "ink", name: "ink", blurb: "black ink that covers the screen, drains to a puddle and rises round a figure" },
+  { id: "enemies", name: "enemies", blurb: "flat sweeps, cuts and beams centred on a top-down attacker" },
   { id: "projectiles", name: "projectiles", blurb: "bullets, rockets, lasers, arrows" },
   { id: "spawn", name: "spawn & death", blurb: "poofs, portals, souls, shatters" },
   { id: "arcane", name: "arcane", blurb: "portals, runes, missiles, beams" },

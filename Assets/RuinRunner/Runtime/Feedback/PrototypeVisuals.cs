@@ -99,50 +99,5 @@ namespace RuinRunner
             block.AddComponent<BoxCollider2D>();
             return block;
         }
-
-        public static void Burst(Vector2 position, Color color, int count = 8)
-        {
-            for (var i = 0; i < count; i++)
-            {
-                var spark = new GameObject("HitSpark");
-                spark.transform.position = position;
-                spark.transform.localScale = Vector3.one * Random.Range(.08f, .18f);
-                AddSprite(spark, color, 20);
-                var angle = Random.Range(0f, Mathf.PI * 2f);
-                var velocity = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * Random.Range(2f, 6f);
-                spark.AddComponent<FadingSpark>().Initialize(velocity);
-            }
-        }
-    }
-
-    public sealed class FadingSpark : MonoBehaviour
-    {
-        private const float InitialLifetime = .35f;
-        private Vector2 velocity;
-        private float lifetime = InitialLifetime;
-        private SpriteRenderer spriteRenderer;
-
-        public void Initialize(Vector2 initialVelocity)
-        {
-            velocity = initialVelocity;
-            spriteRenderer = GetComponent<SpriteRenderer>();
-        }
-
-        private void Update()
-        {
-            lifetime -= Time.deltaTime;
-            transform.position += (Vector3)(velocity * Time.deltaTime);
-            velocity *= .9f;
-            transform.localScale *= .92f;
-
-            if (spriteRenderer != null)
-            {
-                var color = spriteRenderer.color;
-                color.a = Mathf.Clamp01(lifetime / InitialLifetime);
-                spriteRenderer.color = color;
-            }
-
-            if (lifetime <= 0f) Destroy(gameObject);
-        }
     }
 }

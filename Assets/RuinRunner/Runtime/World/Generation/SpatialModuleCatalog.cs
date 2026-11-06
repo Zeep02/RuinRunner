@@ -3,63 +3,269 @@ using System.Collections.Generic;
 
 namespace RuinRunner.Generation
 {
+    /// <summary>Composes each room from the run's seed. Floor reaches all four doorways through two bands; each corner of the room is
+    /// kept, cut back or stepped, so the outline differs. Combat rooms then get an interior plan (pillar rows, a central block, a ring,
+    /// staggered blocks, offset walls or a scatter), and the anchors and enemy spawn points are found on whatever floor is left.</summary>
     public static class SpatialModuleCatalog
     {
-        // No authored building is rotated or reflected. Each theme has eight different floor/obstacle compositions.
-        static readonly ModuleDefinition[][] catalog = { OuterRuins(), FloodedHalls(), SealCore() };
-        public static IReadOnlyList<ModuleDefinition> ForStage(int stage)
-        { if (stage < 0 || stage >= catalog.Length) throw new ArgumentOutOfRangeException(nameof(stage)); return catalog[stage]; }
-        static MapRect R(float x, float y, float w, float h) => new MapRect(x, y, w, h);
-        static MapRect[] P(params MapRect[] pieces) => pieces;
-        static ModuleDefinition[] OuterRuins() => new[]
+        // Largest room is 28 by 20. The generator's room spacing leaves six units of solid ground beyond that.
+        const int BossHalfWidth = 14, BossHalfHeight = 10;
+        // Rooms without a plan keep their middle open: rewards, services and exits sit there. Combat rooms find those spots afterwards.
+        const int ClearHalfWidth = 4, ClearHalfHeight = 6;
+        // The floor bands that reach the doorways.
+        const int BandHalfWidth = 4;
+        // A corridor is 6 wide. Nothing stands in front of a doorway for this depth.
+        const int LaneHalfWidth = 3, DoorDepth = 5;
+        const int CornerWhole = 0, CornerCut = 1, CornerStepped = 2;
+        // Corners in counterclockwise order, so turning a shape is a change of starting corner.
+        static readonly int[][] RoomShapes =
         {
-            M("ruins-cross-court", "무너진 교차 마당", "Ruins", P(R(-16,-5,32,10), R(-9,-12,18,24)), P(R(-6,5,3,3),R(3,-9,3,3))),
-            M("ruins-offset-garden", "엇갈린 정원", "Ruins", P(R(-18,-4,36,8),R(-4,-13,8,26),R(-15,2,15,8),R(0,-10,15,8)), P(R(-12,5,3,3),R(8,-8,3,3))),
-            M("ruins-collapsed-plaza", "붕괴 광장", "Ruins", P(R(-16,-9,32,18),R(-10,-13,20,26)), P(R(-10,-6,4,4),R(5,3,5,4),R(7,-7,3,3))),
-            M("ruins-procession-road", "행렬의 옛길", "Ruins", P(R(-20,-5,40,10),R(-6,-11,12,22),R(-16,-8,8,16)), P(R(-13,3,3,3),R(9,-4,5,2))),
-            M("ruins-split-foundation", "갈라진 기단", "Ruins", P(R(-17,-4,34,8),R(-4,-14,8,28),R(-14,-11,11,10),R(3,1,11,10)), P(R(-11,-8,4,4),R(7,5,4,4))),
-            M("ruins-three-terraces", "세 단의 정원", "Ruins", P(R(-18,-5,36,10),R(-12,-10,24,20),R(-5,-14,10,28)), P(R(-9,5,3,3),R(6,-8,3,3),R(9,4,3,3))),
-            M("ruins-broken-cloister", "끊긴 회랑", "Ruins", P(R(-18,-10,36,20),R(-7,-13,14,26)), P(R(-12,-6,5,3),R(-12,3,5,3),R(7,-6,5,3),R(7,3,5,3))),
-            M("ruins-gate-wings", "날개 성문", "Ruins", P(R(-20,-4,40,8),R(-5,-12,10,24),R(-16,-9,9,18),R(7,-7,10,14)), P(R(-13,3,3,4),R(10,-5,4,3)))
+            new[] { CornerWhole, CornerWhole, CornerWhole, CornerWhole },
+            new[] { CornerCut, CornerCut, CornerCut, CornerCut },
+            new[] { CornerWhole, CornerCut, CornerWhole, CornerCut },
+            new[] { CornerWhole, CornerWhole, CornerCut, CornerCut },
+            new[] { CornerWhole, CornerWhole, CornerWhole, CornerCut },
+            new[] { CornerStepped, CornerStepped, CornerStepped, CornerStepped },
+            new[] { CornerWhole, CornerStepped, CornerCut, CornerStepped },
+            new[] { CornerStepped, CornerCut, CornerStepped, CornerCut },
         };
-        static ModuleDefinition[] FloodedHalls() => new[]
-        {
-            M("flood-cistern-docks", "저수조 선착장", "Flooded", P(R(-18,-4,36,8),R(-5,-14,10,28),R(-14,0,28,10)), P(R(-10,5,4,3),R(6,5,4,3))),
-            M("flood-parallel-weirs", "쌍둑 수로", "Flooded", P(R(-18,-11,36,22),R(-5,-14,10,28)), P(R(-13,-7,9,3),R(4,4,9,3))),
-            M("flood-stair-basin", "계단 물받이", "Flooded", P(R(-18,-4,36,8),R(-13,-8,26,16),R(-8,-13,16,26)), P(R(-10,3,4,3),R(5,-9,3,4))),
-            M("flood-crook-pier", "굽은 부두", "Flooded", P(R(-20,-4,40,8),R(-5,-12,10,24),R(-16,-9,18,7),R(0,2,15,7)), P(R(-13,-7,5,3),R(8,4,4,3))),
-            M("flood-lock-gallery", "수문 열주실", "Flooded", P(R(-17,-10,34,20),R(-8,-14,16,28)), P(R(-11,-7,3,5),R(-11,3,3,4),R(8,-7,3,4),R(8,2,3,5))),
-            M("flood-reservoir-arms", "가지 저수로", "Flooded", P(R(-19,-5,38,10),R(-5,-14,10,28),R(-13,0,9,11),R(4,-11,9,11)), P(R(-11,5,4,3),R(7,-8,4,3))),
-            M("flood-sunken-court", "가라앉은 뜰", "Flooded", P(R(-15,-11,30,22),R(-19,-4,38,8),R(-6,-14,12,28)), P(R(-11,-6,4,4),R(6,3,4,5),R(7,-7,4,3))),
-            M("flood-pump-chamber", "펌프실", "Flooded", P(R(-19,-5,38,10),R(-13,-10,26,20),R(-4,-14,8,28)), P(R(-10,3,6,4),R(4,-7,6,4)))
-        };
-        static ModuleDefinition[] SealCore() => new[]
-        {
-            M("seal-cruciform", "봉인 십자실", "Core", P(R(-18,-6,36,12),R(-7,-14,14,28)), P(R(-5,8,3,3),R(2,-11,3,3))),
-            M("seal-offset-vault", "어긋난 금고", "Core", P(R(-18,-4,36,8),R(-4,-14,8,28),R(-14,0,12,11),R(2,-11,12,11)), P(R(-11,5,5,3),R(6,-8,5,3))),
-            M("seal-pillared-crown", "기둥 왕관실", "Core", P(R(-17,-10,34,20),R(-10,-14,20,28)), P(R(-12,-7,4,4),R(-12,3,4,4),R(8,-7,4,4),R(8,3,4,4))),
-            M("seal-long-sanctum", "긴 성소", "Core", P(R(-21,-5,42,10),R(-8,-12,16,24)), P(R(-16,-3,5,2),R(11,1,5,2),R(-6,6,3,3))),
-            M("seal-forked-archive", "갈래 기록실", "Core", P(R(-19,-4,38,8),R(-4,-14,8,28),R(-15,-11,11,8),R(4,3,11,8)), P(R(-12,-9,4,4),R(8,5,4,4))),
-            M("seal-three-rings", "삼중 봉인대", "Core", P(R(-19,-4,38,8),R(-14,-9,28,18),R(-7,-14,14,28)), P(R(-11,3,3,4),R(8,-7,3,4),R(-5,8,3,3),R(2,-11,3,3))),
-            M("seal-twin-reliquary", "쌍 유물실", "Core", P(R(-20,-5,40,10),R(-5,-14,10,28),R(-16,-10,10,20),R(6,-10,10,20)), P(R(-13,-6,4,4),R(9,3,4,4))),
-            M("seal-broken-citadel", "갈라진 성채", "Core", P(R(-18,-10,36,20),R(-7,-14,14,28),R(-21,-3,42,6)), P(R(-13,2,6,5),R(7,-7,6,5),R(-12,-7,3,3)))
-        };
+        static readonly int[][] Corners = { new[] { 1, 1 }, new[] { -1, 1 }, new[] { -1, -1 }, new[] { 1, -1 } };
+        // Every size here has drawn landmarks to match: StageLandmarks picks by footprint.
+        static readonly int[][] ScatterSizes = { new[] { 2, 2 }, new[] { 2, 2 }, new[] { 3, 3 }, new[] { 3, 3 }, new[] { 5, 2 }, new[] { 2, 4 } };
+        static readonly int[][] BlockSizes = { new[] { 4, 4 }, new[] { 5, 2 }, new[] { 2, 4 }, new[] { 3, 3 } };
 
-        static ModuleDefinition M(string id, string name, string theme, MapRect[] floor, MapRect[] obstacles)
+        static readonly string[][] Names =
         {
-            float left = float.MaxValue, bottom = float.MaxValue, right = float.MinValue, top = float.MinValue;
-            foreach (var piece in floor) { left = Math.Min(left,piece.X); bottom = Math.Min(bottom,piece.Y); right = Math.Max(right,piece.Right); top = Math.Max(top,piece.Top); }
-            var module = new ModuleDefinition { Id=id, DisplayName=name, Theme=theme, FloorPieces=floor, Obstacles=obstacles,
-                Bounds=new MapRect(left,bottom,right-left,top-bottom), Outline=TraceExterior(floor),
-                PlayerAnchor=new MapPoint(-2,0), RewardAnchor=new MapPoint(0,-2.75f), ServiceAnchor=new MapPoint(0,2.5f), ExitAnchor=new MapPoint(0,5),
-                SpawnCandidates=new[] {new MapPoint(-4,0),new MapPoint(4,0),new MapPoint(0,4),new MapPoint(0,-4),new MapPoint(-3,3),new MapPoint(3,-3)},
-                DecorationSupports=new[] {R(-2,7,4,2),R(-2,-9,4,2)} };
-            return module;
+            new[] { "무너진 교차 마당", "엇갈린 정원", "붕괴 광장", "행렬의 옛길", "갈라진 기단", "세 단의 정원", "끊긴 회랑", "날개 성문" },
+            new[] { "저수조 선착장", "쌍둑 수로", "계단 물받이", "굽은 부두", "수문 열주실", "가지 저수로", "가라앉은 뜰", "펌프실" },
+            new[] { "봉인 십자실", "어긋난 금고", "기둥 왕관실", "긴 성소", "갈래 기록실", "삼중 봉인대", "쌍 유물실", "갈라진 성채" },
+        };
+        static readonly string[] Themes = { "Ruins", "Flooded", "Core" };
+
+        static MapRect R(float x, float y, float w, float h) => new MapRect(x, y, w, h);
+
+        sealed class Plan
+        {
+            public HashSet<long> Cells;
+            public List<MapRect> Placed = new List<MapRect>();
+            public int HalfWidth, HalfHeight, WallMargin;
+            public bool KeepMiddle;
         }
-        static MapPoint[] TraceExterior(MapRect[] floor)
+
+        public static ModuleDefinition Compose(int stage, RegionRole role, ref GenerationRandom random)
         {
+            if (stage < 0 || stage >= Themes.Length) throw new ArgumentOutOfRangeException(nameof(stage));
+            bool boss = role == RegionRole.Boss, combat = role == RegionRole.Combat;
+            int halfWidth = boss ? BossHalfWidth : combat ? 11 + random.Next(4) : 9 + random.Next(3);
+            int halfHeight = boss ? BossHalfHeight : combat ? 8 + random.Next(3) : 6 + random.Next(2);
+
+            // Bands along both axes reach all four room edges so any doorway has floor behind it.
+            var pieces = new List<MapRect> { R(-halfWidth, -BandHalfWidth, halfWidth * 2, BandHalfWidth * 2), R(-BandHalfWidth, -halfHeight, BandHalfWidth * 2, halfHeight * 2) };
+            var shape = boss ? RoomShapes[0] : RoomShapes[random.Next(RoomShapes.Length)];
+            int turn = random.Next(4);
+            for (int i = 0; i < 4; i++) AddCorner(pieces, Corners[i], shape[(i + turn) % 4], halfWidth, halfHeight, ref random);
             var cells = new HashSet<long>();
-            foreach (var r in floor) for(int y=(int)r.Y;y<r.Top;y++) for(int x=(int)r.X;x<r.Right;x++) cells.Add(Key(x,y));
+            foreach (var r in pieces) for (int y = (int)r.Y; y < r.Top; y++) for (int x = (int)r.X; x < r.Right; x++) cells.Add(Key(x, y));
+
+            var plan = new Plan { Cells = cells, HalfWidth = halfWidth, HalfHeight = halfHeight, WallMargin = combat ? 2 : 1, KeepMiddle = !combat };
+            if (combat) { PlaceInterior(plan, ref random); Scatter(plan, 4 + random.Next(3), ref random); }
+            else if (boss) PlaceBossPillars(plan, ref random);
+            else Scatter(plan, 1 + random.Next(2), ref random);
+
+            var taken = new List<MapPoint>();
+            var player = FindSpot(plan, new MapPoint(-2, 0), taken);
+            var reward = FindSpot(plan, new MapPoint(0, -2.75f), taken);
+            var service = FindSpot(plan, new MapPoint(0, 2.5f), taken);
+            var exit = FindSpot(plan, new MapPoint(0, 5), taken);
+            var spawns = PlaceSpawns(plan, player, taken, ref random);
+            var names = Names[stage];
+            var signature = halfWidth + "x" + halfHeight + "-" + cells.Count + "-" + plan.Placed.Count;
+            foreach (var o in plan.Placed) signature += "-" + (int)o.X + "," + (int)o.Y;
+            return new ModuleDefinition
+            {
+                Id = Themes[stage] + "-" + signature, DisplayName = names[random.Next(names.Length)], Theme = Themes[stage],
+                FloorPieces = pieces.ToArray(), Obstacles = plan.Placed.ToArray(),
+                Bounds = new MapRect(-halfWidth, -halfHeight, halfWidth * 2, halfHeight * 2), Outline = TraceExterior(cells),
+                PlayerAnchor = player, RewardAnchor = reward, ServiceAnchor = service, ExitAnchor = exit,
+                SpawnCandidates = spawns, DecorationSupports = Array.Empty<MapRect>()
+            };
+        }
+
+        // Every piece has a corner on the room's centre, so the union is a staircase in each quarter and can never leave a hole.
+        static void AddCorner(List<MapRect> pieces, int[] corner, int kind, int halfWidth, int halfHeight, ref GenerationRandom random)
+        {
+            int wideX = halfWidth - random.Next(2), wideY = halfHeight - random.Next(2);
+            int shortX = Math.Min(halfWidth, 6 + random.Next(2)), shortY = Math.Min(halfHeight, 5 + random.Next(2));
+            if (kind == CornerWhole) pieces.Add(Corner(corner, wideX, wideY));
+            else if (kind == CornerCut) pieces.Add(Corner(corner, shortX, shortY));
+            else { pieces.Add(Corner(corner, wideX, shortY)); pieces.Add(Corner(corner, shortX, wideY)); }
+        }
+        static MapRect Corner(int[] corner, int w, int h) => R(corner[0] > 0 ? 0 : -w, corner[1] > 0 ? 0 : -h, w, h);
+
+        static void PlaceInterior(Plan plan, ref GenerationRandom random)
+        {
+            int hw = plan.HalfWidth, hh = plan.HalfHeight;
+            switch (random.Next(6))
+            {
+                case 0: // Two rows of pillars along the room, a few of them fallen.
+                {
+                    int spacing = 4 + random.Next(2), row = 3 + random.Next(2);
+                    for (int i = -3; i <= 3; i++)
+                        foreach (int side in new[] { row, -row - 2 })
+                            if (random.Next(5) > 0) Try(plan, i * spacing - 1, side, 2, 2);
+                    break;
+                }
+                case 1: // Two rows across the room.
+                {
+                    int spacing = 4 + random.Next(2), column = 4 + random.Next(2);
+                    for (int i = -2; i <= 2; i++)
+                        foreach (int side in new[] { column, -column - 2 })
+                            if (random.Next(5) > 0) Try(plan, side, i * spacing - 1, 2, 2);
+                    break;
+                }
+                case 2: // One large structure in the middle; the fight circles it.
+                {
+                    var size = BlockSizes[random.Next(BlockSizes.Length)];
+                    Try(plan, -size[0] / 2 + random.Next(3) - 1, -size[1] / 2 + random.Next(3) - 1, size[0], size[1]);
+                    break;
+                }
+                case 3: // A broken ring around an open centre.
+                {
+                    int across = hw - 5, up = hh - 4;
+                    foreach (var step in new[] { new[] { 2, 0 }, new[] { 1, 1 }, new[] { 0, 2 }, new[] { -1, 1 }, new[] { -2, 0 }, new[] { -1, -1 }, new[] { 0, -2 }, new[] { 1, -1 } })
+                        if (random.Next(4) > 0) Try(plan, step[0] * across / 2 - 1, step[1] * up / 2 - 1, 2, 2);
+                    break;
+                }
+                case 4: // Staggered blocks to weave through.
+                {
+                    int shift = random.Next(2);
+                    for (int row = -1; row <= 1; row++)
+                        for (int column = -2; column <= 2; column++)
+                            if ((row + column + shift) % 2 == 0) Try(plan, column * 5 - 1, row * 5 - 1, 3, 3);
+                    break;
+                }
+                default: // Two long structures offset from each other, so the way through bends.
+                {
+                    int flip = random.Next(2) == 0 ? 1 : -1;
+                    Try(plan, flip > 0 ? -hw + 3 : hw - 8, 2 + random.Next(2), 5, 2);
+                    Try(plan, flip > 0 ? hw - 8 : -hw + 3, -4 - random.Next(2), 5, 2);
+                    Try(plan, -1 + (flip > 0 ? 3 : -3) - 1, -2 + random.Next(2), 3, 3);
+                    break;
+                }
+            }
+        }
+
+        static void PlaceBossPillars(Plan plan, ref GenerationRandom random)
+        {
+            // The arena stays readable: the same pillar in each corner, set a little differently each time.
+            int size = 2 + random.Next(2), across = 7 + random.Next(3), up = 4 + random.Next(2);
+            foreach (var corner in Corners) Try(plan, corner[0] > 0 ? across : -across - size, corner[1] > 0 ? up : -up - size, size, size);
+        }
+
+        static void Scatter(Plan plan, int wanted, ref GenerationRandom random)
+        {
+            for (int attempt = 0; attempt < 200 && plan.Placed.Count < wanted; attempt++)
+            {
+                var size = ScatterSizes[random.Next(ScatterSizes.Length)];
+                Try(plan, -plan.HalfWidth + random.Next(plan.HalfWidth * 2 - size[0] + 1), -plan.HalfHeight + random.Next(plan.HalfHeight * 2 - size[1] + 1), size[0], size[1]);
+            }
+        }
+
+        static bool Try(Plan plan, int x, int y, int w, int h)
+        {
+            var candidate = R(x, y, w, h);
+            if (!Allowed(plan, candidate)) return false;
+            plan.Placed.Add(candidate);
+            return true;
+        }
+
+        static bool Allowed(Plan plan, MapRect r)
+        {
+            if (plan.KeepMiddle)
+            {
+                if (r.X < ClearHalfWidth && r.Right > -ClearHalfWidth && r.Y < ClearHalfHeight && r.Top > -ClearHalfHeight) return false;
+                if (r.X < LaneHalfWidth && r.Right > -LaneHalfWidth) return false;
+                if (r.Y < LaneHalfWidth && r.Top > -LaneHalfWidth) return false;
+            }
+            // In front of each doorway.
+            if (r.Y < LaneHalfWidth && r.Top > -LaneHalfWidth && (r.Right > plan.HalfWidth - DoorDepth || r.X < -plan.HalfWidth + DoorDepth)) return false;
+            if (r.X < LaneHalfWidth && r.Right > -LaneHalfWidth && (r.Top > plan.HalfHeight - DoorDepth || r.Y < -plan.HalfHeight + DoorDepth)) return false;
+            // Room to walk all the way around it. Separate islands can never cut the floor in two.
+            int margin = plan.WallMargin;
+            for (int y = (int)r.Y - margin; y < r.Top + margin; y++) for (int x = (int)r.X - margin; x < r.Right + margin; x++) if (!plan.Cells.Contains(Key(x, y))) return false;
+            foreach (var other in plan.Placed) if (r.X - 2 < other.Right && r.Right + 2 > other.X && r.Y - 2 < other.Top && r.Top + 2 > other.Y) return false;
+            return true;
+        }
+
+        // The nearest free floor to where this anchor would like to be.
+        static MapPoint FindSpot(Plan plan, MapPoint wanted, List<MapPoint> taken)
+        {
+            bool found = false; var best = wanted; float bestDistance = float.MaxValue;
+            if (SpotIsFree(plan, wanted, taken)) { taken.Add(wanted); return wanted; }
+            for (float y = -plan.HalfHeight; y <= plan.HalfHeight; y += .5f)
+                for (float x = -plan.HalfWidth; x <= plan.HalfWidth; x += .5f)
+                {
+                    var point = new MapPoint(x, y); var distance = Distance(point, wanted);
+                    if (distance >= bestDistance || !SpotIsFree(plan, point, taken)) continue;
+                    best = point; bestDistance = distance; found = true;
+                }
+            if (!found) throw new InvalidOperationException("No free floor for a room anchor");
+            taken.Add(best);
+            return best;
+        }
+        static bool SpotIsFree(Plan plan, MapPoint point, List<MapPoint> taken)
+        {
+            foreach (var other in taken) if (Distance(point, other) < 2f) return false;
+            if (InsideAny(plan.Placed, point)) return false;
+            for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++)
+                if (!plan.Cells.Contains(Key((int)Math.Floor(point.X + x * 1f), (int)Math.Floor(point.Y + y * .8f)))) return false;
+            return true;
+        }
+
+        static MapPoint[] PlaceSpawns(Plan plan, MapPoint player, List<MapPoint> anchors, ref GenerationRandom random)
+        {
+            int hw = plan.HalfWidth, hh = plan.HalfHeight;
+            var doors = new[] { new MapPoint(hw, 0), new MapPoint(-hw, 0), new MapPoint(0, hh), new MapPoint(0, -hh) };
+            var candidates = new List<MapPoint>();
+            for (int y = -hh + 2; y <= hh - 2; y++)
+                for (int x = -hw + 2; x <= hw - 2; x++)
+                {
+                    var point = new MapPoint(x, y);
+                    if (Distance(point, player) < 4f || !HasMargin(plan.Cells, point) || InsideAny(plan.Placed, point)) continue;
+                    bool clear = true;
+                    foreach (var anchor in anchors) if (Distance(point, anchor) < 2f) clear = false;
+                    // Nothing appears in the player's face as they step through a doorway.
+                    foreach (var door in doors) if (Distance(point, door) < 5f) clear = false;
+                    if (clear) candidates.Add(point);
+                }
+            if (candidates.Count == 0) throw new InvalidOperationException("No floor for enemy spawns");
+            random.Shuffle(candidates);
+            var spots = new List<MapPoint>();
+            foreach (float spacing in new[] { 2.5f, 1.5f })
+                foreach (var point in candidates)
+                {
+                    if (spots.Count >= 8) break;
+                    bool clear = true;
+                    foreach (var other in spots) if (Distance(point, other) < spacing) clear = false;
+                    if (clear) spots.Add(point);
+                }
+            return spots.ToArray();
+        }
+
+        static bool HasMargin(HashSet<long> cells, MapPoint point)
+        {
+            for (int y = -2; y <= 1; y++) for (int x = -2; x <= 1; x++) if (!cells.Contains(Key((int)Math.Floor(point.X) + x, (int)Math.Floor(point.Y) + y))) return false;
+            return true;
+        }
+        static bool InsideAny(List<MapRect> rects, MapPoint point)
+        {
+            foreach (var r in rects) if (point.X > r.X - 1.5f && point.X < r.Right + 1.5f && point.Y > r.Y - 1.5f && point.Y < r.Top + 1.5f) return true;
+            return false;
+        }
+        static float Distance(MapPoint a, MapPoint b) => (float)Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+
+        static MapPoint[] TraceExterior(HashSet<long> cells)
+        {
             var edges = new Dictionary<long,long>();
             foreach(var key in cells)
             {

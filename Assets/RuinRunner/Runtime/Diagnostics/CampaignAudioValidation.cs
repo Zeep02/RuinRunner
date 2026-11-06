@@ -123,7 +123,7 @@ namespace RuinRunner
             var music = Sources().Where(s => s.name.StartsWith("CampaignMusic_")).ToArray();
             Require(music.All(s => s.isPlaying && s.volume > .01f), "both real music clips overlap during crossfade");
             Require(first.time > before, "outgoing clip continues instead of restarting or cutting");
-            float energy = music.Sum(s => Mathf.Pow(s.volume / (isolated.GetVolume(AudioChannel.Music) * .65f), 2));
+            float energy = music.Sum(s => Mathf.Pow(s.volume / (isolated.GetVolume(AudioChannel.Music) * PrototypeAudioController.MusicLevel(s.clip.name.StartsWith("stage1") ? 0 : 1)), 2));
             Require(Mathf.Abs(energy - 1) < .015f, "crossfade has equal power without doubled gain");
             Time.timeScale = 0;
             yield return new WaitForSecondsRealtime(2.7f);
@@ -175,17 +175,20 @@ namespace RuinRunner
         private int rate, channels;
         public float Peak { get; private set; }
         public int Frames { get; private set; }
-        public void Configure(int sampleRate) { rate = sampleRate; }
+        public void Configure(int sampleRate) { rate = sampleRate; MasterLimiter.OutputHandedOn = true; }
         private void OnAudioFilterRead(float[] data, int channelCount)
         {
             lock (gate)
             {
-                if (rate == 0 || samples.Count > rate * channelCount * 60) return;
-                channels = channelCount;
-                samples.AddRange(data);
-                Frames += data.Length / channels;
-                foreach (var sample in data) Peak = Mathf.Max(Peak, Mathf.Abs(sample));
+                if (rate != 0 && samples.Count <= rate * channelCount * 60)
+                {
+                    channels = channelCount;
+                    samples.AddRange(data);
+                    Frames += data.Length / channels;
+                    foreach (var sample in data) Peak = Mathf.Max(Peak, Mathf.Abs(sample));
+                }
             }
+            if (MasterLimiter.SilentRun) System.Array.Clear(data, 0, data.Length);
         }
         public void Write(string path)
         {

@@ -12,13 +12,12 @@ namespace RuinRunner
             DestroyAll<EnemySpawnTelegraph>();
             DestroyAll<RewardChest>();
             DestroyAll<ExperienceOrb>();
+            DestroyAll<GoldCoin>();
             DestroyAll<FieldLootPickup>();
             DestroyAll<EnemyProjectile>();
             DestroyAll<PlayerProjectile>();
-            DestroyAll<FadingSpark>();
             DestroyAll<TransientSpriteEffect>();
-            DestroyAll<MeleeSlashEffect>();
-            DestroyAll<MeleeThrustEffect>();
+            DestroyAll<SignatureSlashEffect>();
             DestroyAll<ExternalCombatEffect>();
             DestroyAll<NativeCombatEffect>();
             DestroyAll<WeaponSecondaryParticles>();

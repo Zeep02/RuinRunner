@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using RuinRunner.Generation;
 using UnityEngine;
 
 namespace RuinRunner
@@ -34,13 +35,18 @@ namespace RuinRunner
         public int InventoryFocusQuickSlot { get; private set; } = -1;
         public bool IsMapOpen { get; private set; }
         public bool IsStatsOpen { get; private set; }
-        public bool IsUnlockOpen { get; private set; }
         public bool IsGameOver { get; private set; }
         public bool IsVictory { get; private set; }
         public bool IsManuallyPaused { get; private set; }
         public bool IsExitOpen { get; private set; }
         public bool IsEncounterTransitioning => waveTransition;
-        public string WaveBanner { get; private set; }
+        private string waveBanner;
+        public string WaveBanner
+        {
+            get => waveBanner;
+            private set { waveBanner = value; if (!string.IsNullOrEmpty(value)) WaveBannerSince = Time.unscaledTime; }
+        }
+        public float WaveBannerSince { get; private set; }
         public float WaveBannerUntil { get; private set; }
         public string LootMessage { get; private set; }
         public float LootMessageUntil { get; private set; }
@@ -54,7 +60,7 @@ namespace RuinRunner
 
         public bool IsPaused
         {
-            get { return !IsRunActive || sessionPhase == GameSessionPhase.BossIntro || IsServiceOpen || IsStageTransitioning || IsChoosingAccessory || IsMapOpen || modalCloseFrame == Time.frameCount || IsInventoryOpen || IsStatsOpen || IsUnlockOpen || IsGameOver || IsManuallyPaused; }
+            get { return !IsRunActive || sessionPhase == GameSessionPhase.BossIntro || IsServiceOpen || IsStageTransitioning || IsChoosingAccessory || IsMapOpen || modalCloseFrame == Time.frameCount || IsInventoryOpen || IsStatsOpen  || IsGameOver || IsManuallyPaused; }
         }
         private int modalCloseFrame = -1;
 
@@ -83,6 +89,8 @@ namespace RuinRunner
             LootMessage = string.Empty;
             CameraFollow = CameraFollow.Create();
             CameraFollow.ConfigureCombatFeedback(PlayHitStop, PlayBossDefeatSlowMotion, PlayMeleeFinisherHitStop);
+            RuinRunner.CameraFollow.DramaticSlow = PlayDramaticSlow;
+            RuinRunner.CameraFollow.MeleeHitStop = PlayMeleeHitStop;
             gameObject.AddComponent<PrototypeHud>().Initialize(this);
             RefreshTimeScale();
 
@@ -109,6 +117,14 @@ namespace RuinRunner
                     BeginRunForActiveSlot();
                 }
                 gameObject.AddComponent<AutomatedStageValidation>().Initialize(this);
+            }
+
+            if (!automatedRun && System.Array.IndexOf(validationArguments, CombatSandbox.CommandLineArgument) >= 0)
+            {
+                SaveSlots.OpenTransientForTests();
+                BeginRunForActiveSlot();
+                gameObject.AddComponent<CombatSandbox>().Initialize(this);
+                return;
             }
 
 #if UNITY_STANDALONE && !UNITY_EDITOR
@@ -201,8 +217,10 @@ namespace RuinRunner
             if (DungeonMap != null && DungeonMap.Root != null) Destroy(DungeonMap.Root);
             stageEpoch++;
             sessionPhase = GameSessionPhase.Transition;
+            InkTransition.Hold(CampaignStage.Get(0).Name);
+            ScreenVignette.Ensure(this);
             oathTracker = new EquipmentOathTracker();
-            usedServices.Clear(); pendingLoot.Clear(); lootByEvent.Clear(); serviceByOperation.Clear(); processedEconomyReceipts.Clear(); rewardSequence=0; IsRewardReserved=false;
+            usedServices.Clear(); pendingLoot.Clear(); lootByEvent.Clear(); serviceByOperation.Clear(); processedEconomyReceipts.Clear(); rewardSequence=0;
             CurrentStageIndex = 0;
             WeaponLootTable.SetDropStage(CurrentStageIndex);AccessoryLootTable.SetDropStage(CurrentStageIndex);
             PrototypeAudioController.SetStage(0);
@@ -231,7 +249,6 @@ namespace RuinRunner
             IsChoosingAccessory = false;
             IsInventoryOpen = false;
             IsStatsOpen = false;
-            IsUnlockOpen = false;
             IsManuallyPaused = false;
             IsExitOpen = false;
             waveTransition = true;
@@ -250,7 +267,7 @@ namespace RuinRunner
 
             // 무기 없이 장검 판정만 사용하던 숨은 기본값을 제거한다.
             // 새 런은 실제 무기 데이터를 1번 퀵슬롯에 넣어 외형, UI, 전투 판정이 일치한다.
-            Inventory.TryAddConfirmed(legacyFixture ? "rust_sword" : BackendRun.loadout.startingWeaponId, InventoryEntryKind.Weapon, "", true);
+            Inventory.TryAddConfirmed(legacyFixture ? "trainee_blade" : BackendRun.loadout.startingWeaponId, InventoryEntryKind.Weapon, "", true);
 
             Player = PlayerController.Create(
                 DungeonMap.GetSpawnPoint(CurrentRoom),
@@ -263,6 +280,8 @@ namespace RuinRunner
             Player.EquipWeapon(Inventory.EquippedWeapon);
             Progression = Player.gameObject.AddComponent<PlayerProgression>();
             Progression.Initialize(OnLevelRewardEarned);
+            Player.GoldQuery=()=>(int)RunGold;
+            Player.ConfigureMastery(SaveSlots.ActiveData?.unlockedTalentIds);
             Player.ConfigureCombatGrowth(ActiveTalents.Has, NotifyCombatAction);
             Player.IsTrainingCombat = false;
             CameraFollow.Target = Player.transform;
@@ -271,9 +290,13 @@ namespace RuinRunner
             CreateFieldServices();
             InitializeRunEconomy();
 
+            Player.SetEntranceLock(true);
+            yield return new WaitForSecondsRealtime(.9f);
             IsStageTransitioning = false;
             sessionPhase = GameSessionPhase.Expedition;
             RefreshTimeScale();
+            yield return InkTransition.Reveal(Player);
+            Player.SetEntranceLock(false);
 
             yield return new WaitForSeconds(.7f);
             StartCoroutine(BeginCurrentRoom());
@@ -298,8 +321,8 @@ namespace RuinRunner
             rewardSpawnedForRoom = false;
             currentWaveIndex = 0;
             roomWaveCount = room.WaveCount;
-            WaveBanner = "ROOM " + (CurrentRoom + 1) + " — " + room.displayName;
-            if (room.bossRoom) WaveBanner += " / BOSS";
+            WaveBanner = room.displayName;
+            if (room.bossRoom) WaveBanner += " — 수호자의 방";
             WaveBannerUntil = Time.unscaledTime + 2f;
             yield return new WaitForSeconds(.55f);
 
@@ -314,7 +337,7 @@ namespace RuinRunner
             var room = DungeonMap.GetRoom(CurrentRoom);
             if (roomWaveCount > 1)
             {
-                WaveBanner = "WAVE " + (waveIndex + 1) + "/" + roomWaveCount + " — 적 출현 감지";
+                WaveBanner = (waveIndex + 1) + "/" + roomWaveCount;
                 WaveBannerUntil = Time.unscaledTime + 1.8f;
             }
 
@@ -357,10 +380,11 @@ namespace RuinRunner
             AwardEnemyGold(enemy);
             if (Player != null) Player.OnEnemyDefeated(enemy);
             if (Progression != null)
-                ExperienceOrb.Create(enemy.transform.position, enemy.ExperienceReward, Progression,
+                ExperienceOrb.Create(enemy.transform.position, enemy.ExperienceReward * (ActiveTalents.Has(TalentId.CursedPower) ? 2 : 1), Progression,
                     () => EnemiesAlive == 0 && !waveTransition && currentWaveIndex + 1 >= roomWaveCount);
 
             var defeatedStageBoss = enemy == Boss;
+            if (!enemy.IsBoss && UnityEngine.Random.value < EnemyPotionChance) DropHealthPotion(enemy.transform.position);
             if (defeatedStageBoss) Boss = null;
             EnemiesAlive = Mathf.Max(0, EnemiesAlive - 1);
             if (EnemiesAlive == 0 && !IsGameOver && !waveTransition)
@@ -371,14 +395,20 @@ namespace RuinRunner
                     waveTransition = true;
                     StartCoroutine(BeginNextWave());
                 }
-                else StartCoroutine(SpawnRoomReward());
+                else
+                {
+                    // The last one of a room hangs in the air for a moment.
+                    SigFx.Play("RoomClearRing", enemy.transform.position, 0, -1, true, false, .8f);
+                    if (!defeatedStageBoss) { PlayDramaticSlow(.34f, .22f); CameraFollow.Shake(.2f, .22f); }
+                    StartCoroutine(SpawnRoomReward());
+                }
             }
         }
 
         private IEnumerator BeginNextWave()
         {
             RuntimeSceneObjects.ClearProjectiles();
-            WaveBanner = "WAVE CLEAR";
+            WaveBanner = "";
             WaveBannerUntil = Time.unscaledTime + 1.2f;
             yield return new WaitForSeconds(.75f);
             yield return StartCoroutine(BeginWave(currentWaveIndex + 1));
@@ -391,9 +421,11 @@ namespace RuinRunner
             waveTransition = true;
             RuntimeSceneObjects.ClearProjectiles();
             yield return new WaitForSeconds(.65f);
+            if (IsGameOver) yield break;
             var rewardRoom = CurrentRoom;
             AwardEncounterMaterials(rewardRoom);
-            var center = DungeonMap.GetRoomCenter(rewardRoom) + RoomLayoutRules.RewardPosition;
+            // A room's plan may fill its middle; the generator found the chest a free spot.
+            var center = DungeonMap.Graph != null ? GeneratedStageUnityAdapter.Vector(DungeonMap.Graph.Regions[rewardRoom].RewardPosition) : DungeonMap.GetRoomCenter(rewardRoom) + RoomLayoutRules.RewardPosition;
             var epoch = stageEpoch;
             ChestRewards rewards = null; RewardChest chest = null; var sampledLuck = float.NaN;
             ChestRewards ResolveRewards()
@@ -412,7 +444,7 @@ namespace RuinRunner
             DungeonMap.Regions[rewardRoom].Chest = ActiveChest;
             DungeonMap.UnlockExit(rewardRoom);
             IsExitOpen = true;
-            WaveBanner = "ROOM CLEAR — 상자 근처에서 E";
+            WaveBanner = "";
             WaveBannerUntil = Time.unscaledTime + 2.6f;
             waveTransition = false;
         }
@@ -426,19 +458,18 @@ namespace RuinRunner
             var origin = state.Chest == null ? (Vector2)Player.transform.position : (Vector2)state.Chest.transform.position;
             var scatterIndex = 0;
             var bossReward = DungeonMap.GetRoom(rewardRoom).bossRoom;
-            bool directed=ActiveTalents.Has(TalentId.ChestIntent);
+            DropGold(origin,BackendCatalog?.economy?.chestGold??0);
             foreach (var weapon in new[] { rewards.Weapon, rewards.BonusWeapon })
             {
                 if (weapon == null) continue;
-                var converted=directed&&ChestPrefersAccessories?RunRandom.Sample(RunSeed,79,CurrentStageIndex*10000+rewardRoom*10+scatterIndex,()=>AccessoryLootTable.RollOfRarity(weapon.Rarity)):null;
-                SpawnEquipmentPickup(origin,converted==null?weapon:null,converted,scatterIndex++,bossReward,"chest-item:"+CurrentStageIndex+":"+rewardRoom+":"+scatterIndex);
+                SpawnEquipmentPickup(origin,weapon,null,scatterIndex++,bossReward,"chest-item:"+CurrentStageIndex+":"+rewardRoom+":"+scatterIndex);
             }
             if (rewards.Accessory != null)
             {
                 var accessory = rewards.Accessory;
-                var converted=directed&&!ChestPrefersAccessories?RunRandom.Sample(RunSeed,80,CurrentStageIndex*10000+rewardRoom*10+scatterIndex,()=>WeaponLootTable.RollOfRarity(accessory.Rarity)):null;
-                SpawnEquipmentPickup(origin,converted,converted==null?accessory:null,scatterIndex++,bossReward,"chest-accessory:"+CurrentStageIndex+":"+rewardRoom);
+                SpawnEquipmentPickup(origin,null,accessory,scatterIndex++,bossReward,"chest-accessory:"+CurrentStageIndex+":"+rewardRoom);
             }
+            if (UnityEngine.Random.value < ChestPotionChance) DropHealthPotion(origin,scatterIndex++);
             Debug.Log("[Run] Chest seed=" + RunSeed + " encounter=" + rewardRoom + " weapon=" + rewards.Weapon.Id +
                 " accessory=" + (rewards.Accessory == null ? "none" : rewards.Accessory.Id));
             var experience = bossReward ? 45 : 20 + rewardRoom * 6;
@@ -451,7 +482,7 @@ namespace RuinRunner
             {
                 // Once per chest: a stated reward, not a side effect of replacing the Player.
                 Player.Stats.Heal(Player.MaxHealth * CampaignStage.ClearHealingFraction);
-                LootMessage = "수호자의 축복 — 최대 체력의 30% 회복";
+                LootMessage = "체력 30% 회복";
                 LootMessageUntil = Time.unscaledTime + 4f;
                 StartCoroutine(PrepareStageResult());
                 return;
@@ -486,7 +517,7 @@ namespace RuinRunner
                 setMessages.Add(setBonus.Name);
             }
             LootMessage = setMessages.Count == 0 ? message : message + "\n세트 활성  " + string.Join(", ", setMessages.ToArray());
-            LootMessageUntil = Time.unscaledTime + 2.5f;
+            LootMessageUntil = Time.unscaledTime + 1.8f;
         }
 
         private void BeginStageClearSafety()
@@ -511,7 +542,7 @@ namespace RuinRunner
 
             IsStageResultReady = true;
             CreateStageExit();
-            WaveBanner = CurrentStage.Name + " 해방 — 보상을 정리한 뒤 봉인석으로";
+            WaveBanner = CurrentStage.Name + " 해방";
             WaveBannerUntil = Time.unscaledTime + 4f;
         }
 
@@ -531,7 +562,7 @@ namespace RuinRunner
             IsGameOver = true;
             sessionPhase = GameSessionPhase.Result;
             IsStageResultReady = false;
-            PrototypeAudio.Play(PrototypeSound.Victory, AudioChannel.Music, .8f);
+            PrototypeAudio.Play(PrototypeSound.Victory, AudioChannel.Music, .6f);
             RefreshTimeScale();
         }
 
@@ -546,27 +577,10 @@ namespace RuinRunner
             return false;
         }
 
-        public void OpenPostRunLegacy()
-        {
-            if (!IsGameOver || MetaProgression == null) return;
-            IsUnlockOpen = true;
-            PrototypeAudio.Play(PrototypeSound.UiClick, AudioChannel.Interface, .5f);
-            RefreshTimeScale();
-        }
-
-        public void ClosePostRunLegacy()
-        {
-            if (!IsGameOver) return;
-            IsUnlockOpen = false;
-            PrototypeAudio.Play(PrototypeSound.UiClick, AudioChannel.Interface, .4f);
-            RefreshTimeScale();
-        }
-
         private void OnLevelRewardEarned()
         {
             if (IsGameOver) return;
-            if(ActiveTalents.Has(TalentId.ReserveOffer)&&Progression.PendingLevelRewards==1&&!IsChoosingAccessory){IsRewardReserved=true;return;}
-            IsRewardReserved=false;
+            if (Player != null) SigFx.Play("LevelUpBurst", Player.transform.position, 0, -1, true, false, .7f);
             if (!IsChoosingAccessory)
                 CurrentAccessoryChoices = RunContent.Choices(RunSeed, accessoryOfferIndex++, Player.Stats.Luck);
             IsChoosingAccessory = true;
@@ -579,9 +593,9 @@ namespace RuinRunner
             if (Time.frameCount == accessorySelectionFrame || System.Array.IndexOf(CurrentAccessoryChoices, definition) < 0) return;
             if (!Progression.SpendLevelReward()) return;
             accessorySelectionFrame = Time.frameCount;
-            if(legacyFixture)CollectAccessoryPickup(definition);
-            else SpawnEquipmentPickup(Player.transform.position,null,definition,0,IsStageClearPending,"level-choice:"+accessoryOfferIndex);
-            PrototypeAudio.Play(PrototypeSound.Inventory, AudioChannel.Inventory, .7f);
+            // A full bag leaves the reward on the floor instead of losing it.
+            if(!legacyFixture||!CollectAccessoryPickup(definition))SpawnEquipmentPickup(Player.transform.position,null,definition,0,IsStageClearPending,"level-choice:"+accessoryOfferIndex);
+            PrototypeAudio.Play(PrototypeSound.Inventory, AudioChannel.Inventory, .55f);
             IsChoosingAccessory = Progression.PendingLevelRewards > 0;
             CurrentAccessoryChoices = IsChoosingAccessory
                 ? RunContent.Choices(RunSeed, accessoryOfferIndex++, Player.Stats.Luck)
@@ -715,11 +729,6 @@ namespace RuinRunner
             RefreshTimeScale();
         }
 
-        public bool UnlockMetaUpgrade(MetaUpgradeDefinition definition)
-        {
-            return false; // Legacy numeric upgrades are no longer a gameplay action.
-        }
-
         private void GrantMetaReward(bool victory)
         {
             if (metaRewardGranted) return;
@@ -736,7 +745,7 @@ namespace RuinRunner
             TickServices();
             // Closing a service consumes this frame's Escape/Interact input.
             // Otherwise Escape also opens the pause menu immediately afterward.
-            if (IsServiceOpen || IsStageTransitioning || modalCloseFrame == Time.frameCount) return;
+            if (IsServiceOpen || IsStageTransitioning || InkTransition.LocksInput || modalCloseFrame == Time.frameCount) return;
             if (IsRunActive && !IsTown && !IsStageTransitioning && DungeonMap != null && Player != null)
             {
                 DungeonMap.TrackPosition(Player.transform.position);
@@ -752,7 +761,7 @@ namespace RuinRunner
                     if (distance < nearestChest) { nearestChest = distance; ActiveChest = region.Chest; }
                 }
             }
-            if (IsMapOpen && (!IsRunActive || IsStageTransitioning || IsChoosingAccessory || IsInventoryOpen || IsStatsOpen || IsUnlockOpen || IsGameOver || IsManuallyPaused))
+            if (IsMapOpen && (!IsRunActive || IsStageTransitioning || IsChoosingAccessory || IsInventoryOpen || IsStatsOpen  || IsGameOver || IsManuallyPaused))
             { IsMapOpen = false; RefreshTimeScale(); }
             if (!IsRunActive)
             {
@@ -775,8 +784,7 @@ namespace RuinRunner
 
             if (IsGameOver)
             {
-                if (IsUnlockOpen && Settings.GetKeyDown(GameAction.Pause)) ClosePostRunLegacy();
-                else if (Settings.GetKeyDown(GameAction.Reload)) RestartRun();
+                if (Settings.GetKeyDown(GameAction.Reload)) RestartRun();
                 return;
             }
 
@@ -795,7 +803,7 @@ namespace RuinRunner
                 return;
             }
 
-            if (!IsChoosingAccessory && !IsGameOver && !IsManuallyPaused && !IsStatsOpen && !IsUnlockOpen &&
+            if (!IsChoosingAccessory && !IsGameOver && !IsManuallyPaused && !IsStatsOpen &&
                 Settings.GetKeyDown(GameAction.Inventory))
             {
                 IsInventoryOpen = !IsInventoryOpen;
@@ -811,23 +819,21 @@ namespace RuinRunner
                 return;
             }
 
-            if (!IsChoosingAccessory && !IsGameOver && !IsManuallyPaused && !IsInventoryOpen && !IsUnlockOpen && Settings.GetKeyDown(GameAction.Stats))
+            if (!IsChoosingAccessory && !IsGameOver && !IsManuallyPaused && !IsInventoryOpen && Settings.GetKeyDown(GameAction.Stats))
             {
                 IsStatsOpen = !IsStatsOpen;
                 RefreshTimeScale();
             }
 
-
             if (!IsChoosingAccessory && !IsGameOver && Settings.GetKeyDown(GameAction.Pause))
             {
                 if (HasDisassemblyConfirmation) { CancelEquipmentDisassembly(); return; }
-                if (IsInventoryOpen || IsStatsOpen || IsUnlockOpen)
+                if (IsInventoryOpen || IsStatsOpen )
                 {
                     if (IsInventoryOpen) modalCloseFrame = Time.frameCount;
                     CancelEquipmentDisassembly();
                     IsInventoryOpen = false;
                     IsStatsOpen = false;
-                    IsUnlockOpen = false;
                     RefreshTimeScale();
                 }
                 else
@@ -862,11 +868,7 @@ namespace RuinRunner
                 if (Settings.GetKeyDown(GameAction.Weapon2)) SelectWeaponSlot(1);
                 if (Settings.GetKeyDown(GameAction.Weapon3)) SelectWeaponSlot(2);
                 if (Settings.GetKeyDown(GameAction.Reload) && Inventory.StartReload())
-                {
-                    LootMessage = "재장전 중...";
-                    LootMessageUntil = Time.unscaledTime + 1f;
                     PrototypeAudio.Play(PrototypeSound.Inventory, AudioChannel.Inventory, .4f);
-                }
             }
 
         }
@@ -920,7 +922,6 @@ namespace RuinRunner
             IsChoosingAccessory = false;
             IsInventoryOpen = false;
             IsStatsOpen = false;
-            IsUnlockOpen = false;
             IsGameOver = false;
             IsManuallyPaused = false;
             IsExitOpen = false;
@@ -947,7 +948,6 @@ namespace RuinRunner
             IsChoosingAccessory = false;
             IsInventoryOpen = false;
             IsStatsOpen = false;
-            IsUnlockOpen = false;
             IsGameOver = false;
             IsManuallyPaused = false;
             IsStageClearPending = false;
@@ -970,14 +970,22 @@ namespace RuinRunner
 
         private void PlayHitStop(bool critical, bool boss)
         {
-            if (IsPaused || boss || !critical || timeEffectActive) return;
-            PlayTimeEffect(.025f, .4f);
+            if (IsPaused || timeEffectActive) return;
+            if (critical) PlayTimeEffect(.075f, .05f);
+            else PlayTimeEffect(boss ? .03f : .035f, .12f);
         }
 
         private void PlayMeleeFinisherHitStop()
         {
             if (IsPaused || IsStageClearPending || timeEffectActive) return;
-            PlayTimeEffect(.022f, .4f);
+            PlayTimeEffect(.07f, .06f);
+        }
+
+        // Boss phase changes and other authored beats take over any short hit stop.
+        public void PlayDramaticSlow(float realSeconds, float scale)
+        {
+            if (IsPaused) return;
+            PlayTimeEffect(realSeconds, scale);
         }
 
         private void PlayBossDefeatSlowMotion()
@@ -985,8 +993,17 @@ namespace RuinRunner
             PlayTimeEffect(1.15f, .18f);
         }
 
+        private void PlayMeleeHitStop(float realSeconds, float scale)
+        {
+            if (IsPaused || IsStageClearPending) return;
+            if (timeEffectActive && timeEffectEndsAt - Time.unscaledTime > realSeconds) return;
+            PlayTimeEffect(realSeconds, scale);
+        }
+
+        private float timeEffectEndsAt;
         private void PlayTimeEffect(float realSeconds, float scale)
         {
+            timeEffectEndsAt = Time.unscaledTime + realSeconds;
             if (timeEffectRoutine != null) StopCoroutine(timeEffectRoutine);
             timeEffectRoutine = StartCoroutine(TimeEffectRoutine(realSeconds, scale));
         }

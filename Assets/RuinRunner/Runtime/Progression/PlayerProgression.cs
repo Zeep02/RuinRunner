@@ -17,17 +17,19 @@ namespace RuinRunner
             onLevelRewardEarned = levelRewardCallback;
         }
 
+        public float ExperienceScale { get; set; } = 1;
+
         public void AddExperience(int amount)
         {
-            Experience += Mathf.Max(0, amount);
+            Experience += Mathf.Max(0, Mathf.RoundToInt(amount * ExperienceScale));
             while (Experience >= RequiredExperience)
             {
                 Experience -= RequiredExperience;
                 Level++;
                 PendingLevelRewards++;
                 RequiredExperience = 28 + (Level - 1) * 16;
-                PrototypeAudio.Play(PrototypeSound.Upgrade, AudioChannel.Interface, .7f);
-                PrototypeVisuals.Burst(transform.position, new Color(.25f, .85f, 1f), 20);
+                PrototypeAudio.Play(PrototypeSound.Upgrade, AudioChannel.Interface, .55f);
+                BossNativeEffect.CreateOverActors(null, "FxManaBurst", transform.position, 0f);
                 if (onLevelRewardEarned != null) onLevelRewardEarned();
             }
         }

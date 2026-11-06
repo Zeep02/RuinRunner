@@ -62,8 +62,6 @@ namespace RuinRunner
         public int WakeContactsResolved { get; private set; }
         public int BashContactsResolved { get; private set; }
         public int ShardsCollected { get; private set; }
-        public int ActiveShards => shards.Count;
-        public float Shield => shield+lastLightShield;
         public int ManaThreadProcs { get; private set; }
         public int GuardBellProcs { get; private set; }
         public int RushProcs { get; private set; }
@@ -85,7 +83,8 @@ namespace RuinRunner
         {
             int count = 0;
             if (inventory != null) foreach (var item in inventory.Accessories) if (item.Type == type) count++;
-            return Mathf.Min(Tuning(type).EffectCount("maxCopies"), count);
+            // Asked every frame for every passive, including ones an older pinned catalog doesn't list.
+            return count == 0 ? 0 : Mathf.Min(Tuning(type).EffectCount("maxCopies"), count);
         }
         AccessoryTuning Tuning(AccessoryType type)
         {
@@ -195,6 +194,7 @@ namespace RuinRunner
         {
             if (!Active || enemy == null) return;
             SpawnShard(enemy.transform.position);
+            OnPassiveKill(enemy);
             if (!dealingProc && Set(ItemSetType.BloodMoon, 3) && marks.TryGetValue(enemy, out var mark) && mark.Ticks > 0)
             {
                 // Only a player kill spreads. Bleed/chain/orbit/wake kills cannot recursively spread.
@@ -289,7 +289,7 @@ namespace RuinRunner
         public void OnDashStarted(Vector2 start)
         {
             if(cadenceStep==1)cadenceStep=2;
-            rushUntil=0;focusCharge=0;DestroyView(focusView);focusView=null;
+            rushUntil=0;focusCharge=0;DestroyView(focusView);focusView=null;passiveDashFrom=start;
             dashWake = Active && Set(ItemSetType.Storm, 2) && clock >= wakeReady;
             if (!dashWake) return;
             wakeReady = clock + SetTuning(ItemSetType.Storm,2).Effect("cooldownSeconds"); previousDashPoint = start; wakeDamage = Snapshot * SetTuning(ItemSetType.Storm,2).Effect("damageFraction");
@@ -306,6 +306,7 @@ namespace RuinRunner
         public void OnDashEnded()
         {
             dashWake = false;
+            if(Active)OnPassiveDashEnded();
             if(Active&&Copies(AccessoryType.RushSpur)>0&&clock>=rushReady)rushUntil=clock+Effect(AccessoryType.RushSpur,"windowSeconds");
         }
         void AddWake(Vector2 point)
@@ -318,6 +319,7 @@ namespace RuinRunner
         public void OnDefenseSuccess(Vector2 aim)
         {
             if (!Active) return;
+            OnPassiveDefense(aim);
             if(Copies(AccessoryType.GuardBell)>0&&clock>=bellReady)
             {
                 bellReady=clock+Effect(AccessoryType.GuardBell,Upgrade(AccessoryType.GuardBell)>=2?"legacyCooldownSeconds":"cooldownSeconds");GuardBellProcs++;

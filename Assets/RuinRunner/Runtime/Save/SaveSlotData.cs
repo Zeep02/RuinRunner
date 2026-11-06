@@ -24,7 +24,7 @@ namespace RuinRunner
         public long serverRevision;
         public int legacyMigrationVersion;
         public int legacyRefundVersion;
-        public string startingWeaponId = "rust_sword";
+        public string startingWeaponId = "trainee_blade";
         public string[] unlockedWeaponIds = Array.Empty<string>();
         public string[] unlockedTalentIds = Array.Empty<string>();
         public string[] activeTalentIds = Array.Empty<string>();

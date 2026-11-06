@@ -1,0 +1,29 @@
+{
+  "clip": "WChainHorizonD",
+  "ppu": 32,
+  "pivotX": 0.67391,
+  "pivotY": 0.5,
+  "width": 23,
+  "height": 15,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/bolt",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 8,
+  "fps": 15,
+  "loop": true,
+  "frames": 5,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 23,
+  "origin": [
+    15,
+    7
+  ],
+  "optionsJson": "{\"palette\":[\"#14161c\",\"#2c3038\",\"#4a4f5a\",\"#70757f\",\"#9ea3ac\",\"#d0d4da\",\"#f6f7f8\"],\"kind\":\"shard\",\"size\":2.6,\"tail\":10}"
+}

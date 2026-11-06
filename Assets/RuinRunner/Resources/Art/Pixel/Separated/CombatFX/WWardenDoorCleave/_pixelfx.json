@@ -1,0 +1,29 @@
+{
+  "clip": "WWardenDoorCleave",
+  "ppu": 32,
+  "pivotX": 0.36538,
+  "pivotY": 0.49471,
+  "width": 234,
+  "height": 189,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 9,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 162,
+  "origin": [
+    85,
+    95
+  ],
+  "optionsJson": "{\"palette\":[\"#101218\",\"#262a34\",\"#3e4452\",\"#5e6674\",\"#88909c\",\"#bcc2ca\",\"#f0f2f4\"],\"R\":72,\"W\":46,\"a0\":-170,\"a1\":100,\"over\":0}"
+}

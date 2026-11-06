@@ -1,0 +1,29 @@
+{
+  "clip": "BreakStone",
+  "ppu": 32,
+  "pivotX": 0.52724,
+  "pivotY": 0.2972,
+  "width": 257,
+  "height": 143,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "0.9",
+  "source": "pixelfx",
+  "effect": "impacts/ground-slam",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 27,
+  "durationSeconds": 0.9,
+  "visibleDiameter": 239,
+  "origin": [
+    135,
+    100
+  ],
+  "optionsJson": "{}"
+}

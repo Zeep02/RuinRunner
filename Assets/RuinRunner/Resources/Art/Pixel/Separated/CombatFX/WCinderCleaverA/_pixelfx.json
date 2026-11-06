@@ -1,0 +1,28 @@
+{
+  "clip": "WCinderCleaverA",
+  "ppu": 32,
+  "pivotX": 0.00781,
+  "pivotY": 0.46429,
+  "width": 64,
+  "height": 14,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/line",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 23,
+  "fps": 30,
+  "loop": false,
+  "frames": 11,
+  "durationSeconds": 0.367,
+  "visibleDiameter": 64,
+  "origin": [
+    0,
+    7
+  ],
+  "optionsJson": "{\"palette\":[\"#14060a\",\"#380a10\",\"#6e1210\",\"#ac2410\",\"#e8501a\",\"#ff8c2a\",\"#ffd25a\"],\"style\":\"crack\",\"W\":5,\"taper\":true}"
+}

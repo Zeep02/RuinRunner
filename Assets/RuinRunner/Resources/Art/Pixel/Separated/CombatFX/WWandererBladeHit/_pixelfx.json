@@ -1,0 +1,28 @@
+{
+  "clip": "WWandererBladeHit",
+  "ppu": 32,
+  "pivotX": 0.5119,
+  "pivotY": 0.56122,
+  "width": 42,
+  "height": 49,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 44,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 26,
+  "origin": [
+    21,
+    21
+  ],
+  "optionsJson": "{\"palette\":[\"#14141a\",\"#2a2a30\",\"#44444c\",\"#66666e\",\"#8c8c94\",\"#b8b8be\",\"#e8e8ea\"],\"sparks\":[\"#e8e8ea\",\"#b8b8be\",\"#8c8c94\",\"#66666e\"],\"len\":13}"
+}

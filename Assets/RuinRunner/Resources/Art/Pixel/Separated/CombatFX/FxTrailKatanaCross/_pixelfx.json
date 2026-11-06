@@ -1,0 +1,29 @@
+{
+  "clip": "FxTrailKatanaCross",
+  "ppu": 32,
+  "pivotX": 0.4517,
+  "pivotY": 0.50599,
+  "width": 176,
+  "height": 167,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 11,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 152,
+  "origin": [
+    79,
+    82
+  ],
+  "optionsJson": "{\"palette\":[\"#10202e\",\"#1f4258\",\"#34708c\",\"#5aa4c0\",\"#94d4e4\",\"#d4f2f6\",\"#ffffff\"],\"R\":66,\"W\":24,\"cross\":true,\"sparksN\":12}"
+}

@@ -1,0 +1,28 @@
+{
+  "clip": "EShotWater",
+  "ppu": 32,
+  "pivotX": 0.7233,
+  "pivotY": 0.49107,
+  "width": 103,
+  "height": 56,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "projectiles/plasma-shot",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 6,
+  "fps": 30,
+  "loop": true,
+  "frames": 24,
+  "durationSeconds": 0.8,
+  "visibleDiameter": 78,
+  "origin": [
+    74,
+    28
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"],\"size\":4}"
+}

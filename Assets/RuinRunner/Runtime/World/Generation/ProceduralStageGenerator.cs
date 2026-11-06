@@ -9,7 +9,7 @@ namespace RuinRunner.Generation
     {
         public const string Version = "modules-v1.0.0";
         public const int MaximumAttempts = 12;
-        public const float HorizontalPitch = 48, VerticalPitch = 36, PassageWidth = 6;
+        public const float HorizontalPitch = 34, VerticalPitch = 26, PassageWidth = 6;
         static readonly int[] DX={1,0,-1,0}, DY={0,1,0,-1};
 
         // Explicit seeds deliberately do not consult history, wall time, or Unity's global random state.
@@ -37,23 +37,10 @@ namespace RuinRunner.Generation
             diagnostics.ValidationSummary=fallbackValidation.Summary;return fallback;
         }
 
-        // Only ordinary new expeditions call this. Persist the returned seed, signature, and version before entering the stage.
-        public static GeneratedStage ChooseFreshSeed(Func<int> nextSeed,int stage,ISet<string> recentSignatures,int candidateLimit=8)
-        {
-            if(nextSeed==null)throw new ArgumentNullException(nameof(nextSeed));
-            if(candidateLimit<1||candidateLimit>32)throw new ArgumentOutOfRangeException(nameof(candidateLimit));
-            GeneratedStage result=null;
-            for(int i=0;i<candidateLimit;i++)
-            { result=Generate(nextSeed(),stage);if(recentSignatures==null||!recentSignatures.Contains(result.StructureSignature))return result; }
-            result.Diagnostics.RepeatedRecentStructure=true;return result;
-        }
-
         static GeneratedStage Build(int seed,int stage,int attempt,bool fallback)
         {
             var random=new GenerationRandom(seed,stage,GenerationStream.Layout,attempt);
             var regions=new List<GeneratedRegion>();var edges=new List<GeneratedConnection>();var occupied=new HashSet<long>();
-            var modules=SpatialModuleCatalog.ForStage(stage);var bag=new List<int>();
-            for(int i=0;i<modules.Count;i++)bag.Add(i);random.Shuffle(bag);int moduleCursor=0;
             int count=fallback?6:5+random.Next(2),gx=0,gy=0;
             for(int i=0;i<count;i++)
             {
@@ -77,7 +64,7 @@ namespace RuinRunner.Generation
                     gx+=DX[direction];gy+=DY[direction];
                 }
                 var role=i==0?RegionRole.Entrance:i==count-1?RegionRole.Boss:RegionRole.Combat;
-                var region=CreateRegion(stage,regions.Count,gx,gy,role,modules[bag[moduleCursor++%bag.Count]],i,null);
+                var region=CreateRegion(stage,regions.Count,gx,gy,role,SpatialModuleCatalog.Compose(stage,role,ref random),i,null);
                 regions.Add(region);occupied.Add(SpatialModuleCatalog.Key(gx,gy));
                 if(i>0)Connect(stage,regions[i-1],region,true,edges);
             }
@@ -103,7 +90,7 @@ namespace RuinRunner.Generation
                         if(occupied.Contains(SpatialModuleCatalog.Key(x,y)))continue;
                         // Non-connected neighboring rooms remain separated by at least six units of solid exterior.
                         if(!fallback&&(Math.Abs(x)>3||Math.Abs(y)>3))continue;
-                        var branch=CreateRegion(stage,regions.Count,x,y,role,modules[bag[moduleCursor++%bag.Count]],-1,service);
+                        var branch=CreateRegion(stage,regions.Count,x,y,role,SpatialModuleCatalog.Compose(stage,role,ref random),-1,service);
                         regions.Add(branch);occupied.Add(SpatialModuleCatalog.Key(x,y));Connect(stage,parent,branch,false,edges);return;
                     }
                 }

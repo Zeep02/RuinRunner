@@ -26,8 +26,16 @@ namespace RuinRunner
                 if((!rarity.HasValue||item.Rarity==rarity.Value)&&(!dropStages.TryGetValue(item.Id,out var range)||dropStage>=range.x&&dropStage<=range.y)&&(!dropWeights.TryGetValue(item.Id,out var weight)||weight>0))choices.Add(item);
             return choices;
         }
-        public static WeaponDefinition RollOfRarity(WeaponRarity rarity)
-        {var choices=EligibleWeapons(rarity);if(choices.Count==0)throw new InvalidOperationException("No eligible weapon at requested rarity "+rarity);return WeightedWeapon(choices);}
+        public static WeaponDefinition RollOfRarity(WeaponRarity rarity)=>WeightedWeapon(EligibleNearest(rarity));
+        // Not every grade has weapons (none are Uncommon). A roll for a missing grade gets the next one down, or else up.
+        static List<WeaponDefinition> EligibleNearest(WeaponRarity rarity)
+        {
+            for(int step=0;step<=4;step++)
+                foreach(int grade in new[]{(int)rarity-step,(int)rarity+step})
+                    if(grade>=0&&grade<=4)
+                    {var choices=EligibleWeapons((WeaponRarity)grade);if(choices.Count>0)return choices;}
+            throw new InvalidOperationException("No eligible weapon at any rarity");
+        }
         static float Number(JObject stats,string key,float fallback,float minimum,float maximum)
         {float value=stats?[key]?.Value<float>()??fallback;if(float.IsNaN(value)||float.IsInfinity(value)||value<minimum||value>maximum)throw new ArgumentException("Invalid weapon catalog field: "+key);return value;}
         public static void BindPinnedCatalog(ContentCatalog catalog)
@@ -49,7 +57,8 @@ namespace RuinRunner
                 d.CatalogSpecialCooldown=Number(s,"specialCooldown",WeaponActionCatalog.Get(old).Cooldown,.25f,15);
                 next.Add(d);weights.Add(d.Id,item.dropWeight);
             }
-            if(next.Count!=Weapons.Length)throw new ArgumentException("Pinned catalog must contain every known weapon; unknown mechanics cannot be invented by numeric data");
+            // Find above already refused any weapon this build has no mechanics for. An older pinned catalog simply lists fewer current ones.
+            if(next.Count==0)throw new ArgumentException("Pinned catalog has no weapons");
             for(int stage=0;stage<3;stage++)if(!next.Exists(w=>weights[w.Id]>0&&stage>=stages[w.Id].x&&stage<=stages[w.Id].y))throw new ArgumentException("No eligible catalog weapon for stage "+stage);
             Weapons=next.ToArray();dropWeights.Clear();foreach(var row in weights)dropWeights.Add(row.Key,row.Value);dropStages.Clear();foreach(var row in stages)dropStages.Add(row.Key,row.Value);PinnedCatalogVersion=catalog.version;
         }
@@ -88,7 +97,8 @@ namespace RuinRunner
                 var tuning=AccessoryTuning.Parse(item.id,item.stats,catalog.accessoryTuningVersion);
                 next.Add(new AccessoryDefinition(old.Id,old.Type,string.IsNullOrWhiteSpace(item.name)?old.Name:item.name,string.IsNullOrWhiteSpace(item.description)?old.Description:item.description,(WeaponRarity)item.rarity,old.SetType,old.Color,tuning));weights.Add(item.id,item.dropWeight);
             }
-            if(next.Count!=Accessories.Length)throw new ArgumentException("Pinned catalog must contain every known accessory");
+            // Find above already refused any accessory this build has no mechanics for. An older pinned catalog simply lists fewer current ones.
+            if(next.Count==0)throw new ArgumentException("Pinned catalog has no accessories");
             for(int stage=0;stage<3;stage++)if(!next.Exists(a=>weights[a.Id]>0&&stage>=stages[a.Id].x&&stage<=stages[a.Id].y))throw new ArgumentException("No eligible catalog accessory for stage "+stage);
             Accessories=next.ToArray();ItemSetCatalog.Commit(setDefinitions);dropWeights.Clear();foreach(var row in weights)dropWeights.Add(row.Key,row.Value);dropStages.Clear();foreach(var row in stages)dropStages.Add(row.Key,row.Value);PinnedCatalogVersion=catalog.version;
         }

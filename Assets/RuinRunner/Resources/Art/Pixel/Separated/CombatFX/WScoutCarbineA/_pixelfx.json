@@ -1,0 +1,28 @@
+{
+  "clip": "WScoutCarbineA",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.5,
+  "width": 29,
+  "height": 29,
+  "premultiplied": true,
+  "canvas": null,
+  "center": true,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 39,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 29,
+  "origin": [
+    14,
+    14
+  ],
+  "optionsJson": "{\"palette\":[\"#2a2c36\",\"#50566a\",\"#8088a0\",\"#b0b8cc\",\"#d8dee8\",\"#f4f6fa\",\"#ffffff\"],\"shape\":\"reticle\",\"size\":1}"
+}

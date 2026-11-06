@@ -1,0 +1,28 @@
+{
+  "clip": "FxImplosion",
+  "ppu": 32,
+  "pivotX": 0.53022,
+  "pivotY": 0.51183,
+  "width": 182,
+  "height": 169,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "explosions/implosion",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 26,
+  "durationSeconds": 1.733,
+  "visibleDiameter": 169,
+  "origin": [
+    96,
+    82
+  ],
+  "optionsJson": "{\"palette\":[\"#050308\",\"#0f0a18\",\"#1c1230\",\"#2c1a4a\",\"#432468\",\"#5e3290\",\"#8048b8\",\"#a970e0\"]}"
+}

@@ -3,12 +3,12 @@ using UnityEngine;
 namespace RuinRunner
 {
     // Capture after both native body animation and held-weapon sockets have settled.
-    // Four reusable pairs bound the cost even when dashes are chained.
+    // Five reusable pairs bound the cost even when dashes are chained.
     [DefaultExecutionOrder(300)]
     public sealed class DashAfterimageEffect : MonoBehaviour
     {
-        private const int Capacity = 4;
-        private const float Lifetime = .18f;
+        private const int Capacity = 5;
+        private const float Lifetime = .2f, Opacity = .6f;
         private const float Interval = .04f;
         private readonly SpriteRenderer[,] images = new SpriteRenderer[Capacity, 2];
         private readonly float[] remaining = new float[Capacity];
@@ -51,7 +51,7 @@ namespace RuinRunner
                 {
                     var image = images[i, part];
                     image.enabled = remaining[i] > 0f && image.sprite != null;
-                    image.color = new Color(.55f, .85f, 1f, .32f * fade * fade);
+                    image.color = new Color(.55f, .85f, 1f, Opacity * fade);
                     // Re-evaluate against the current actor, including northward dashes.
                     image.sortingOrder = body.sortingOrder - 8 + part;
                 }
@@ -63,20 +63,26 @@ namespace RuinRunner
                 nextSample -= Time.deltaTime;
                 if (nextSample <= 0f && (!wasDashing || Vector3.Distance(lastPosition, body.transform.position) >= .2f))
                 {
-                    Snapshot(images[next, 0], body);
-                    Snapshot(images[next, 1], weapon == null ? null : weapon.VisualRenderer);
-                    // Keep the captured hand/weapon occlusion within each silhouette.
-                    if (weapon != null && weapon.VisualRenderer != null && weapon.VisualRenderer.sortingOrder < body.sortingOrder)
-                    {
-                        var swap = images[next, 0]; images[next, 0] = images[next, 1]; images[next, 1] = swap;
-                    }
-                    remaining[next] = Lifetime;
-                    lastPosition = body.transform.position;
-                    next = (next + 1) % Capacity;
+                    Stamp();
                     nextSample = Interval;
                 }
             }
             wasDashing = player.IsDashing;
+        }
+
+        // Leaves one afterimage of the current pose. Weapon skills that move the hero without a dash call this themselves.
+        internal void Stamp()
+        {
+            Snapshot(images[next, 0], body);
+            Snapshot(images[next, 1], weapon == null ? null : weapon.VisualRenderer);
+            // Keep the captured hand/weapon occlusion within each silhouette.
+            if (weapon != null && weapon.VisualRenderer != null && weapon.VisualRenderer.sortingOrder < body.sortingOrder)
+            {
+                var swap = images[next, 0]; images[next, 0] = images[next, 1]; images[next, 1] = swap;
+            }
+            remaining[next] = Lifetime;
+            lastPosition = body.transform.position;
+            next = (next + 1) % Capacity;
         }
 
         private static void Snapshot(SpriteRenderer target, SpriteRenderer source)
@@ -90,7 +96,7 @@ namespace RuinRunner
             target.flipX = source.flipX; target.flipY = source.flipY;
             target.sortingLayerID = source.sortingLayerID;
             target.sortingOrder = source.sortingOrder - 8;
-            target.color = new Color(.55f, .85f, 1f, .32f);
+            target.color = new Color(.55f, .85f, 1f, Opacity);
         }
 
         private void Clear()

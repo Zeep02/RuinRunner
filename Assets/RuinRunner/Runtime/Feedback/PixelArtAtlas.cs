@@ -29,10 +29,7 @@ namespace RuinRunner
             if (type == EnemyType.Tidekeeper) return TidekeeperArt.Frames(state);
             if (type == EnemyType.SealHeart) return SealHeartArt.Frames(state);
             if (ExternalCreatureArt.Supports(type)) return ExternalCreatureArt.Frames(type,state,0);
-            if (type == EnemyType.Boss) return GetBossFrames(Mathf.Clamp(state, 0, 5));
-            if ((int)type >= (int)EnemyType.Tidekeeper)
-                return IndividualArt.Frames("Campaign/" + type + "/" + (state == 0 ? "idle" : state == 1 ? "move" : state == 2 ? "attack" : "death"), type == EnemyType.Tidecaller && state == 0 ? 3 : 4);
-            return GeneratedActorFrames.GetEnemy(Mathf.Clamp((int)type, 0, 3) * 3 + Mathf.Clamp(state, 0, 2));
+            return GetBossFrames(Mathf.Clamp(state, 0, 5));
         }
 
         public static Sprite[] GetBossFrames(int row)

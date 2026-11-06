@@ -1,0 +1,28 @@
+{
+  "clip": "WTwinStarB",
+  "ppu": 32,
+  "pivotX": 0.53571,
+  "pivotY": 0.46429,
+  "width": 14,
+  "height": 14,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 16,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 13,
+  "origin": [
+    7,
+    7
+  ],
+  "optionsJson": "{\"palette\":[\"#08080c\",\"#1a1a20\",\"#34343c\",\"#6c6c74\",\"#a8a8b0\",\"#dcdce0\",\"#ffffff\"],\"shape\":\"half\",\"size\":1,\"side\":1}"
+}

@@ -1,0 +1,29 @@
+{
+  "clip": "FxPropPollen",
+  "ppu": 32,
+  "pivotX": 0.25,
+  "pivotY": -0.025,
+  "width": 22,
+  "height": 20,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "nature/prop-spores",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 120,
+  "durationSeconds": 4,
+  "visibleDiameter": 12,
+  "origin": [
+    5,
+    20
+  ],
+  "optionsJson": "{\"palette\":[\"#3c5a24\",\"#5a8434\",\"#a8cc58\",\"#e4f4a0\"],\"motes\":4,\"spread\":7,\"drift\":3.5,\"glow\":0.06}"
+}

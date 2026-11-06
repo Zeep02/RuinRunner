@@ -1,0 +1,29 @@
+{
+  "clip": "ESealCircle",
+  "ppu": 32,
+  "pivotX": 0.5026,
+  "pivotY": 0.125,
+  "width": 192,
+  "height": 220,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "3",
+  "source": "pixelfx",
+  "effect": "arcane/magic-circle-cast",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 13,
+  "fps": 30,
+  "loop": false,
+  "frames": 90,
+  "durationSeconds": 3,
+  "visibleDiameter": 216,
+  "origin": [
+    96,
+    192
+  ],
+  "optionsJson": "{\"palette\":[\"#2a1c08\",\"#5a3e10\",\"#9a6c18\",\"#d8a428\",\"#ffd84a\",\"#fff09a\",\"#fffbe6\"]}"
+}

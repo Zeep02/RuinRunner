@@ -11,7 +11,6 @@ namespace RuinRunner
         public string EquipmentMessage { get; private set; } = "";
         public OwnedEquipment SelectedEquipment => Inventory.FindOwned(equipmentSelection);
         public bool CanManageEquipment => IsRunActive && IsInventoryOpen && !IsGameOver && Player != null && !Player.IsDead && !IsStageTransitioning && !IsChoosingAccessory && !EconomyOperationPending && !BackendHasPending;
-        public bool CanUpgradeEquipment => false;
         public bool EquipmentOperationReady => equipmentOperationFrame != Time.frameCount && Time.unscaledTime >= equipmentOperationUntil;
         public bool HasDisassemblyConfirmation => CanManageEquipment && disassemblyIdentity != 0 &&
             equipmentSelection == disassemblyIdentity && Inventory.Revision == disassemblyRevision &&
@@ -43,10 +42,6 @@ namespace RuinRunner
             { RequestEquipmentDisassembly(item.Identity, item.UpgradeLevel); return true; }
             return false;
         }
-        public bool UpgradeSelectedEquipment(long identity, int expectedLevel)
-        {
-            return false;
-        }
 
         public bool RequestEquipmentDisassembly(long identity, int expectedLevel)
         {
@@ -71,7 +66,7 @@ namespace RuinRunner
         void AwardEncounterMaterials(int room)
         {
             if(!legacyFixture)_ = ClaimGold("combat:"+CurrentStageIndex+":"+room,"combat");
-            LootMessage = "구역 정리"; LootMessageUntil = Time.unscaledTime + 2;
+            if(Player!=null)DropGold(Player.transform.position,BackendCatalog?.economy?.combatGold??0);
 
         }
     }

@@ -1,0 +1,29 @@
+{
+  "clip": "StainCore",
+  "ppu": 32,
+  "pivotX": 0.45833,
+  "pivotY": 0.46,
+  "width": 36,
+  "height": 25,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "ink/stain",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 11,
+  "durationSeconds": 0.367,
+  "visibleDiameter": 36,
+  "origin": [
+    16,
+    13
+  ],
+  "optionsJson": "{\"palette\":[\"#120a1e\",\"#241638\",\"#44286e\"]}"
+}

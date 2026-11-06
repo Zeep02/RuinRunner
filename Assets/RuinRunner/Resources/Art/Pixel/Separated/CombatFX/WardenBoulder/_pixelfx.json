@@ -1,0 +1,28 @@
+{
+  "clip": "WardenBoulder",
+  "ppu": 32,
+  "pivotX": 0.44783,
+  "pivotY": 0.13755,
+  "width": 115,
+  "height": 229,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-boulder",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 31,
+  "durationSeconds": 2.067,
+  "visibleDiameter": 201,
+  "origin": [
+    51,
+    197
+  ],
+  "optionsJson": "{}"
+}

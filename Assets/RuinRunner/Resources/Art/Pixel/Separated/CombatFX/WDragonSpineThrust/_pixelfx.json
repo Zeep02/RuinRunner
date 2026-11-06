@@ -1,0 +1,28 @@
+{
+  "clip": "WDragonSpineThrust",
+  "ppu": 32,
+  "pivotX": 0.00562,
+  "pivotY": 0.48529,
+  "width": 89,
+  "height": 34,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/stab",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 9,
+  "fps": 45,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.222,
+  "visibleDiameter": 76,
+  "origin": [
+    0,
+    17
+  ],
+  "optionsJson": "{\"palette\":[\"#1a1814\",\"#3a352c\",\"#5e5648\",\"#8a806c\",\"#b8ad96\",\"#e4dcc8\",\"#fffaf0\"],\"sparks\":[\"#fffaf0\",\"#e4dcc8\",\"#b8ad96\",\"#8a806c\"],\"LEN\":72,\"W\":7}"
+}

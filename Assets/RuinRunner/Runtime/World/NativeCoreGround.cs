@@ -10,7 +10,6 @@ namespace RuinRunner
         readonly List<Mesh> meshes=new List<Mesh>();
         public int StoneCount { get; private set; }
         public int VariantMask { get; private set; }
-        public int MeshCount=>meshes.Count;
         void OnDestroy(){foreach(var mesh in meshes)if(mesh!=null)Destroy(mesh);}
         sealed class Batch
         {

@@ -1,0 +1,28 @@
+{
+  "clip": "WardenWalk",
+  "ppu": 32,
+  "pivotX": 0.45238,
+  "pivotY": 0.01667,
+  "width": 105,
+  "height": 90,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-walk",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": true,
+  "frames": 24,
+  "durationSeconds": 1.6,
+  "visibleDiameter": 105,
+  "origin": [
+    47,
+    88
+  ],
+  "optionsJson": "{}"
+}

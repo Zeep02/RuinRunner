@@ -98,14 +98,6 @@ namespace RuinRunner
             }
         }
 
-        public void SaveProgression(int legacyShards, IReadOnlyDictionary<MetaUpgradeType, int> ranks)
-        {
-            if (ServerBound) throw new InvalidOperationException("Progression must be confirmed by the backend.");
-            if (ActiveData == null) return;
-            UpdateProgression(legacyShards, ranks);
-            SaveActive();
-        }
-
         private void UpdateProgression(int legacyShards, IReadOnlyDictionary<MetaUpgradeType, int> ranks)
         {
             ActiveData.legacyShards = Mathf.Max(0, legacyShards);

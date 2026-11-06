@@ -1,0 +1,29 @@
+{
+  "clip": "WLightningCarbineE",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.13168,
+  "width": 237,
+  "height": 262,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": "0.77",
+  "until": "1.7",
+  "source": "pixelfx",
+  "effect": "lightning/lightning-strike",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 78,
+  "fps": 30,
+  "loop": false,
+  "frames": 28,
+  "durationSeconds": 0.933,
+  "visibleDiameter": 240,
+  "origin": [
+    118,
+    227
+  ],
+  "optionsJson": "{\"palette\":[\"#24160a\",\"#5e3a0c\",\"#a8680f\",\"#e8a218\",\"#ffd23c\",\"#fff08a\",\"#ffffff\"]}"
+}

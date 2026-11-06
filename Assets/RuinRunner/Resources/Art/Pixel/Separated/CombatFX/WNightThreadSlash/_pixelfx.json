@@ -1,0 +1,29 @@
+{
+  "clip": "WNightThreadSlash",
+  "ppu": 32,
+  "pivotX": 0.36275,
+  "pivotY": 0.51056,
+  "width": 153,
+  "height": 142,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 64,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 123,
+  "origin": [
+    55,
+    69
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0a24\",\"#191648\",\"#2b2478\",\"#4638b0\",\"#7a6ce0\",\"#b8aaff\",\"#f4eeff\"],\"R\":53,\"W\":26}"
+}

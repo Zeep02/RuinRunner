@@ -1,0 +1,28 @@
+{
+  "clip": "WardenPound",
+  "ppu": 32,
+  "pivotX": 0.40086,
+  "pivotY": 0.02475,
+  "width": 116,
+  "height": 101,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-pound",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 25,
+  "durationSeconds": 1.667,
+  "visibleDiameter": 100,
+  "origin": [
+    46,
+    98
+  ],
+  "optionsJson": "{}"
+}

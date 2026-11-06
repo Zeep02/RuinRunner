@@ -1,0 +1,29 @@
+{
+  "clip": "WThornSpearB",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.29167,
+  "width": 19,
+  "height": 12,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 8,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 19,
+  "origin": [
+    9,
+    8
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1a0e\",\"#163418\",\"#225224\",\"#357530\",\"#4f9a3a\",\"#7cc048\",\"#d4f090\"],\"shape\":\"vine\",\"size\":1.3}"
+}

@@ -10,6 +10,15 @@ namespace RuinRunner
         static int claimedInteractionFrame=-1;
         static int nextIdentity;
         int identity;
+        public static int PendingDecisions
+        {
+            get
+            {
+                var count=0;
+                foreach(var item in active)if(item!=null&&item.RequiresStageDecision)count++;
+                return count;
+            }
+        }
         public bool RequiresStageDecision {get;set;}
         public WeaponRarity Rarity {get;private set;}
         public InventoryEntryKind InventoryKind {get;set;}=InventoryEntryKind.Accessory;
@@ -34,7 +43,7 @@ namespace RuinRunner
             WeaponRarity rarity=WeaponRarity.Common)
         {
             var root=new GameObject("FieldLoot_"+name);root.transform.position=position;
-            var pickup=root.AddComponent<FieldLootPickup>();
+            var pickup=root.AddComponent<FieldLootPickup>();pickup.useGUILayout=false;
             pickup.identity=++nextIdentity;
             pickup.player=target;pickup.settings=gameSettings;pickup.collect=collectCallback;
             pickup.displayName=name;pickup.Rarity=rarity;pickup.origin=position;
@@ -132,6 +141,7 @@ namespace RuinRunner
             {
                 itemRenderer.enabled=true;groundMarker.enabled=true;
                 RewardPresentation.Reveal(origin+Vector2.up*.35f,Rarity,1001-Mathf.RoundToInt(origin.y*100),false);
+                if((int)Rarity>=(int)WeaponRarity.Rare)SigFx.Play("LootBeam",origin,0,-1,true,false,.7f);
             }
             var progress=Mathf.Clamp01((age-delay)/duration);
             var ease=progress*progress*(3-2*progress);
@@ -161,13 +171,13 @@ namespace RuinRunner
         void OnGUI()
         {
             if(Time.timeScale<=0||!IsSelected||Camera.main==null)return;
-            if(promptStyle==null)promptStyle=PixelUiSkin.CreateWorldPromptStyle(RewardPresentation.Color(Rarity),24,false);
+            if(promptStyle==null)promptStyle=PixelUiSkin.CreateWorldPromptStyle(RewardPresentation.Color(Rarity),12,false);
             var screen=Camera.main.WorldToScreenPoint(ItemVisualCenter+Vector3.up*(placementSize.y*.5f));if(screen.z<=0)return;
             var binding=settings.GetBinding(GameAction.Interact);
             var key=binding.primary!=KeyCode.None?binding.primary:binding.alternate;
-            var text="["+GameSettingsService.GetKeyName(key)+"] "+RewardPresentation.Name(Rarity)+" · "+displayName;
-            var width=Mathf.Min(Screen.width-16,Mathf.Max(120,promptStyle.CalcSize(new GUIContent(text)).x+12));
-            GUI.Box(new Rect(Mathf.Clamp(screen.x-width*.5f,8,Screen.width-width-8),Mathf.Max(8,Screen.height-screen.y-52),width,44),text,promptStyle);
+            var text=GameSettingsService.GetKeyName(key)+" 획득하기";
+            var width=promptStyle.CalcSize(new GUIContent(text)).x+8;
+            GUI.Box(new Rect(Mathf.Clamp(screen.x-width*.5f,8,Screen.width-width-8),Mathf.Max(8,Screen.height-screen.y-32),width,26),text,promptStyle);
         }
         void OnDestroy(){active.Remove(this);}
     }

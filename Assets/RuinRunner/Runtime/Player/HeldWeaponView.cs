@@ -21,7 +21,6 @@ namespace RuinRunner
         private bool angleInitialized;
 
         public string CurrentWeaponId => currentWeaponId;
-        public bool IsVisible => weaponRenderer != null && weaponRenderer.enabled && weaponRenderer.sprite != null;
         public Sprite RendererSprite => weaponRenderer == null ? null : weaponRenderer.sprite;
         internal SpriteRenderer VisualRenderer => weaponRenderer;
         public Vector2 BladePoint(float distance)
@@ -87,7 +86,7 @@ namespace RuinRunner
             weaponRenderer.flipY = flipped;
 
             var sourceForwardAngle = NativeWeaponArt.TryGet(weapon.Id,out var nativePose) ? nativePose.ForwardAngle : RangedWeaponArt.TryGet(weapon.Id, out var landmarks)
-                ? landmarks.ForwardAngle : weapon.Id == "rust_sword" ? 90f : IsBladeFamily(weapon.Family) ? 45f : 0f;
+                ? landmarks.ForwardAngle : IsBladeFamily(weapon.Family) ? 45f : 0f;
             if (flipped) sourceForwardAngle = -sourceForwardAngle;
             var targetAngle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg - sourceForwardAngle;
             // Carry the barrel down during evasion; the native dash arm is raised
@@ -135,17 +134,26 @@ namespace RuinRunner
             if(dashCarry&&IsBladeFamily(weapon.Family))
                 weaponRenderer.sortingOrder=(bodyRenderer==null?1000:bodyRenderer.sortingOrder)-2;
             weaponPivot.localPosition = GetHandPosition(weapon, aim);
-            weaponPivot.localScale = Vector3.one * GetDisplayScale(weapon);
+            weaponPivot.localScale = Vector3.one * GetDisplayScale(weapon) * (1f + SwapPop * Mathf.Clamp01(1f - (Time.unscaledTime - swappedAt) / SwapPopSeconds));
         }
 
+        const float SwapPop = .45f, SwapPopSeconds = .16f;
+        float swappedAt = -9f;
         private void RefreshWeapon(bool force)
         {
             var weapon = player == null ? null : player.EquippedWeapon;
             var nextId = weapon == null ? null : weapon.Id;
             if (!force && nextId == currentWeaponId) return;
 
+            // A new weapon arrives in the hand with a flourish, not by being already there.
+            if (!force && currentWeaponId != null && weapon != null)
+            {
+                swappedAt = Time.unscaledTime;
+                NativeCombatEffect.Create("RewardRing", (Vector2)transform.position + Vector2.down * .2f, 0, .55f, .24f, RewardPresentation.Color(weapon.Rarity));
+            }
             currentWeaponId = nextId;
-            weaponRenderer.sprite = PixelArtAtlas.GetHeldWeaponSprite(weapon);
+            // An orb floats on its own; there is nothing in the hand.
+            weaponRenderer.sprite = weapon != null && weapon.Family == WeaponFamily.Orb ? null : PixelArtAtlas.GetHeldWeaponSprite(weapon);
             weaponRenderer.enabled = weaponRenderer.sprite != null;
             angleInitialized = false;
             attackTime = 10f;
@@ -196,7 +204,8 @@ namespace RuinRunner
                    family == WeaponFamily.Longsword ||
                    family == WeaponFamily.Mace ||
                    family == WeaponFamily.Katana ||
-                   family == WeaponFamily.Greatsword;
+                   family == WeaponFamily.Greatsword ||
+                   family == WeaponFamily.Spear;
         }
 
         private static float GetDisplayScale(WeaponDefinition weapon)

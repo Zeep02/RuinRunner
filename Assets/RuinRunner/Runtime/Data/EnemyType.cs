@@ -11,7 +11,31 @@ namespace RuinRunner
         Tidekeeper,
         SealHeart,
         Tidecaller,
-        Sentinel
+        Sentinel,
+        Sporeling,
+        RuneTotem,
+        TideCrab,
+        Wisp,
+        SealKnight,
+        Hexer,
+        // Stage 1
+        BoneShield,
+        VineLasher,
+        RuinRat,
+        MossArcher,
+        PowderBeetle,
+        // Stage 2
+        Drowned,
+        EelSpitter,
+        CoralGuard,
+        JellyLamp,
+        TideSiren,
+        // Stage 3
+        InkShade,
+        SealGolem,
+        GildedBolter,
+        ChainWarden,
+        SealPriest
     }
 
     public static class EnemyRoles

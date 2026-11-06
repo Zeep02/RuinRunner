@@ -23,8 +23,6 @@ namespace RuinRunner
         public float ManaOnKill { get; private set; } = 2;
         float baseHealth = 40, baseMana = 80, baseArmor, baseSpeed = 7, baseCritical = .08f;
         float baseCriticalDamage = 1.5f, baseLuck = 2, baseManaRegen = 5, criticalProgress;
-        int metaHealth, metaMana, metaDamage, metaLuck, metaSpeed, metaArmor;
-        bool metaApplied;
         InventorySystem inventory;
         readonly Dictionary<UpgradeType, int> traits = new Dictionary<UpgradeType, int>();
         readonly Dictionary<AccessoryType, int> legacyAccessories = new Dictionary<AccessoryType, int>();
@@ -60,13 +58,28 @@ namespace RuinRunner
             baseSpeed = balance.moveSpeed; baseCritical = balance.criticalChance; baseCriticalDamage = balance.criticalDamage;
             baseLuck = balance.luck; baseManaRegen = balance.manaRegeneration; Recalculate();
         }
+        public float TalentHealthScale { get; set; } = 1;
+        public float TalentHealScale { get; set; } = 1;
+        public float TalentManaScale { get; set; } = 1;
+        public float TalentRegenScale { get; set; } = 1;
+        // The permanent tree, added before anything that scales.
+        public float MasteryHealth { get; set; }
+        public float MasteryMana { get; set; }
+        public float MasteryDamage { get; set; }
+        public float MasterySkill { get; set; }
+        public float MasteryCritical { get; set; }
+        public float MasteryCriticalDamage { get; set; }
+        public float MasterySpeed { get; set; }
         public void Recalculate()
         {
-            MaxHealth = baseHealth + metaHealth * 10; MaxMana = baseMana + metaMana * 10;
-            Armor = baseArmor + metaArmor * 2; MoveSpeed = baseSpeed + metaSpeed * .2f;
-            CriticalChance = baseCritical; CriticalDamage = baseCriticalDamage; Luck = baseLuck + metaLuck;
-            ManaRegeneration = baseManaRegen; WeaponDamageMultiplier = 1 + metaDamage * .04f;
+            MaxHealth = baseHealth; MaxMana = baseMana;
+            Armor = baseArmor; MoveSpeed = baseSpeed;
+            CriticalChance = baseCritical; CriticalDamage = baseCriticalDamage; Luck = baseLuck;
+            ManaRegeneration = baseManaRegen; WeaponDamageMultiplier = 1;
             SpecialDamageMultiplier = 1; LifeOnKill = 0; ManaOnKill = 2;
+            MaxHealth += MasteryHealth; MaxMana += MasteryMana; MoveSpeed += MasterySpeed;
+            CriticalChance += MasteryCritical; CriticalDamage += MasteryCriticalDamage;
+            WeaponDamageMultiplier += MasteryDamage; SpecialDamageMultiplier += MasterySkill;
             foreach (var pair in traits) for (int i = 0; i < pair.Value; i++) ApplyTraitValues(pair.Key);
             if (inventory != null)
             {
@@ -80,7 +93,7 @@ namespace RuinRunner
                 foreach (var bonus in setDefinitions)
                     if (legacySets.Contains(bonus.SetType + ":" + bonus.RequiredPieces)) ApplySetValues(bonus.SetType, bonus.RequiredPieces);
             }
-            MaxHealth = Mathf.Max(1, MaxHealth); MaxMana = Mathf.Max(0, MaxMana);
+            MaxHealth = Mathf.Max(1, MaxHealth * TalentHealthScale); MaxMana = Mathf.Max(0, MaxMana * TalentManaScale); ManaRegeneration *= TalentRegenScale;
             Health = Mathf.Clamp(Health, 0, MaxHealth); Mana = Mathf.Clamp(Mana, 0, MaxMana);
         }
         public void Tick(float deltaTime, bool outOfCombat = false) => RestoreMana(ManaRegeneration * (outOfCombat ? 4 : 1) * deltaTime);
@@ -94,7 +107,8 @@ namespace RuinRunner
             if (criticalProgress < 1) return false; criticalProgress--; return true;
         }
         public void RestoreAfterKill() { Heal(LifeOnKill); RestoreMana(ManaOnKill); }
-        public void Heal(float amount) => Health = Mathf.Min(MaxHealth, Health + Mathf.Max(0, amount));
+        public void Heal(float amount) => Health = Mathf.Min(MaxHealth, Health + Mathf.Max(0, amount) * TalentHealScale);
+        public void PayHealth(float amount) => Health = Mathf.Max(1, Health - Mathf.Max(0, amount));
         public void RestoreMana(float amount) => Mana = Mathf.Min(MaxMana, Mana + Mathf.Max(0, amount));
         public void ApplyTrait(UpgradeType type)
         {
@@ -150,15 +164,6 @@ namespace RuinRunner
         {
             foreach(var definition in setDefinitions)
                 if(definition.SetType==type&&definition.RequiredPieces==count){ApplyTuningValues(definition.Tuning,1);return;}
-        }
-        public void ApplyMetaProgression(MetaProgressionService progression)
-        {
-            if (progression == null) return;
-            metaHealth = progression.GetRank(MetaUpgradeType.VitalLegacy); metaMana = progression.GetRank(MetaUpgradeType.ArcaneWellspring);
-            metaDamage = progression.GetRank(MetaUpgradeType.WarriorInstinct); metaLuck = progression.GetRank(MetaUpgradeType.LuckyBloodline);
-            metaSpeed = progression.GetRank(MetaUpgradeType.NimbleFootwork); metaArmor = progression.GetRank(MetaUpgradeType.ReinforcedSoul);
-            Recalculate();
-            if (!metaApplied) { metaApplied = true; Health = MaxHealth; Mana = MaxMana; }
         }
     }
 }

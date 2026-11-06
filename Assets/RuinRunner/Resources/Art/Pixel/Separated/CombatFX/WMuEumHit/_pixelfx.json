@@ -1,0 +1,28 @@
+{
+  "clip": "WMuEumHit",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.4875,
+  "width": 41,
+  "height": 40,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 67,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 23,
+  "origin": [
+    20,
+    20
+  ],
+  "optionsJson": "{\"palette\":[\"#060608\",\"#101014\",\"#1c1c22\",\"#32323a\",\"#5a5a64\",\"#a0a0aa\",\"#f0f0f4\"],\"sparks\":[\"#f0f0f4\",\"#a0a0aa\",\"#5a5a64\",\"#32323a\"],\"len\":13}"
+}

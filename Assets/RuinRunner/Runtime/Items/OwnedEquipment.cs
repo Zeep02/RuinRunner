@@ -36,12 +36,6 @@ namespace RuinRunner
         public bool Awakened { get; internal set; }
         bool chamberedDuringReload;
         public WeaponDefinition Weapon => Definition;
-        public bool LoadSingleRound()
-        {
-            if(Definition.AttackType!=WeaponAttackType.Ranged||Ammo>=Definition.MagazineSize)return false;
-            if(IsReloading&&Ammo==0)chamberedDuringReload=true;
-            Ammo++;return true;
-        }
         public bool IsReloading => Weapon.AttackType == WeaponAttackType.Ranged && ReloadRemaining > 0;
         public OwnedWeapon(WeaponDefinition definition, int? ammo = null, float reload = 0)
         {

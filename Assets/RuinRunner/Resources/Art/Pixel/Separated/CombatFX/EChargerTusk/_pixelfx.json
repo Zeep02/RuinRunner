@@ -1,0 +1,29 @@
+{
+  "clip": "EChargerTusk",
+  "ppu": 32,
+  "pivotX": 0.00704,
+  "pivotY": 0.54348,
+  "width": 71,
+  "height": 23,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "enemies/gore",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 3,
+  "fps": 30,
+  "loop": false,
+  "frames": 16,
+  "durationSeconds": 0.533,
+  "visibleDiameter": 66,
+  "origin": [
+    0,
+    10
+  ],
+  "optionsJson": "{\"palette\":[\"#1a1208\",\"#3e2c14\",\"#6c5024\",\"#a0803c\",\"#ccb060\",\"#ecdca0\",\"#fffcec\"],\"reach\":66}"
+}

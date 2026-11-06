@@ -1,0 +1,29 @@
+{
+  "clip": "WStormCloudStaffA",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.5,
+  "width": 163,
+  "height": 174,
+  "premultiplied": true,
+  "canvas": null,
+  "center": true,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "lightning/storm-cloud",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": true,
+  "frames": 45,
+  "durationSeconds": 3,
+  "visibleDiameter": 160,
+  "origin": [
+    83,
+    163
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0f2e\",\"#1a2050\",\"#2a3080\",\"#3f6cdf\",\"#7cc8ff\",\"#fff08a\",\"#ffffff\"]}"
+}

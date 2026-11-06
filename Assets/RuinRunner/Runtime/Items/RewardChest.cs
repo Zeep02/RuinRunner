@@ -26,6 +26,7 @@ namespace RuinRunner
             var root = new GameObject("RewardChest");
             root.transform.position = position;
             var chest = root.AddComponent<RewardChest>();
+            chest.useGUILayout = false;
             chest.Rarity = rarity;
             chest.frames = IndividualArt.Frames("RewardChest/" + rarity, 6);
             chest.chestRenderer = PrototypeVisuals.AddSprite(root, Color.white, 1000 - Mathf.RoundToInt(position.y * 100f));
@@ -53,12 +54,12 @@ namespace RuinRunner
             if (!CanOpen || !PlayerInRange || Time.timeScale <= 0 || Camera.main == null) return;
             var point = Camera.main.WorldToScreenPoint(transform.position + Vector3.up * 1.05f);
             if (point.z <= 0) return;
-            var style = promptStyle ?? (promptStyle = PixelUiSkin.CreateWorldPromptStyle(RewardPresentation.Color(Rarity), 24, false));
+            var style = promptStyle ?? (promptStyle = PixelUiSkin.CreateWorldPromptStyle(RewardPresentation.Color(Rarity), 12, false));
             var binding = settings.GetBinding(GameAction.Interact);
             var key = binding.primary != KeyCode.None ? binding.primary : binding.alternate;
-            var text = "[" + GameSettingsService.GetKeyName(key) + "] " + RewardPresentation.Name(Rarity) + " · " + HintName;
-            var width = Mathf.Min(Screen.width-16, style.CalcSize(new GUIContent(text)).x+16);
-            GUI.Box(new Rect(Mathf.Clamp(point.x-width/2,8,Screen.width-width-8),Screen.height-point.y-22,width,44),text,style);
+            var text = GameSettingsService.GetKeyName(key) + " 열기";
+            var width = style.CalcSize(new GUIContent(text)).x+8;
+            GUI.Box(new Rect(Mathf.Clamp(point.x-width/2,8,Screen.width-width-8),Screen.height-point.y-13,width,26),text,style);
         }
         private void Open()
         {

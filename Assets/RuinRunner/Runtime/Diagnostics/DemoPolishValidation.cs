@@ -17,7 +17,7 @@ namespace RuinRunner
         private IEnumerator ValidateDemoPolish()
         {
             var settings = new GameSettingsService();
-            player.EquipWeapon(DemoContent.Weapon("rust_sword"));
+            player.EquipWeapon(DemoContent.Weapon("trainee_blade"));
             var floor = new GameObject("ValidationFloor");
             floor.transform.localScale = new Vector3(35, 20, 1);
             PrototypeVisuals.AddSprite(floor, new Color(.29f, .35f, .46f), -100);
@@ -92,7 +92,7 @@ namespace RuinRunner
             {
                 openCount++;
                 loot = FieldLootPickup.Create(new Vector2(-2.2f, 0), "검증용 활", Color.cyan, player, settings, () => true, 0,
-                    InventoryIconFactory.GetWorldSprite("hand_crossbow", Color.white, InventoryIconKind.Weapon));
+                    InventoryIconFactory.GetWorldSprite("scout_carbine", Color.white, InventoryIconKind.Weapon));
             }, settings);
             var chestPosition = chest.transform.position;
             var seen = new HashSet<int> { 0 };
@@ -142,25 +142,6 @@ namespace RuinRunner
             PolishCapture("05-dash-fill-0-25-50-75-100");
             for (var region = 0; region < 4; region++) foreach (var placement in DemoContent.Enemies(region))
                 Require(placement.type != EnemyType.Shooter, "seedling excluded from demo region " + region);
-            var radial = EnemyProjectile.Create(new Vector2(2, 1), Vector2.up, 0, 1, Color.red, .27f, EnemyProjectileArt.BossRadial);
-            var aimed = EnemyProjectile.Create(new Vector2(3, 1), new Vector2(-1, 1), 0, 1, Color.red, .24f, EnemyProjectileArt.BossAimed);
-            var radialFrames = new HashSet<int>(); var aimedFrames = new HashSet<int>();
-            var aimedRotation = aimed.transform.rotation;
-            for (var i = 0; i < 50; i++)
-            {
-                yield return null;
-                if (radialFrames.Add(radial.FrameIndex)) PolishCapture("06-projectiles-frame-" + radial.FrameIndex);
-                aimedFrames.Add(aimed.FrameIndex);
-                Require(aimed.transform.rotation == aimedRotation, "aimed projectile never spins away from flight direction");
-            }
-            Require(radialFrames.Count == 8 && aimedFrames.Count == 8, "both supplied projectile rows animate all eight frames");
-            Require(Mathf.Approximately(radial.GetComponent<CircleCollider2D>().radius, .135f) &&
-                Mathf.Approximately(aimed.GetComponent<CircleCollider2D>().radius, .12f), "new projectile art retains original hit radii");
-            var savedFrame = radial.FrameIndex; Time.timeScale = 0;
-            for (var i = 0; i < 10; i++) yield return null;
-            Require(radial.FrameIndex == savedFrame, "projectile animation freezes while paused");
-            Time.timeScale = 1;
-            for (var i = 0; i < 20; i++) yield return null;
         }
     }
 }

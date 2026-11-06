@@ -65,7 +65,7 @@ namespace RuinRunner.EditorTools
             "Assets/RuinRunner/Runtime/Feedback/PrototypeAudioController.cs",
             "Assets/RuinRunner/Runtime/Feedback/PixelArtAtlas.cs",
             "Assets/RuinRunner/Runtime/Feedback/PixelWorldArt.cs",
-            "Assets/RuinRunner/Runtime/Feedback/MeleeSlashEffect.cs",
+            "Assets/RuinRunner/Runtime/Feedback/SignatureSlashEffect.cs",
             "Assets/RuinRunner/Editor/BalanceTuningWindow.cs",
             "Assets/RuinRunner/Resources/Art/ruin_background.png",
             "Assets/RuinRunner/Resources/Art/Pixel/TopDown/topdown_nature_room_v1.png",

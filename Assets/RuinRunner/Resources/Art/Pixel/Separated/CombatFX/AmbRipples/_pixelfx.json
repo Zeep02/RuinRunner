@@ -1,0 +1,29 @@
+{
+  "clip": "AmbRipples",
+  "ppu": 32,
+  "pivotX": 0.50397,
+  "pivotY": 0.42708,
+  "width": 126,
+  "height": 48,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "water/ripples",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 60,
+  "durationSeconds": 2,
+  "visibleDiameter": 115,
+  "origin": [
+    63,
+    27
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"]}"
+}

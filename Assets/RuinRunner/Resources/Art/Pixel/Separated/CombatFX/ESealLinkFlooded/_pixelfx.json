@@ -1,0 +1,28 @@
+{
+  "clip": "ESealLinkFlooded",
+  "ppu": 32,
+  "pivotX": 0.00781,
+  "pivotY": 0.16667,
+  "width": 64,
+  "height": 3,
+  "premultiplied": true,
+  "canvas": "90x50",
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/line-loop",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 54,
+  "fps": 12,
+  "loop": true,
+  "frames": 6,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 64,
+  "origin": [
+    0,
+    2
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"],\"style\":\"thread\",\"W\":3,\"taper\":false}"
+}

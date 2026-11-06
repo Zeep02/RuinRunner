@@ -55,6 +55,8 @@ namespace RuinRunner.EditorTools
             foreach (var weapon in WeaponLootTable.All)
             {
                 var cell = GetWeaponIconIndex(weapon.Id);
+                // Weapon kinds without a slot in the old atlas have only their own icon files.
+                if (cell < 0) continue;
                 Export(weapon.Id, InventoryIconKind.Weapon, Crop(source, cell % 8, cell / 8, 8, true));
             }
             // The original sixth row contains NINE icons, not eight. Enum order is not art order.

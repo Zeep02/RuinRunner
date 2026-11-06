@@ -22,15 +22,10 @@ namespace RuinRunner
         private int upgradeLevel;
         private SpriteRenderer castingBody;
         private TrailRenderer trace;
-        private System.Action<EnemyController,Vector2> contactCallback;
         private bool secondary;
         private int launchEpoch;
         private long sourceWeaponIdentity;
-        private int ricochets;
-        private bool anchorRound;
-        public PlayerProjectile OnContact(System.Action<EnemyController,Vector2> callback){contactCallback=callback;return this;}
         public PlayerProjectile AsSecondary(){secondary=true;return this;}
-        public PlayerProjectile WithMutation(bool ricochet,bool anchor){ricochets=ricochet?1:0;anchorRound=anchor;return this;}
 
         public static PlayerProjectile Create(
             Vector2 position,
@@ -93,7 +88,7 @@ namespace RuinRunner
             projectile.sourceWeaponIdentity=sourceOwner==null?0:sourceOwner.CombatWeaponIdentity;
             projectile.upgradeLevel=upgrade;
             projectile.castingBody=castingBody;projectile.trace=trail;
-            projectile.explosiveShot=family==WeaponFamily.Cannon||special&&weaponId=="flintlock";
+            projectile.explosiveShot=family==WeaponFamily.Cannon;
             return projectile;
         }
 
@@ -105,7 +100,6 @@ namespace RuinRunner
             var wall=Physics2D.BoxCast(transform.position,damageBox.size,transform.eulerAngles.z,step.normalized,step.magnitude,1<<GameLayers.Ground);
             if (wall.collider!=null)
             {
-                if(ricochets>0){ricochets--;velocity=Vector2.Reflect(velocity,wall.normal);transform.position=wall.centroid+wall.normal*.025f;transform.rotation=Quaternion.Euler(0,0,Mathf.Atan2(velocity.y,velocity.x)*Mathf.Rad2Deg);trace.Clear();return;}
                 HitWall(wall.point+wall.normal*.025f);
                 return;
             }
@@ -137,9 +131,7 @@ namespace RuinRunner
             var point=other.ClosestPoint(transform.position);
             if(Physics2D.Linecast(transform.position,point,1<<GameLayers.Ground).collider!=null)return;
             if(owner!=null&&!secondary)owner.OnDirectCombatHit(enemy,sourceAction,damage,false,sourceWeaponIdentity:sourceWeaponIdentity,magazineHit:!special);
-            contactCallback?.Invoke(enemy,point);
             if(secondary&&owner!=null)owner.SecondaryHit(enemy,damage,velocity.normalized*4f);else enemy.TakeDamage(damage, velocity.normalized * 4f, critical);
-            if(anchorRound&&owner!=null){anchorRound=false;if(owner.IsCombatEpochValid(launchEpoch))owner.PlantAwakenedRound(point,damage*.45f,sourceAction,sourceWeaponIdentity);}
             CombatPresentation.Impact(family,point,velocity.normalized,special,critical,false,weaponId);
             if(explosiveShot){Blast(point);remainingHits=1;}
             remainingHits--;

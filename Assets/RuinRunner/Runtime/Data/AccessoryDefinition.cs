@@ -34,7 +34,27 @@ namespace RuinRunner
         PrismCage,
         TrailSpindle,
         FocusPrism,
-        ManaAegis
+        ManaAegis,
+        RetributionThorn,
+        MirrorShard,
+        CinderSeed,
+        ThunderCharm,
+        PoisonCenser,
+        ChainSpark,
+        SoulLantern,
+        VineSnare,
+        ShadowTwinRing,
+        QuakeBell,
+        FrostWaveNecklace,
+        GuardianFeather,
+        BloodPact,
+        SwapFlash,
+        MeteorCompass,
+        GravityPearl,
+        TimeHourglass,
+        HolyTithe,
+        StormCore,
+        PhoenixAsh
     }
 
     public sealed class AccessoryDefinition

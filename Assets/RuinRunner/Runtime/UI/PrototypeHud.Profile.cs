@@ -15,8 +15,8 @@ namespace RuinRunner
                 "유산 "+summary.LegacyShards+" · 원정 "+summary.TotalRuns+"회 · 엔딩 "+summary.CampaignVictories+"회\n"+
                 "유산·해금·원정 기록이 처음 상태로 돌아갑니다.\n초기화한 진행도는 게임에서 되돌릴 수 없습니다.",compactStyle);
             GUI.Label(new Rect(panel.x+32,panel.y+184,596,46),
-                game.ResetProfileChallengeReady?"2/2 · 서버가 확인한 이 슬롯을 최종 초기화합니다.":
-                "1/2 · 초기화할 슬롯을 확인한 뒤 계속하세요.",compactStyle);
+                game.ResetProfileChallengeReady?"2/2":
+                "1/2",compactStyle);
             bool enabled=GUI.enabled;
             GUI.enabled=enabled&&!game.SessionOperationPending&&!game.BackendBusy;
             if(GUI.Button(new Rect(panel.x+32,panel.y+250,200,50),"취소",buttonStyle))game.CancelProfileReset();
@@ -26,7 +26,7 @@ namespace RuinRunner
             }
             else if(GUI.Button(new Rect(panel.x+248,panel.y+250,380,50),"슬롯 확인 후 계속",buttonStyle))game.PrepareProfileReset();
             GUI.enabled=enabled;
-            GUI.Label(new Rect(panel.x+32,panel.y+312,596,28),game.BackendBusy?game.BackendStatus:
+            GUI.Label(new Rect(panel.x+32,panel.y+312,596,28),
                 !string.IsNullOrEmpty(game.BackendErrorCode)?game.BackendStatus:game.SessionMessage,compactStyle);
         }
     }

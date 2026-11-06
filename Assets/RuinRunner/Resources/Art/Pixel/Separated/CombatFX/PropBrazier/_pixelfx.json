@@ -1,0 +1,14 @@
+{
+  "clip": "PropBrazier",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "24bc5775-81c4-41a7-9099-69cb2530e7d5",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

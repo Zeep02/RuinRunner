@@ -1,0 +1,28 @@
+{
+  "clip": "FxCleave",
+  "ppu": 32,
+  "pivotX": 0.31962,
+  "pivotY": 0.17453,
+  "width": 158,
+  "height": 106,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "melee/heavy-cleave",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 30,
+  "durationSeconds": 2,
+  "visibleDiameter": 135,
+  "origin": [
+    50,
+    87
+  ],
+  "optionsJson": "{\"palette\":[\"#1e1206\",\"#4a2c08\",\"#86520c\",\"#c48412\",\"#f0b424\",\"#ffe066\",\"#fff6c4\",\"#ffffff\"]}"
+}

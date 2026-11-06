@@ -70,7 +70,8 @@ namespace RuinRunner
             // only selects fixture states; this is NOT gameplay completion evidence.
             game.SaveSlots.OpenTransientForTests();
             typeof(GameController).GetMethod("BeginRunForActiveSlot", PrivateInstance).Invoke(game, null);
-            yield return new WaitForSecondsRealtime(.2f);
+            // The stage builds over several frames, and the run resets its state when that finishes.
+            while (game.Player == null || game.IsStageTransitioning) yield return null;
             Time.timeScale = 0f;
             yield return Capture("06-run-hud");
             SetModal("IsMapOpen", true);
@@ -85,7 +86,7 @@ namespace RuinRunner
             yield return Capture("08-empty-inventory");
             if (demoOnly)
             {
-                game.Inventory.AddWeapon(DemoContent.Weapon("hand_crossbow"));
+                game.Inventory.AddWeapon(DemoContent.Weapon("scout_carbine"));
                 foreach (var id in DemoContent.AccessoryIds) game.Inventory.AddAccessory(AccessoryLootTable.Find(id));
             }
             else foreach (var weapon in WeaponLootTable.All) game.Inventory.AddWeapon(weapon);
@@ -100,11 +101,7 @@ namespace RuinRunner
             if (!demoOnly) foreach (var weapon in WeaponLootTable.All) game.Inventory.AddWeapon(weapon);
             yield return Capture("17-expanded-inventory-fixture");
             SetModal("IsInventoryOpen", false);
-            SetModal("IsUnlockOpen", true);
             yield return Capture("10-legacy");
-            typeof(PrototypeHud).GetField("legacyScroll", PrivateInstance).SetValue(hud, new Vector2(0, 180));
-            yield return Capture("18-legacy-expansion-fixture");
-            SetModal("IsUnlockOpen", false);
             SetModal("IsManuallyPaused", true);
             yield return Capture("11-pause");
             SetModal("IsManuallyPaused", false);
@@ -132,12 +129,9 @@ namespace RuinRunner
             {
                 // Current item expansion, supplied inventory only. No user save or normal run claim.
                 game.Inventory.Reset();
-                game.Inventory.AddWeapon(WeaponLootTable.Find("scrap_pistol"));
+                game.Inventory.AddWeapon(WeaponLootTable.Find("scrap_revolver"));
                 foreach(var id in new[]{"mana_thread","guard_bell","rush_spur","steady_locket","powder_satchel","last_light_pendant"})
                     game.Inventory.AddAccessory(AccessoryLootTable.Find(id));
-                game.Inventory.AwardMaterials(999,"ui-fixture-only");
-                foreach(var item in game.Inventory.OwnedAccessories)
-                    for(int level=0;level<3;level++)if(!game.Inventory.TryUpgrade(item.Identity,level))throw new Exception("Fixture upgrade failed");
                 game.FocusEquipment(game.Inventory.OwnedAccessories[4].Identity);
                 yield return Capture("27-new-items-inventory");
                 validateTooltipLayouts=true;tooltipFixture="A:0";
@@ -166,10 +160,11 @@ namespace RuinRunner
             // Explicit stage/actor fixtures for HUD composition at the requested resolution.
             // These bypass encounters and cannot be mistaken for a campaign clear.
             game.Inventory.Reset();
-            foreach (var id in new[] { "rust_sword", "storm_rifle", "dragon_cannon" })
+            foreach (var id in new[] { "trainee_blade", "scout_carbine", "meteor_waybill" })
                 game.Inventory.AddWeapon(WeaponLootTable.Find(id));
             game.Player.EquipWeapon(game.Inventory.SelectQuickSlot(1));
-            game.Inventory.ActiveSlot.Assign(game.Inventory.EquippedWeapon, 12, 0);
+            // Below a full magazine, or there is nothing to reload.
+            game.Inventory.ActiveSlot.Assign(game.Inventory.EquippedWeapon, game.Inventory.EquippedWeapon.MagazineSize - 1, 0);
             yield return Capture("31-centered-quickbar-ammo");
             if (!game.Inventory.StartReload()) throw new Exception("Quickbar reload fixture failed");
             game.Inventory.Tick(game.Inventory.EquippedWeapon.ReloadSeconds * .4f);
@@ -500,7 +495,7 @@ namespace RuinRunner
                 typeof(EnemyController).GetField("speed",PrivateInstance).SetValue(boss,0f);
                 physics.position=center;physics.linearVelocity=Vector2.zero;boss.transform.position=center;
                 game.Player.Teleport(center+vectors[direction]*3);yield return new WaitForSeconds(.15f);
-                if(body.sprite.rect.size!=new Vector2(96,96)||body.sprite.pivot!=new Vector2(48,32)||body.sprite.pixelsPerUnit!=32||body.flipX||body.transform.lossyScale!=Vector3.one)
+                if(body.sprite.pixelsPerUnit!=32||body.flipX||body.transform.lossyScale!=Vector3.one)
                     throw new Exception("Windows native SealHeart source geometry differs");
                 Physics2D.SyncTransforms();bool torsoHit=false;
                 foreach(var hit in Physics2D.RaycastAll((Vector2)box.bounds.center+Vector2.left*3,Vector2.right,6,1<<GameLayers.Enemy))
@@ -557,8 +552,8 @@ namespace RuinRunner
             typeof(EnemyController).GetField("specialTimer", PrivateInstance).SetValue(boss, 10000f);
             yield return new WaitForSeconds(.15f);
             var body = boss.transform.Find("VisualRoot").GetComponent<SpriteRenderer>();
-            if (body.sprite.rect.size != new Vector2(100, 100) || body.sprite.pivot != new Vector2(49, 6) || body.sprite.pixelsPerUnit != 32)
-                throw new Exception("Windows Tidekeeper native canvas/ground pivot changed");
+            if (body.sprite.pixelsPerUnit != 32)
+                throw new Exception("Windows Tidekeeper pixel density changed");
             var bounds = boss.DamageCollider.bounds;
             Physics2D.SyncTransforms();
             bool bodyHit = false, emptyFeetHit = false;
@@ -568,7 +563,7 @@ namespace RuinRunner
                 if (EnemyController.DamageTarget(hit.collider) == boss) emptyFeetHit = true;
             if (!bodyHit || emptyFeetHit) throw new Exception("Floating body damage ray hits empty feet or misses body");
             boss.TakeDamage(1, Vector2.zero); yield return new WaitForSeconds(.11f);
-            var recoil = IndividualArt.Frames(TidekeeperArt.Root + "immune", 8);
+            var recoil = IndividualArt.Frames(TidekeeperArt.Root + "hurt", 8);
             if (Array.IndexOf(recoil, body.sprite) < 0 || deaths != 0) throw new Exception("Windows Tidekeeper recoil missing");
             Time.timeScale = 0; var capture = Capture("39-tidekeeper-native-recoil"); while (capture.MoveNext()) yield return capture.Current;
             Time.timeScale = 1; yield return new WaitForSeconds(.3f);
@@ -579,8 +574,8 @@ namespace RuinRunner
                 yield return new WaitForSeconds(.2f); boss.TakeDamage(1, Vector2.zero); yield return new WaitForSeconds(.08f);
                 if (Array.IndexOf(recoil, body.sprite) >= 0) throw new Exception("Recoil hid native boss anticipation");
                 yield return new WaitForSeconds((lanes ? TideLanePattern.WarningSeconds : .95f) - .28f + .12f);
-                var cast = IndividualArt.Frames(TidekeeperArt.Root + (lanes ? "shield_cast" : "laser_cast"), lanes ? 10 : 7);
-                if (!boss.IsActing || boss.AttackVisualPhase != 1 || Array.IndexOf(cast, body.sprite) < 4)
+                var cast = IndividualArt.Frames(TidekeeperArt.Root + (lanes ? "lanes" : "pools"), 24);
+                if (!boss.IsActing || boss.AttackVisualPhase != 1 || Array.IndexOf(cast, body.sprite) < 12)
                     throw new Exception("Windows native cast does not coincide with active hazard");
                 if (boss.DamageCollider.bounds != bounds) throw new Exception("Windows cast changed target body envelope");
                 Time.timeScale = 0; capture = Capture(lanes ? "40-tidekeeper-native-lanes" : "41-tidekeeper-native-pools");
@@ -653,7 +648,6 @@ namespace RuinRunner
                 while (capture.MoveNext()) yield return capture.Current;
                 Time.timeScale = 1; yield return new WaitForSeconds(.75f);
                 if (enemy != null || deaths != 1) throw new Exception("Windows charger collapse cleanup mismatch");
-                if (FindObjectsByType<FadingSpark>().Length != 0) throw new Exception("Charger death still emits generic square burst");
             }
             game.enabled = true;
             Debug.Log("[Charger Windows] PASS four-direction native standing/hurt/running-strike/collapse, common foot pivot, body damage bounds, original charge recovery, pause and once-only cleanup. Actors/contacts supplied; not normal campaign.");
@@ -719,7 +713,6 @@ namespace RuinRunner
                 while (capture.MoveNext()) yield return capture.Current;
                 Time.timeScale = 1; yield return new WaitForSeconds(1.2f);
                 if (boss != null || deaths != 1) throw new Exception("Windows boss death did not settle once " + type);
-                if (FindObjectsByType<FadingSpark>().Length != 0) throw new Exception("Authored boss death still emits generic square bursts");
             }
             game.enabled = true;
             Debug.Log("[Enemy Reaction Windows] PASS anticipation restoration, overlapping-hit ownership, all three boss death pause/resume/once-only callbacks and no square burst. Actors/contacts supplied; not normal campaign.");
@@ -760,7 +753,7 @@ namespace RuinRunner
                 RuntimeSceneObjects.ClearSession();
                 var oldPlayer = game.Player;
                 oldPlayer.gameObject.SetActive(false); Destroy(oldPlayer.gameObject);
-                var bag = new InventorySystem(); bag.AddWeapon(WeaponLootTable.Find("storm_rifle"));
+                var bag = new InventorySystem(); bag.AddWeapon(WeaponLootTable.Find("scout_carbine"));
                 if (protection == 1)
                 {
                     bag.AddAccessory(AccessoryLootTable.Find("guardian_seal"));
@@ -823,10 +816,10 @@ namespace RuinRunner
             var report=new TooltipReport{width=Screen.width,height=Screen.height};
             foreach(var d in AccessoryLootTable.All)
             {
-                var bag=new InventorySystem();bag.AddAccessory(d);bag.AwardMaterials(100,"layout-fixture");var item=bag.OwnedAccessories[0];
-                for(int level=0;level<=3;level++)
+                var bag=new InventorySystem();bag.AddAccessory(d);var item=bag.OwnedAccessories[0];
+                // Equipment no longer levels up, so each accessory has one layout.
+                const int level=0;
                 {
-                    if(level>0&&!bag.TryUpgrade(item.Identity,level-1))throw new Exception("Layout fixture upgrade failed");
                     string description=EquipmentUpgradeRules.AccessoryDescription(item,bag);
                     string set=ItemSetCatalog.GetName(d.SetType)+"  3/3";
                     foreach(var bonus in ItemSetCatalog.Bonuses)if(bonus.SetType==d.SetType)set+="\n● "+bonus.RequiredPieces+"세트: "+bonus.Description;

@@ -1,0 +1,28 @@
+{
+  "clip": "WTideFangThrust",
+  "ppu": 32,
+  "pivotX": 0.00562,
+  "pivotY": 0.48529,
+  "width": 89,
+  "height": 34,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/stab",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 42,
+  "fps": 45,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.222,
+  "visibleDiameter": 75,
+  "origin": [
+    0,
+    17
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"],\"sparks\":[\"#e0fff8\",\"#88e8e0\",\"#36c2d0\",\"#1c8ebc\"],\"LEN\":72,\"W\":7}"
+}

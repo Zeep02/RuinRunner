@@ -1,7 +1,7 @@
 param(
     [string]$PlayerDirectory,
     [Parameter(Mandatory=$true)][string]$OutputDirectory,
-    [ValidateSet('campaign-v1','campaign-v2')][string]$ContentVersion='campaign-v2',
+    [ValidateSet('campaign-v1','campaign-v2','campaign-v3','campaign-v4','campaign-v5')][string]$ContentVersion='campaign-v5',
     [switch]$BackendOnly
 )
 $ErrorActionPreference='Stop'
@@ -38,7 +38,7 @@ foreach($name in @('bin','lib','share')){Copy-Item -LiteralPath (Join-Path $pgSo
 foreach($name in @('server_license.txt','commandlinetools_3rd_party_licenses.txt')){Copy-Item -LiteralPath (Join-Path $pgSource $name) -Destination (Join-Path $licenses ('postgresql-'+$name))}
 Copy-Item -LiteralPath (Join-Path $pgSource 'doc/src/sgml/html/legalnotice.html') -Destination (Join-Path $licenses 'postgresql-legalnotice.html')
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ReleaseTemplates/Npgsql-LICENSE.txt') -Destination $licenses
-Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'ReleaseTemplates') -File | Where-Object {$_.Extension -in '.ps1','.cmd'} | ForEach-Object {Copy-Item -LiteralPath $_.FullName -Destination $output}
+Get-ChildItem -LiteralPath (Join-Path $PSScriptRoot 'ReleaseTemplates') -File | Where-Object {$_.Extension -in '.ps1','.cmd' -or $_.Name -eq 'SERVER-README.txt'} | ForEach-Object {Copy-Item -LiteralPath $_.FullName -Destination $output}
 $playerName=''
 if(!$BackendOnly){
     $game=Join-Path $output 'Game';New-Item -ItemType Directory -Path $game | Out-Null
@@ -64,13 +64,13 @@ Ruin Runner local Windows package
 
 public-config.json contains ports, content version and the game filename only. Runtime secrets and
 all database data are created under %LOCALAPPDATA%\RuinRunner\LocalBackend, outside this package.
-The local API listens on 127.0.0.1 only. If the menu says the API is unavailable, run the local start
+"Start Local Game.cmd" keeps the API on 127.0.0.1; only "Start Server.cmd" opens it to the network. If the menu says the API is unavailable, run the local start
 shortcut; if a port is occupied, stop the older owned backend or choose free ports in the public config.
 Logs: %LOCALAPPDATA%\RuinRunner\LocalBackend\logs. Never delete its database to fix a connection error.
 
-Remote API: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Start-Game.ps1 -ApiUrl https://YOUR-API/
-This skips the local server and passes only the public HTTPS URL to the game. Supply server credentials
-to the remote server separately. No public service or paid hosting is provisioned by this package.
+Playing across PCs: see SERVER-README.txt. Run "Start Server.cmd" on the server PC and "Join Server.cmd" on each game PC.
+Public server: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Start-Game.ps1 -ApiUrl https://YOUR-API/
+Plain HTTP is accepted only for private network addresses. No public service or paid hosting is provisioned by this package.
 
 Isolated validation: Start-LocalBackend.ps1 -DataRoot <new-isolated-directory> -ApiPort <free-port>
 -DatabasePort <free-port>, then Start-Game.ps1 with the same options and -ValidationProfile <new-name>.

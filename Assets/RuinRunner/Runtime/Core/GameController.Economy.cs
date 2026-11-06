@@ -23,25 +23,45 @@ namespace RuinRunner
             int epoch = sessionEpoch;
             string runId = BackendRun?.runId;
             settlementRunId = runId;
-            SessionMessage = "원정 정산 확인 중 · 보상은 아직 확정되지 않았습니다.";
+            SessionMessage = "";
             try
             {
                 await SettleBackendRunAsync(victory?"victory":"defeat",Stats.EnemiesDefeated,priorStageVisitedRegions+(DungeonMap?.VisitedRegionCount??0),StagesCleared);
                 if (SessionMatches(epoch, runId:runId)) RefreshSettlementProjection();
             }
-            catch(Exception e){if(SessionMatches(epoch, runId:runId)){Debug.LogException(e);SessionMessage="정산 대기 중 · 다시 확인할 수 있습니다.";}}
+            catch(Exception e){if(SessionMatches(epoch, runId:runId)){Debug.LogException(e);SessionMessage="";}}
         }
         async void AwardEnemyGold(EnemyController enemy)
         {
             if(legacyFixture||!IsExpedition)return;
+            DropGold(enemy.transform.position,enemy.IsBoss?BackendCatalog?.economy?.bossGold??0:BackendCatalog?.economy?.enemyGold??0);
             var id="enemy:"+CurrentStageIndex+":"+CurrentRoom+":"+CombatTargetIdentity.For(enemy);
             await ClaimGold(id,enemy.IsBoss?"boss":"enemy");
+        }
+        // The server has already counted it; the coins are how the player sees it arrive.
+        public long DisplayedGold=>Math.Max(0,RunGold-GoldCoin.InFlight);
+        void DropGold(Vector2 at,int amount)
+        {
+            if(legacyFixture||Player==null)return;
+            GoldCoin.Burst(at,amount,Player.transform,()=>EnemiesAlive==0&&!waveTransition&&currentWaveIndex+1>=roomWaveCount);
         }
         async Task ClaimGold(string eventId,string source)
         {
             if(legacyFixture||BackendRun==null)return;
             try { await ClaimBackendRewardAsync(new RewardRequest{operationId=Guid.NewGuid().ToString(),eventId=eventId,source=source,stageIndex=CurrentStageIndex,roomId=CurrentRegionId}); }
             catch(Exception e){Debug.LogException(e);}
+        }
+        const float PotionHealing=.25f,ChestPotionChance=.3f,EnemyPotionChance=.04f;
+        void DropHealthPotion(Vector2 at,int scatter=0)
+        {
+            if(legacyFixture||Player==null)return;
+            FieldLootPickup.Create(at,"회복 포션",new Color(.92f,.2f,.26f),Player,Settings,()=>
+            {
+                Player.Stats.Heal(Player.MaxHealth*PotionHealing);
+                SigFx.Play("FxPotionHeal",Player.FeetPoint,0,-1,true,false,.5f);
+                PrototypeAudio.Play(PrototypeSound.Upgrade,AudioChannel.Interface,.4f);
+                return true;
+            },scatter,IndividualArt.Sprite("CombatFX/PickupPotion/00"));
         }
         public string CurrentRegionId=>DungeonMap?.Graph?.Regions[CurrentRoom].Id??("region-"+CurrentRoom);
         void ApplyEconomyReceipt(EconomyReceipt receipt)
@@ -92,21 +112,19 @@ namespace RuinRunner
             foreach(var item in BackendEconomy.items)
                 if(item.origin=="starter"&&Inventory.ActiveSlot.Item!=null){Inventory.ActiveSlot.Item.ServerInstanceId=item.instanceId;Inventory.ActiveSlot.Item.IsStartingEquipment=true;break;}
         }
-        public async void BuyShopOffer(string offerId,bool barter=false)
+        public async void BuyShopOffer(string offerId)
         {
             var shop=CurrentShop;if(shop==null||EconomyOperationPending||BackendHasPending||EnemiesAlive>0)return;
             var offer=Array.Find(shop.offers,o=>o.offerId==offerId);if(offer==null||offer.stock<=0)return;
-            var sold=Inventory.FindOwned(ServiceSelectedEquipment);
-            if(barter&&(sold==null||sold.IsStartingEquipment||!ActiveTalents.Has(TalentId.MerchantBarter)||!Inventory.CanDisassemble(sold.Identity)))return;
             var kind=offer.kind=="weapon"?InventoryEntryKind.Weapon:InventoryEntryKind.Accessory;
-            bool capacity=Inventory.HasRoomFor(kind)||barter&&sold!=null&&(!Inventory.IsEquipped(sold.Identity)||kind==InventoryEntryKind.Weapon);
+            bool capacity=Inventory.HasRoomFor(kind);
             if(offer.kind!="heal"&&!capacity){SessionMessage="가방을 먼저 비워 주세요.";return;}
-            if(!barter&&RunGold<offer.price){SessionMessage="골드가 부족합니다.";return;}
+            if(RunGold<offer.price){SessionMessage="골드가 부족합니다.";return;}
             EconomyOperationPending=true;
             try
             {
-                var receipt=await TradeBackendAsync(new TradeRequest{operationId=Guid.NewGuid().ToString(),action=barter?"barter":"buy",shopId=shop.shopId,offerId=offerId,instanceId=barter?sold.ServerInstanceId:null});
-                if(receipt!=null){ApplyEconomyReceipt(receipt);SessionMessage=barter?"교환했습니다.":"구입했습니다.";}
+                var receipt=await TradeBackendAsync(new TradeRequest{operationId=Guid.NewGuid().ToString(),action="buy",shopId=shop.shopId,offerId=offerId});
+                if(receipt!=null){ApplyEconomyReceipt(receipt);SessionMessage="구입했습니다.";}
             }
             finally{EconomyOperationPending=false;}
         }

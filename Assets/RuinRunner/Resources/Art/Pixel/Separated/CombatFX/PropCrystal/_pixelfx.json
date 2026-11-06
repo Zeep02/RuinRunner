@@ -1,0 +1,14 @@
+{
+  "clip": "PropCrystal",
+  "ppu": 32,
+  "pivotX": 0.48438,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "9feeff5b-7057-4348-bd28-e10efff149db",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

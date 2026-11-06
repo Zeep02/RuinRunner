@@ -1,0 +1,29 @@
+{
+  "clip": "WRedLotusE",
+  "ppu": 32,
+  "pivotX": 0.53597,
+  "pivotY": 0.60061,
+  "width": 139,
+  "height": 164,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "melee/flower-bloom",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 25,
+  "fps": 30,
+  "loop": false,
+  "frames": 36,
+  "durationSeconds": 1.2,
+  "visibleDiameter": 163,
+  "origin": [
+    74,
+    65
+  ],
+  "optionsJson": "{\"palette\":[\"#100406\",\"#30080c\",\"#5a1014\",\"#92181c\",\"#cc2c28\",\"#f06050\",\"#ffd0c0\"],\"R\":62,\"petals\":8,\"seed\":21}"
+}

@@ -1,0 +1,28 @@
+{
+  "clip": "WTwinStarHit",
+  "ppu": 32,
+  "pivotX": 0.45745,
+  "pivotY": 0.55208,
+  "width": 47,
+  "height": 48,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 92,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 38,
+  "origin": [
+    21,
+    21
+  ],
+  "optionsJson": "{\"palette\":[\"#08080c\",\"#1a1a20\",\"#34343c\",\"#6c6c74\",\"#a8a8b0\",\"#dcdce0\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#dcdce0\",\"#a8a8b0\",\"#6c6c74\"],\"len\":13}"
+}

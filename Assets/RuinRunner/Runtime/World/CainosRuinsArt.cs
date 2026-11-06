@@ -65,8 +65,8 @@ namespace RuinRunner
                 // Short ground cover belongs to banks and verges, leaving the
                 // travel lane and combat center legible. It adds no collision.
                 var h=Hash(x,y);
-                if(PavingClearance(terrain,pavingPaths,point)<-.6f&&(point-court).sqrMagnitude>22&&h%19==0&&
-                   Mathf.PerlinNoise(x*.16f+17,y*.16f+59)>.55f&&
+                if(PavingClearance(terrain,pavingPaths,point)<-.6f&&(point-court).sqrMagnitude>22&&h%7==0&&
+                   Mathf.PerlinNoise(x*.16f+17,y*.16f+59)>.42f&&
                    (placement==null||(!placement.IsReserved(new Rect(point-Vector2.one*.4f,Vector2.one*.8f))&&placement.HasFloor(new Rect(point-Vector2.one*.4f,Vector2.one*.8f)))))
                     Draw(root.transform,"Verge grass",Sprite("Plants/grass-"+(1+h%15).ToString("00")),point,2,false);
             }
@@ -77,24 +77,9 @@ namespace RuinRunner
                 var center=terrain.Centers[region];var room=terrain.Rooms[region];
                 foreach(var island in room.platforms)
                 {
-                    var bounds=ClosedBounds(terrain,center+island.position,island.size);
-                    if(bounds.width<1||bounds.height<1)continue;
-                    BuildPlinth(root.transform,bounds);
-                    var foot=new Vector2(Mathf.Round(bounds.center.x*32)/32,bounds.yMin+.5f);
-                    Place(root.transform,room.bossRoom?"statue":"broken-pillar",foot,occupied);
+                    StageLandmarks.Place(root.transform,0,center+island.position,island.size,occupied);
                     if(budget.Exhausted){yield return null;budget.Resume();}
                 }
-                // Repeated architectural bays have a purpose: lamps frame the
-                // entry/court; a single guardian statue marks each end of the route.
-                if(region==0||room.bossRoom)
-                    if(NorthWall(terrain,center,room.Size,center.x,1.3f,out var shrine))
-                        Place(root.transform,"statue",shrine,occupied,placement);
-                foreach(var side in new[]{-1,1})
-                    for(var attempt=0;attempt<4;attempt++)
-                    {
-                        if(!NorthWall(terrain,center,room.Size,center.x+side*(5+attempt),.5f,out var lamp))continue;
-                        if(Place(root.transform,"lantern",lamp,occupied,placement))break;
-                    }
                 if(budget.Exhausted){yield return null;budget.Resume();}
             }
             if(placement!=null)
@@ -188,67 +173,6 @@ namespace RuinRunner
             }
                 if(budget.Exhausted){yield return null;budget.Resume();}
             }
-        }
-        static void BuildPlinth(Transform parent,Rect bounds)
-        {
-            // Solid native stone still exactly covers the existing closed cells.
-            // Small surviving pavers break up the broad unmarked top without
-            // altering the platform footprint, collision or source pixel size.
-            for(var y=bounds.yMin;y<bounds.yMax;y++)for(var x=bounds.xMin;x<bounds.xMax;x++)
-                Draw(parent,"Ruined plinth top",Sprite(PavingHash(Mathf.RoundToInt(x),Mathf.RoundToInt(y))%5==0?"Stone/quiet":"Stone/worn"),new Vector2(x+.5f,y+.5f),12,false);
-            for(var row=0;bounds.yMin+.875f+row*.5f<=bounds.yMax-.5f;row++)
-            for(var column=0;bounds.xMin+.5f+column*.5f+(row&1)*.25f<=bounds.xMax-.5f;column++)
-            {
-                var point=new Vector2(bounds.xMin+.5f+column*.5f+(row&1)*.25f,bounds.yMin+.875f+row*.5f);
-                var hash=PavingHash(Mathf.RoundToInt(point.x*4),Mathf.RoundToInt(point.y*4));
-                if(hash%9==0)continue;
-                Draw(parent,"Ruined plinth worn slab",Sprite("StonePaving/"+(hash%32).ToString("00")),point,13,false);
-            }
-            for(var x=bounds.xMin;x<bounds.xMax;x+=.25f)
-            {
-                var i=((Mathf.RoundToInt(x*4)%4)+4)%4;
-                Draw(parent,"Ruined plinth face",Sprite("Ribbon/face-"+i),new Vector2(x+.125f,bounds.yMin+.25f),14,false);
-                Draw(parent,"Ruined plinth lip",Sprite("Ribbon/cap-"+i),new Vector2(x+.125f,bounds.yMin+.625f),16,false);
-                Draw(parent,"Ruined plinth rear rim",Sprite("Ribbon/cap-"+i),new Vector2(x+.125f,bounds.yMax-.125f),16,false);
-            }
-            // Quarter-unit source strips meet exactly; the side strips stop
-            // before the front/rear rows, so corners are drawn only once.
-            for(var y=bounds.yMin+.75f;y<bounds.yMax-.25f;y+=.25f)
-            {
-                var i=((Mathf.RoundToInt(y*4)%4)+4)%4;
-                var left=Draw(parent,"Ruined plinth left rim",Sprite("Ribbon/cap-"+i),new Vector2(bounds.xMin+.125f,y+.125f),16,false);
-                left.transform.localRotation=Quaternion.Euler(0,0,90);
-                var right=Draw(parent,"Ruined plinth right rim",Sprite("Ribbon/cap-"+i),new Vector2(bounds.xMax-.125f,y+.125f),16,false);
-                right.transform.localRotation=Quaternion.Euler(0,0,-90);
-            }
-        }
-        static Rect ClosedBounds(StageTerrainLayout terrain,Vector2 center,Vector2 size)
-        {
-            var min=Vector2.one*float.PositiveInfinity;var max=Vector2.one*float.NegativeInfinity;
-            for(var y=Mathf.FloorToInt(center.y-size.y*.5f);y<Mathf.CeilToInt(center.y+size.y*.5f);y++)
-            for(var x=Mathf.FloorToInt(center.x-size.x*.5f);x<Mathf.CeilToInt(center.x+size.x*.5f);x++)
-                if(!terrain.IsOpen(new Vector2(x+.5f,y+.5f))){min=Vector2.Min(min,new Vector2(x,y));max=Vector2.Max(max,new Vector2(x+1,y+1));}
-            return float.IsInfinity(min.x)?default:new Rect(min,max-min);
-        }
-        static bool NorthWall(StageTerrainLayout terrain,Vector2 center,Vector2 size,float preferredX,float halfWidth,out Vector2 point)
-        {
-            var x=Mathf.Floor(preferredX)+.5f;
-            for(var y=Mathf.Floor(center.y)+.5f;y<center.y+size.y*.5f+3;y++)
-            {
-                var supported=true;
-                for(var dx=-halfWidth;dx<=halfWidth+.01f;dx+=.25f)
-                    if(terrain.IsOpen(new Vector2(x+dx,y))||!terrain.IsOpen(new Vector2(x+dx,y-1))){supported=false;break;}
-                if(supported){point=new Vector2(x,y-.25f);return true;}
-            }
-            point=default;return false;
-        }
-        static bool Place(Transform parent,string id,Vector2 point,List<Rect> occupied,EnvironmentPlacementRules placement=null)
-        {
-            var sprite=Sprite("Props/"+id);var b=sprite.bounds;
-            var rect=new Rect(point+(Vector2)b.min-Vector2.one*.18f,(Vector2)b.size+Vector2.one*.36f);
-            if(placement!=null&&placement.IsReserved(rect))return false;
-            foreach(var old in occupied)if(rect.Overlaps(old))return false;
-            Draw(parent,"Ruins "+id,sprite,point,0,true);occupied.Add(rect);return true;
         }
         static SpriteRenderer Draw(Transform parent,string name,Sprite sprite,Vector2 point,int order,bool depth)
         {

@@ -1,0 +1,28 @@
+{
+  "clip": "WGlacierTombHit",
+  "ppu": 32,
+  "pivotX": 0.50893,
+  "pivotY": 0.49107,
+  "width": 56,
+  "height": 56,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 51,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 29,
+  "origin": [
+    28,
+    28
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1430\",\"#1f4f94\",\"#2f7fcc\",\"#58b4ec\",\"#9bdcff\",\"#d8f4ff\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#d8f4ff\",\"#9bdcff\",\"#58b4ec\"],\"len\":17}"
+}

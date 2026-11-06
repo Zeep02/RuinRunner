@@ -45,7 +45,7 @@ namespace RuinRunner
             compactButton=new GUIStyle(buttonStyle){fontSize=18,clipping=TextClipping.Clip};
             talentSummaries=new string[TalentCatalog.All.Length];
             for(int i=0;i<talentSummaries.Length;i++)
-                talentSummaries[i]=GameTypography.WrapWords(TalentCatalog.All[i].Summary,compactStyle,266);
+                talentSummaries[i]=GameTypography.WrapWords(TalentCatalog.All[i].Summary,talentText,274);
         }
         void DrawSessionOverlay(float width,float height)
         {
@@ -53,7 +53,7 @@ namespace RuinRunner
             if(game.IsTown&&!game.IsInventoryOpen&&!game.IsServiceOpen&&!game.IsManuallyPaused)
             {
                 DrawPanel(new Rect(20,20,350,74));GUI.Label(new Rect(36,29,318,27),"길잡이 쉼터",bodyStyle);
-                GUI.Label(new Rect(36,61,318,24),"유산 "+game.MetaProgression.LegacyShards+" · 활성 재능 "+game.ActiveTalents.Ids.Length+"/3",compactStyle);
+                GUI.Label(new Rect(36,61,318,24),"유산 "+game.MetaProgression.LegacyShards,compactStyle);
                 if(!string.IsNullOrEmpty(game.SessionMessage))GUI.Label(new Rect(width/2-350,108,700,30),game.SessionMessage,compactCenter);
                 DrawQuickSlots(width,height);
             }
@@ -64,17 +64,10 @@ namespace RuinRunner
             }
             if(game.IsExpedition&&!game.IsPaused)
             {
-                GUI.Label(new Rect(24,178,200,28),"골드 "+game.RunGold,compactStyle);
-                float y=height-202;
-                if(game.ActiveTalents.Has(TalentId.ChestIntent))
-                {if(GUI.Button(new Rect(24,y,218,34),"상자 · "+(game.ChestPrefersAccessories?"장신구":"무기"),compactButton))game.ChestPrefersAccessories=!game.ChestPrefersAccessories;y-=38;}
-                if(game.ActiveTalents.Has(TalentId.SupplyChoice))
-                {if(GUI.Button(new Rect(24,y,218,34),"보급 · "+(game.SupplyUsesMana?"마나":"체력"),compactButton))game.SupplyUsesMana=!game.SupplyUsesMana;y-=38;}
-                if(game.IsRewardReserved)
-                {bool enabled=GUI.enabled;GUI.enabled=game.EnemiesAlive==0;if(GUI.Button(new Rect(24,y,218,34),"보관한 보상 선택",compactButton))game.ResolveReservedReward();GUI.enabled=enabled;}
+                DrawGold(96,80,compactStyle);
             }
             if(game.IsServiceOpen)DrawService(width,height);
-            if(game.SessionOperationPending||game.EconomyOperationPending||game.BackendHasPending||!string.IsNullOrEmpty(game.BackendErrorCode))
+            if(game.IsPreparingTownArt||game.BackendHasPending||!string.IsNullOrEmpty(game.BackendErrorCode))
             {
                 DrawPanel(new Rect(width/2-310,height-58,620,44));GUI.Label(new Rect(width/2-292,height-51,445,30),game.IsPreparingTownArt?"마을을 준비하는 중…":game.BackendStatus,compactStyle);
                 GUI.enabled=!game.BackendBusy&&!game.SessionOperationPending;
@@ -99,16 +92,15 @@ namespace RuinRunner
                 case FieldServiceKind.ExchangeAltar:DrawExchange(body);break;
             }
             GUI.enabled=old;
-            GUI.Label(new Rect(panel.x+28,panel.yMax-52,panel.width-56,36),string.IsNullOrEmpty(game.SessionMessage)?game.BackendStatus:game.SessionMessage,compactStyle);
+            GUI.Label(new Rect(panel.x+28,panel.yMax-52,panel.width-56,36),game.SessionMessage,compactStyle);
         }
         void DrawStartingGear(Rect rect)
         {
             var list=game.BackendCatalog?.starterWeapons;if(list==null)return;
-            GUI.Label(new Rect(rect.x,rect.y,rect.width,38),"출정할 무기를 고르세요. 옆 수련 석상에서 시험할 수 있습니다.",compactStyle);
             for(int i=0;i<list.Length;i++)
             {
                 var definition=WeaponLootTable.Find(list[i].id);if(definition==null)continue;
-                var cell=new Rect(rect.x+(i%3)*316,rect.y+50+(i/3)*180,302,162);GUI.Box(cell,"",slotStyle);
+                var cell=new Rect(rect.x+(i%3)*316,rect.y+(i/3)*166,302,154);GUI.Box(cell,"",slotStyle);
                 ItemIconLibrary.DrawGUI(new Rect(cell.x+14,cell.y+14,54,58),InventoryIconFactory.Get(definition.Id,definition.Color,InventoryIconKind.Weapon));
                 GUI.Label(new Rect(cell.x+82,cell.y+17,204,32),definition.Name,compactStyle);
                 GUI.Label(new Rect(cell.x+82,cell.y+49,204,36),WeaponFamilyCatalog.GetName(definition.Family),compactStyle);
@@ -118,38 +110,63 @@ namespace RuinRunner
                 {if(unlocked)game.ChooseStartingWeapon(definition.Id);else game.UnlockTownChoice("weapon",definition.Id);}
             }
         }
+        static readonly string[] TalentIcons={
+            "mirror_shard","last_light_pendant","cinder_seed","shadow_twin_ring","thunder_charm","vampire_fang",
+            "blood_pact","gravity_pearl","mana_thread","sage_sigil","soul_capacitor","arcane_lens",
+            "frost_wave_necklace","rush_spur","time_hourglass","trail_spindle","storm_core","guardian_feather",
+            "powder_satchel","phoenix_ash","holy_tithe","poison_censer","focus_prism","vine_snare"};
         void DrawTalents(Rect rect)
         {
-            GUI.Label(new Rect(rect.x,rect.y,rect.width,32),"활성 "+game.ActiveTalents.Ids.Length+"/3 · 계열당 하나 · 마을에서 무료 재배치",compactStyle);
-            string[] families={"전투 운용","기동","탐색","보상 운용"};
-            for(int family=0;family<4;family++)
+            string[] families={"칼날","마나","발놀림","운명","수련"};
+            for(int family=0;family<families.Length;family++)
             {
-                bool active=false;foreach(var id in game.ActiveTalents.Ids)if((int)TalentCatalog.Find(id).Family==family)active=true;
-                var tab=new Rect(rect.x+family*238,rect.y+42,226,44);
+                bool active=false;
+                if(family<4)foreach(var id in game.ActiveTalents.Ids)if((int)TalentCatalog.Find(id).Family==family)active=true;
+                var tab=new Rect(rect.x+family*190,rect.y,180,44);
                 if(GUI.Button(tab,families[family]+(active?" · 활성":""),talentFamilyTab==family?selectedTabStyle:compactButton))talentFamilyTab=family;
             }
-            string[] icons={"rust_sword","guard_bell","mana_thread","storm_feather","guardian_seal","rush_spur",
-                "storm_feather","sapphire_flask","rush_spur","guard_bell","guardian_seal","mana_thread"};
-            for(int column=0;column<3;column++)
+            GUI.Label(new Rect(rect.x,rect.y+50,rect.width,28),"유산 "+game.MetaProgression.LegacyShards,compactStyle);
+            if(talentFamilyTab>=4){DrawMastery(rect);return;}
+            for(int slot=0;slot<TalentCatalog.PerFamily;slot++)
             {
-                int index=talentFamilyTab*3+column;
-                var t=TalentCatalog.All[index];var cell=new Rect(rect.x+column*316,rect.y+108,302,308);
+                int index=talentFamilyTab*TalentCatalog.PerFamily+slot;
+                var t=TalentCatalog.All[index];var cell=new Rect(rect.x+slot%3*316,rect.y+84+slot/3*198,302,186);
                 bool selected=game.ActiveTalents.Has(t.Type);
                 GUI.Box(cell,"",selected?selectedSlotStyle:slotStyle);
-                DrawContentIcon(new Rect(cell.x+16,cell.y+16,56,56),icons[index],index==0?"weapon":"accessory");
-                GUI.Label(new Rect(cell.x+86,cell.y+18,200,54),t.Name,compactStyle);
-                GUI.Label(new Rect(cell.x+18,cell.y+96,266,110),talentSummaries[index],compactStyle);
+                DrawContentIcon(new Rect(cell.x+12,cell.y+10,40,40),TalentIcons[index],"accessory");
+                GUI.Label(new Rect(cell.x+62,cell.y+16,230,30),t.Name,compactStyle);
+                GUI.Label(new Rect(cell.x+14,cell.y+56,276,84),talentSummaries[index],talentText);
                 bool unlocked=Array.IndexOf(game.SaveSlots.ActiveData.unlockedTalentIds,t.Id)>=0;
                 var offer=Array.Find(game.BackendCatalog.talents,v=>v.id==t.Id);
                 bool achievement=offer==null||game.SaveSlots.ActiveData.totalRuns>=offer.requiredRuns;
-                string state=selected?"이번 출정에 적용":unlocked?"해금 완료 · 무료 선택":!achievement?"원정 "+offer.requiredRuns+"회 필요":"해금 비용 · 유산 "+(offer?.unlockCost??0);
-                GUI.Label(new Rect(cell.x+18,cell.y+210,266,30),state,compactStyle);
-                string label=selected?"선택 해제":unlocked?"이 재능 선택":!achievement?"아직 잠겨 있음":"유산 "+(offer?.unlockCost??0)+" · 해금";
+                string label=selected?"해제":unlocked?"선택":!achievement?"원정 "+offer.requiredRuns+"회 필요":"유산 "+(offer?.unlockCost??0)+" 해금";
                 bool before=GUI.enabled;GUI.enabled=before&&(unlocked||achievement);
-                if(GUI.Button(new Rect(cell.x+16,cell.y+252,270,40),label,compactButton)){if(unlocked)game.ToggleTalent(t.Id);else game.UnlockTownChoice("talent",t.Id);}
+                if(GUI.Button(new Rect(cell.x+12,cell.y+146,278,32),label,compactButton)){if(unlocked)game.ToggleTalent(t.Id);else game.UnlockTownChoice("talent",t.Id);}
                 GUI.enabled=before;
             }
-            GUI.Label(new Rect(rect.x,rect.y+438,rect.width,42),"같은 계열의 다른 재능을 고르면 교체됩니다. 출정 후에는 이번 원정의 선택이 고정됩니다.",compactStyle);
+        }
+        void DrawMastery(Rect rect)
+        {
+            var unlocked=game.SaveSlots.ActiveData.unlockedTalentIds;
+            for(int row=0;row<TalentCatalog.Mastery.Length;row++)
+            {
+                var track=TalentCatalog.Mastery[row];int rank=TalentCatalog.MasteryRank(unlocked,track);
+                var box=new Rect(rect.x,rect.y+84+row*49,rect.width,44);GUI.Box(box,"",slotStyle);
+                GUI.Label(new Rect(box.x+14,box.y+8,430,30),track.Name+" · "+track.Effect,compactStyle);
+                var old=GUI.color;
+                for(int pip=0;pip<TalentCatalog.MasteryRanks;pip++)
+                {
+                    GUI.color=pip<rank?new Color(1f,.76f,.16f):new Color(.16f,.13f,.2f);
+                    GUI.DrawTexture(new Rect(box.x+470+pip*38,box.y+13,30,18),Texture2D.whiteTexture);
+                }
+                GUI.color=old;
+                bool maxed=rank>=TalentCatalog.MasteryRanks;
+                int cost=maxed?0:TalentCatalog.MasteryCosts[rank];
+                bool before=GUI.enabled;GUI.enabled=before&&!maxed&&game.MetaProgression.LegacyShards>=cost;
+                if(GUI.Button(new Rect(box.xMax-176,box.y+6,168,32),maxed?"완료":"유산 "+cost,compactButton))
+                    game.UnlockTownChoice("talent",TalentCatalog.MasteryId(track,rank+1));
+                GUI.enabled=before;
+            }
         }
         void DrawExpedition(Rect rect)
         {
@@ -157,16 +174,13 @@ namespace RuinRunner
             GUI.Label(new Rect(rect.x+70,rect.y+32,rect.width-140,45),"새 원정",titleStyle);
             GUI.Label(new Rect(rect.x+100,rect.y+104,rect.width-200,42),"시작 무기 · "+weapon.Name,bodyStyle);
             var names=new System.Collections.Generic.List<string>();foreach(var id in game.ActiveTalents.Ids)names.Add(TalentCatalog.Find(id).Name);
-            GUI.Label(new Rect(rect.x+100,rect.y+158,rect.width-200,80),"재능 · "+string.Join(" / ",names)+"\n출정하면 이번 원정 동안 고정됩니다.",compactStyle);
-            GUI.Label(new Rect(rect.x+100,rect.y+246,rect.width-200,70),"골드는 이번 원정에서만 사용합니다.\n유산과 해금은 귀환 뒤에도 남습니다.",compactStyle);
-            if(game.BackendHasUnfinishedRun)
-            {GUI.Label(new Rect(rect.x+100,rect.y+318,rect.width-200,40),"정리되지 않은 이전 원정이 있습니다.",compactStyle);if(GUI.Button(new Rect(rect.center.x-150,rect.y+380,300,52),"이전 원정 정리",compactButton))game.ResolveInterruptedExpedition();}
-            else if(GUI.Button(new Rect(rect.center.x-150,rect.y+365,300,52),"출정",buttonStyle))game.DepartTown();
+            GUI.Label(new Rect(rect.x+100,rect.y+158,rect.width-200,80),"재능 · "+string.Join(" / ",names),compactStyle);
+            if(GUI.Button(new Rect(rect.center.x-150,rect.y+365,300,52),"출정",buttonStyle))game.DepartTown();
         }
         void DrawMerchant(Rect rect)
         {
-            var shop=game.CurrentShop;if(shop==null){GUI.Label(rect,"상점 재고를 확인하고 있습니다.",compactStyle);return;}
-            GUI.Label(new Rect(rect.x,rect.y,580,30),"골드 "+game.RunGold+" · 재방문해도 재고는 유지됩니다",compactStyle);
+            var shop=game.CurrentShop;if(shop==null)return;
+            DrawGold(rect.x,rect.y,compactStyle);
             for(int i=0;i<shop.offers.Length;i++)
             {
                 var o=shop.offers[i];var cell=new Rect(rect.x,rect.y+34+i*90,560,84);GUI.Box(cell,"",slotStyle);
@@ -182,35 +196,31 @@ namespace RuinRunner
             var side=new Rect(rect.x+580,rect.y,rect.width-580,rect.height);
             var selected=Array.Find(shop.offers,o=>o.offerId==merchantDetailOffer);
             if(selected==null)DrawOwnedEquipmentList(side,true);
-            else DrawMerchantDetails(side,selected,shop.barterUsed);
+            else DrawMerchantDetails(side,selected);
         }
-        void DrawMerchantDetails(Rect rect,RuinRunner.Backend.ShopOffer offer,bool barterUsed)
+        void DrawMerchantDetails(Rect rect,RuinRunner.Backend.ShopOffer offer)
         {
-            bool canBarter=game.ActiveTalents.Has(TalentId.MerchantBarter);
             string description=WrapPanelText(ContentDescription(offer.contentId,offer.kind),rect.width-38);
             float contentHeight=compactStyle.CalcHeight(new GUIContent(description),rect.width-38);
-            rect.height=Mathf.Clamp(130+contentHeight+(canBarter?104:62),272,rect.height);
+            rect.height=Mathf.Clamp(130+contentHeight+62,272,rect.height);
             GUI.Box(rect,"",slotStyle);
             if(GUI.Button(new Rect(rect.x,rect.y,rect.width,30),"판매 목록으로",compactButton))merchantDetailOffer=null;
             DrawContentIcon(new Rect(rect.x+12,rect.y+44,64,64),offer.contentId,offer.kind);
             GUI.Label(new Rect(rect.x+92,rect.y+48,rect.width-108,64),WrapPanelText(ContentName(offer.contentId,offer.kind),rect.width-108),compactStyle);
-            var view=new Rect(rect.x+8,rect.y+118,rect.width-16,rect.height-(canBarter?218:176));
+            var view=new Rect(rect.x+8,rect.y+118,rect.width-16,rect.height-176);
             merchantDetailScroll=GUI.BeginScrollView(view,merchantDetailScroll,new Rect(0,0,view.width-22,Mathf.Max(view.height,contentHeight)));
             GUI.Label(new Rect(0,0,view.width-22,contentHeight),description,compactStyle);GUI.EndScrollView();
             bool old=GUI.enabled;GUI.enabled=old&&offer.stock>0;
-            if(GUI.Button(new Rect(rect.x+10,rect.yMax-(canBarter?84:48),rect.width-20,34),offer.stock>0?offer.price+" 골드 · 구매":"품절",compactButton))game.BuyShopOffer(offer.offerId);
-            GUI.enabled=old&&offer.stock>0&&!barterUsed&&game.Inventory.FindOwned(game.ServiceSelectedEquipment)!=null;
-            if(canBarter)
-                if(GUI.Button(new Rect(rect.x+10,rect.yMax-42,rect.width-20,34),barterUsed?"현물 교환 사용 완료":"선택한 장비로 현물 교환",compactButton))game.BuyShopOffer(offer.offerId,true);
+            if(GUI.Button(new Rect(rect.x+10,rect.yMax-48,rect.width-20,34),offer.stock>0?offer.price+" 골드 · 구매":"품절",compactButton))game.BuyShopOffer(offer.offerId);
             GUI.enabled=old;
         }
         string ContentDescription(string id,string kind)
         {
-            if(kind=="heal")return "체력 "+(game.BackendCatalog?.economy?.healAmount??0)+" 회복\n구매 즉시 사용 · 최대 체력을 넘지 않습니다.";
+            if(kind=="heal")return "체력 "+(game.BackendCatalog?.economy?.healAmount??0)+" 회복";
             if(kind=="accessory")return AccessoryLootTable.Find(id)?.Description??"";
             var weapon=WeaponLootTable.Find(id);if(weapon==null)return "";
             return WeaponActionCatalog.Get(weapon).Description+"\n기본 공격력 "+weapon.AttackPower.ToString("0.#")+
-                (weapon.AttackType==WeaponAttackType.Ranged?" · 탄창 "+weapon.MagazineSize+"\n장전 "+weapon.ReloadSeconds.ToString("0.#")+"초":" · "+MeleeComboCatalog.Get(weapon).LightSteps.Length+"연속 콤보");
+                (weapon.AttackType==WeaponAttackType.Ranged?" · 탄창 "+weapon.MagazineSize+"\n장전 "+weapon.ReloadSeconds.ToString("0.#")+"초":"");
         }
         void DrawOwnedEquipmentList(Rect rect,bool sell)
         {
@@ -231,21 +241,20 @@ namespace RuinRunner
             DrawOwnedEquipmentList(new Rect(rect.x,rect.y,270,rect.height),false);
             var area=new Rect(rect.x+294,rect.y,rect.width-294,rect.height);
             var weapon=game.Inventory.FindOwned(game.ServiceSelectedEquipment) as OwnedWeapon;
-            if(game.OpenService.Used){GUI.Label(area,"이 장소는 이미 사용했습니다.",compactStyle);return;}
-            if(weapon==null){GUI.Label(area,"변화를 새길 무기를 고르세요.",compactStyle);return;}
-            GUI.Label(new Rect(area.x,area.y,area.width,50),weapon.Name+" · 사본 한 개에만 적용",bodyStyle);
+            if(game.OpenService.Used)return;
+            if(weapon==null)return;
+            GUI.Label(new Rect(area.x,area.y,area.width,50),weapon.Name,bodyStyle);
             if(game.OpenService.Kind==FieldServiceKind.ShapeAnvil)
             {
                 var choices=weapon.Definition.AttackType==WeaponAttackType.Melee?new[]{EquipmentMutation.LongFinisher,EquipmentMutation.WideFinisher}:new[]{EquipmentMutation.Ricochet,EquipmentMutation.AnchorRound};
                 for(int i=0;i<choices.Length;i++)
                 {var m=choices[i];var box=new Rect(area.x,area.y+64+i*156,area.width,140);GUI.Box(box,"",slotStyle);GUI.Label(new Rect(box.x+18,box.y+14,box.width-36,58),EquipmentMutationRules.Name(m)+"\n"+EquipmentMutationRules.Summary(m),compactStyle);bool old=GUI.enabled;GUI.enabled=old&&EquipmentMutationRules.Compatible(weapon,m);if(GUI.Button(new Rect(box.x+18,box.y+88,box.width-36,38),"이 변형 선택",compactButton))game.ApplyFieldMutation(m);GUI.enabled=old;}
-                GUI.Label(new Rect(area.x,area.y+395,area.width,60),"한 번만 선택 · 다른 변형과 함께 적용 불가\n무기의 전용 특수행동은 유지됩니다.",compactStyle);
             }
             else
             {
                 int row=0;foreach(EquipmentOath oath in Enum.GetValues(typeof(EquipmentOath)))
                 {if(!game.CanBeginOath(weapon,oath))continue;var box=new Rect(area.x,area.y+60+row++*126,area.width,118);GUI.Box(box,"",slotStyle);GUI.Label(new Rect(box.x+12,box.y+8,box.width-150,24),EquipmentMutationRules.OathName(oath),compactStyle);GUI.Label(new Rect(box.x+12,box.y+36,box.width-150,74),EquipmentMutationRules.OathCondition(oath)+"\n"+EquipmentMutationRules.OathResult(oath),talentText);if(GUI.Button(new Rect(box.xMax-126,box.y+42,110,38),"서약",compactButton))game.AcceptEquipmentOath(oath);}
-                if(row==0)GUI.Label(new Rect(area.x,area.y+66,area.width,80),"진행 중인 서약이 있거나 이 장비의 조건을 이미 선택했습니다.",compactStyle);
+                
             }
         }
         void DrawExchange(Rect rect)
@@ -269,7 +278,7 @@ namespace RuinRunner
             var preview=new Rect(rect.x+330,rect.y,rect.width-330,rect.height);GUI.Box(preview,"",slotStyle);
             var choice=game.FindExchangeRecipe(game.PendingExchangeRecipe);
             if(choice==null)
-            {GUI.Label(new Rect(preview.x+24,preview.y+24,preview.width-48,60),"교환할 유물을 고르면 필요한 재료와 효과를 비교할 수 있습니다.",compactStyle);return;}
+            return;
             if(exchangeDetailRecipe!=choice.Id){exchangeDetailRecipe=choice.Id;exchangeDetailScroll=Vector2.zero;}
             var ingredients=game.ExchangeIngredients(choice.Id);var output=AccessoryLootTable.Find(choice.OutputId);
             if(output==null)return;
@@ -303,7 +312,6 @@ namespace RuinRunner
                 GUI.Label(new Rect(x,materialY+116,columnWidth,materialHeight),description,compactStyle);
             }
             GUI.EndScrollView();
-            GUI.Label(new Rect(preview.x+16,preview.yMax-82,preview.width-32,30),"소비한 장신구의 효과와 세트 기여는 사라집니다.",talentText);
             bool old=GUI.enabled;GUI.enabled=old&&ingredients.Length==2&&!game.OpenService.Used;
             string action=game.OpenService.Used?"이 제단은 사용했습니다":ingredients.Length==2?"장신구 두 개 소비 · 교환":"재료 부족";
             if(GUI.Button(new Rect(preview.x+16,preview.yMax-46,preview.width-32,34),action,compactButton))game.ConfirmExchange();GUI.enabled=old;
@@ -315,7 +323,5 @@ namespace RuinRunner
             var weapon=kind=="weapon"?WeaponLootTable.Find(id):null;var accessory=kind=="accessory"?AccessoryLootTable.Find(id):null;
             if(weapon!=null||accessory!=null)ItemIconLibrary.DrawGUI(rect,InventoryIconFactory.Get(id,weapon!=null?weapon.Color:accessory.Color,weapon!=null?InventoryIconKind.Weapon:InventoryIconKind.Accessory));
         }
-        static string ShortEffect(string description)
-        {var lines=description.Split('\n');return lines.Length>1?lines[0]+"\n"+lines[1]:description;}
     }
 }

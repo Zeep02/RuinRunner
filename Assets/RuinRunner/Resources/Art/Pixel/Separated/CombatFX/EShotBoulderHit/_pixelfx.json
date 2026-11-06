@@ -1,0 +1,28 @@
+{
+  "clip": "EShotBoulderHit",
+  "ppu": 32,
+  "pivotX": 0.34896,
+  "pivotY": 0.30208,
+  "width": 96,
+  "height": 48,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "impacts/hit-spark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 26,
+  "fps": 30,
+  "loop": false,
+  "frames": 16,
+  "durationSeconds": 0.533,
+  "visibleDiameter": 54,
+  "origin": [
+    33,
+    33
+  ],
+  "optionsJson": "{\"palette\":[\"#140e0a\",\"#2a1e14\",\"#47321e\",\"#69492a\",\"#8e6638\",\"#b88a52\",\"#e6c08a\"],\"height\":0}"
+}

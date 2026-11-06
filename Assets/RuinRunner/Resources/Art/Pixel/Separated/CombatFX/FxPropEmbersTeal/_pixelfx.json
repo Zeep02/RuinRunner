@@ -1,0 +1,29 @@
+{
+  "clip": "FxPropEmbersTeal",
+  "ppu": 32,
+  "pivotX": 0.51667,
+  "pivotY": 0.32222,
+  "width": 30,
+  "height": 45,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "fire/prop-embers",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 120,
+  "durationSeconds": 4,
+  "visibleDiameter": 26,
+  "origin": [
+    15,
+    30
+  ],
+  "optionsJson": "{\"palette\":[\"#0e4a58\",\"#1c8ebc\",\"#36c2d0\",\"#b8f4ee\"]}"
+}

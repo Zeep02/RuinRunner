@@ -1,0 +1,29 @@
+{
+  "clip": "ETotemBeam",
+  "ppu": 32,
+  "pivotX": 0.02126,
+  "pivotY": 0.65179,
+  "width": 588,
+  "height": 56,
+  "premultiplied": true,
+  "canvas": "620x90",
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "enemies/beam",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 10,
+  "fps": 30,
+  "loop": false,
+  "frames": 16,
+  "durationSeconds": 0.533,
+  "visibleDiameter": 574,
+  "origin": [
+    12,
+    19
+  ],
+  "optionsJson": "{\"palette\":[\"#2a1c08\",\"#5a3e10\",\"#9a6c18\",\"#d8a428\",\"#ffd84a\",\"#fff09a\",\"#fffbe6\"],\"L\":576,\"W\":8}"
+}

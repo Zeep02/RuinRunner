@@ -1,0 +1,28 @@
+{
+  "clip": "WNightThreadB",
+  "ppu": 32,
+  "pivotX": 0.00781,
+  "pivotY": 0.16667,
+  "width": 64,
+  "height": 3,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/line",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 81,
+  "fps": 30,
+  "loop": false,
+  "frames": 11,
+  "durationSeconds": 0.367,
+  "visibleDiameter": 64,
+  "origin": [
+    0,
+    2
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0a24\",\"#191648\",\"#2b2478\",\"#4638b0\",\"#7a6ce0\",\"#b8aaff\",\"#f4eeff\"],\"style\":\"thread\",\"W\":2,\"taper\":false}"
+}

@@ -1,0 +1,28 @@
+{
+  "clip": "WardenSpike",
+  "ppu": 32,
+  "pivotX": 0.51449,
+  "pivotY": 0.22321,
+  "width": 69,
+  "height": 56,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "bosses/warden-spike",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 17,
+  "durationSeconds": 1.133,
+  "visibleDiameter": 69,
+  "origin": [
+    35,
+    43
+  ],
+  "optionsJson": "{}"
+}

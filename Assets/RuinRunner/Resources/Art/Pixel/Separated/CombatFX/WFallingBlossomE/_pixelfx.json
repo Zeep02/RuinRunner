@@ -1,0 +1,29 @@
+{
+  "clip": "WFallingBlossomE",
+  "ppu": 32,
+  "pivotX": 0.56542,
+  "pivotY": 0.5885,
+  "width": 107,
+  "height": 113,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "melee/flower-bloom",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 78,
+  "fps": 30,
+  "loop": false,
+  "frames": 36,
+  "durationSeconds": 1.2,
+  "visibleDiameter": 107,
+  "origin": [
+    60,
+    46
+  ],
+  "optionsJson": "{\"palette\":[\"#2c0e20\",\"#5e1c40\",\"#a03068\",\"#d85a90\",\"#ff90b8\",\"#ffc8dc\",\"#fff4f8\"],\"R\":44,\"petals\":7,\"seed\":12}"
+}

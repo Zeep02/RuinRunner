@@ -18,7 +18,7 @@ namespace RuinRunner
             ammoRoot = new GameObject("AmmoGauge");
             ammoRoot.transform.SetParent(transform, false);
             KeepGaugeAboveCombat(ammoRoot);
-            // Both gauges stay centered; ammo/reload occupies the lower row.
+            // Both gauges stay centered; ammo occupies the lower row.
             ammoRoot.transform.localPosition = new Vector3(0f, -1.6875f, 0f);
 
             var ammoBackground = CreateBarPart("AmmoGaugeBackground", ammoRoot.transform, new Vector3(.76f, .52f, 1f), new Color(.03f, .04f, .07f, .9f), 28);
@@ -38,7 +38,7 @@ namespace RuinRunner
             KeepGaugeAboveCombat(gauge);
             gauge.transform.localPosition = new Vector3(0, -1.25f, 0);
             dashGauge = gauge.AddComponent<DashChargeGraphic>();
-            dashGauge.SetCharges(player.DashCharges, player.DashRechargeProgress);
+            dashGauge.SetCharges(player.DashCharges, player.DashRechargeProgress, player.DashCapacity);
         }
 
         private void LateUpdate()
@@ -56,14 +56,14 @@ namespace RuinRunner
 
             if (showAmmo)
             {
-                var ratio = slot.IsReloading ? slot.ReloadProgress : slot.Ammo / (float)slot.Weapon.MagazineSize;
+                // The hero's own reload motion shows the reload; the gauge only ever shows the rounds left.
+                var ratio = slot.Ammo / (float)slot.Weapon.MagazineSize;
                 var width = .56f * Mathf.Clamp01(ratio);
                 ammoFill.localScale = new Vector3(width, .2f, 1f);
                 ammoFill.localPosition = new Vector3((width - .56f) * .5f, 0, 0);
-                ammoFillRenderer.color = slot.IsReloading ? new Color(1f, .45f, .15f) : new Color(1f, .78f, .2f);
             }
 
-            dashGauge.SetCharges(player.DashCharges, player.DashRechargeProgress);
+            dashGauge.SetCharges(player.DashCharges, player.DashRechargeProgress, player.DashCapacity);
         }
 
         private static void KeepGaugeAboveCombat(GameObject root)

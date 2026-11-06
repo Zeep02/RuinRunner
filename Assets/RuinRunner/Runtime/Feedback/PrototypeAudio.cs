@@ -36,7 +36,7 @@ namespace RuinRunner
             var nativeId=sound==PrototypeSound.Hit?"impact":sound==PrototypeSound.Hurt?"hurt":
                 sound==PrototypeSound.Dash?"dash":sound==PrototypeSound.Block?"block":
                 sound==PrototypeSound.Attack?"sword":sound==PrototypeSound.HeavyAttack?"cleave":
-                sound==PrototypeSound.Upgrade?"upgrade":null;
+                sound==PrototypeSound.Upgrade?"level-up":sound==PrototypeSound.Shoot?"magic":null;
             if(nativeId!=null&&CombatAudio.Clip(nativeId)!=null){CombatAudio.Native(nativeId,channel,volume);return;}
             AudioClip clip;
             if (!Clips.TryGetValue(sound, out clip))

@@ -1,0 +1,28 @@
+{
+  "clip": "FxManaBurst",
+  "ppu": 32,
+  "pivotX": 0.47238,
+  "pivotY": 0.16781,
+  "width": 181,
+  "height": 146,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "arcane/mana-burst",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 28,
+  "durationSeconds": 1.867,
+  "visibleDiameter": 156,
+  "origin": [
+    85,
+    121
+  ],
+  "optionsJson": "{}"
+}

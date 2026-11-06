@@ -130,7 +130,6 @@ namespace RuinRunner
             if(game.IsMapOpen)return Phase.Map;
             if(game.IsInventoryOpen)return Phase.Inventory;
             if(game.IsStatsOpen)return Phase.Stats;
-            if(game.IsUnlockOpen)return Phase.Unlock;
             if(game.IsServiceOpen)return Phase.Service;
             if(game.IsChoosingAccessory)return Phase.Reward;
             if(game.IsGameOver)return Phase.Result;

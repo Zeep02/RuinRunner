@@ -24,7 +24,7 @@ namespace RuinRunner
         private EncounterBarrier arrivalSeal;
         private Vector2 departureEntry,arrivalEntry;
 
-        public static RoomExit CreateGraphConnection(Transform parent,GeneratedConnection edge,StageTerrainLayout terrain,Action<int> enteredCallback)
+        public static RoomExit CreateGraphConnection(Transform parent,GeneratedConnection edge,string theme,Action<int> enteredCallback)
         {
             var departure=GeneratedStageUnityAdapter.Vector(edge.DepartureGate);var arrival=GeneratedStageUnityAdapter.Vector(edge.ArrivalGate);
             var axis=(arrival-departure).normalized;bool vertical=Mathf.Abs(axis.y)>.5f;
@@ -32,8 +32,8 @@ namespace RuinRunner
             root.transform.position=arrival+axis*3.25f;
             var exit=root.AddComponent<RoomExit>();exit.IsGraphConnection=true;exit.ConnectionId=edge.Id;exit.SourceRoom=edge.FromIndex;exit.targetRoom=edge.ToIndex;exit.onEntered=enteredCallback;
             exit.departureEntry=departure-axis*3.25f;exit.arrivalEntry=arrival+axis*3.25f;
-            exit.departureSeal=EncounterBarrier.Create(parent,departure,vertical,false,edge.Width,terrain);
-            exit.arrivalSeal=EncounterBarrier.Create(parent,arrival,vertical,false,edge.Width,terrain);
+            exit.departureSeal=EncounterBarrier.Create(parent,departure,vertical,false,edge.Width,theme);
+            exit.arrivalSeal=EncounterBarrier.Create(parent,arrival,vertical,false,edge.Width,theme);
             exit.CreateEntryTrigger(root.transform,exit.departureEntry,vertical,edge.Width,edge.FromIndex);
             exit.CreateEntryTrigger(root.transform,exit.arrivalEntry,vertical,edge.Width,edge.ToIndex);
             exit.unlocked=true;return exit;

@@ -1,0 +1,29 @@
+{
+  "clip": "WRefractorStaffA",
+  "ppu": 32,
+  "pivotX": 0.51786,
+  "pivotY": 0.48214,
+  "width": 28,
+  "height": 28,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 24,
+  "origin": [
+    14,
+    14
+  ],
+  "optionsJson": "{\"palette\":[\"#2a2c36\",\"#50566a\",\"#8088a0\",\"#b0b8cc\",\"#d8dee8\",\"#f4f6fa\",\"#ffffff\"],\"shape\":\"prism\",\"size\":1.6}"
+}

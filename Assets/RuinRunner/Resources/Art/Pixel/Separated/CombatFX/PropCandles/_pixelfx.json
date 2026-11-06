@@ -1,0 +1,14 @@
+{
+  "clip": "PropCandles",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.0375,
+  "width": 32,
+  "height": 40,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "fb6c997c-d81a-4661-b6e0-094d0101a6fc",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

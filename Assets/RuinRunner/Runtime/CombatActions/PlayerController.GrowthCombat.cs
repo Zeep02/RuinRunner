@@ -13,6 +13,7 @@ namespace RuinRunner
         bool crossAwakeReady;
         readonly HashSet<long> volleyReadyCopies=new HashSet<long>();
         int awakenedAction=-1;
+        bool shotPlantsRound;
         NativeCombatEffect plantedView;
         WeaponFamily previousWeaponFamily;
         EquipmentMutation CurrentMutation=>ActiveWeaponState?.Item?.Mutation??EquipmentMutation.None;
@@ -25,11 +26,6 @@ namespace RuinRunner
             if(CurrentMutation==EquipmentMutation.WideFinisher)
                 return new MeleeAttackStep(step.DamageMultiplier,step.DelayMultiplier,step.Reach*.8f,new Vector2(step.HitboxSize.x*.8f,step.HitboxSize.y*1.3f),step.AngleOffset,step.Knockback,step.Motion);
             return step;
-        }
-        void ConfigureMutatedProjectile(PlayerProjectile shot)
-        {
-            bool volleyReady=volleyReadyCopies.Remove(CurrentWeaponIdentity);
-            shot.WithMutation(CurrentMutation==EquipmentMutation.Ricochet,CurrentMutation==EquipmentMutation.AnchorRound||volleyReady);
         }
         public void PlantAwakenedRound(Vector2 point,float damage,int sourceAction,long sourceWeaponIdentity)
         {
@@ -55,7 +51,7 @@ namespace RuinRunner
         {
             if(!crossAwakeReady||!IsAwake(EquipmentOath.CrossWeaponChain))return;
             crossAwakeReady=false;var from=(Vector2)transform.position;
-            var clip=previousWeaponFamily>=WeaponFamily.Crossbow?"RifleEnergy":"TwinCrescent";
+            var clip=previousWeaponFamily>=WeaponFamily.Crossbow&&previousWeaponFamily!=WeaponFamily.Spear?"RifleEnergy":"TwinCrescent";
             ActionLine(from,CombatActionGeometry.Clip(from,AimDirection,3.2f),.75f,Damage*.38f,clip);
         }
         void OnCombatReload(OwnedWeapon item,bool wasEmpty)
@@ -63,16 +59,6 @@ namespace RuinRunner
             if(item==null)return;
             Grow(CombatGrowthKind.ReloadCompleted,null,item.ReloadSequence,false,item.Identity,wasEmpty);
             if(wasEmpty&&item.Awakened&&item.Oath==EquipmentOath.SteadyVolley)volleyReadyCopies.Add(item.Identity);
-        }
-        IEnumerator AimedRifleRelease(Vector2 aim,float damage,bool critical,Color color,int epoch)
-        {
-            NativeCombatEffect.Create("Charge",committedShotOrigin,0,.75f,.12f,Color.white)?.BelowActor(spriteRenderer,-3);
-            float elapsed=0;
-            while(elapsed<.1f&&IsCombatEpochValid(epoch)){elapsed+=Time.deltaTime;yield return null;}
-            if(!IsCombatEpochValid(epoch))yield break;
-            PrepareRangedShot(aim,.2f);
-            SpawnProjectile(aim,damage*1.2f,critical,color,new Vector2(.7f,.22f),6,EquippedWeapon.ProjectileSpeed*1.25f,true);
-            CombatPresentation.Muzzle(EquippedWeapon.Family,committedShotOrigin,aim,true,EquippedWeapon.Id,spriteRenderer.sortingOrder-1,spriteRenderer);
         }
     }
 }

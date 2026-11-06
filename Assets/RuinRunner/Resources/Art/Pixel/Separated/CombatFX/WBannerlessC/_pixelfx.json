@@ -1,0 +1,29 @@
+{
+  "clip": "WBannerlessC",
+  "ppu": 32,
+  "pivotX": 0.51923,
+  "pivotY": 0.02113,
+  "width": 26,
+  "height": 71,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 68,
+  "origin": [
+    13,
+    69
+  ],
+  "optionsJson": "{\"palette\":[\"#180a0a\",\"#3c1412\",\"#6c1e18\",\"#a03020\",\"#d0502c\",\"#f09050\",\"#ffe0b0\"],\"shape\":\"spear\",\"size\":1.2}"
+}

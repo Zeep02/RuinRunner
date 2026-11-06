@@ -1,0 +1,29 @@
+{
+  "clip": "UiLevelUp",
+  "ppu": 32,
+  "pivotX": 0.48098,
+  "pivotY": 0.16667,
+  "width": 184,
+  "height": 147,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "0.9",
+  "source": "pixelfx",
+  "effect": "arcane/mana-burst",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 27,
+  "durationSeconds": 0.9,
+  "visibleDiameter": 156,
+  "origin": [
+    88,
+    122
+  ],
+  "optionsJson": "{\"palette\":[\"#241006\",\"#52240a\",\"#8e4210\",\"#cc7018\",\"#f4a42c\",\"#ffd878\",\"#fff6d8\"]}"
+}

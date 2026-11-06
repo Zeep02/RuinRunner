@@ -74,6 +74,7 @@ namespace RuinRunner
         public void Initialize(GameController controller)
         {
             game = controller;
+            useGUILayout = false;
         }
 
         private void OnGUI()
@@ -98,34 +99,34 @@ namespace RuinRunner
 
             if (game.IsStageTransitioning)
             {
-                var oldColor=GUI.color;GUI.color=new Color(.035f,.045f,.065f,1);
-                GUI.DrawTexture(new Rect(0,0,width,height),Texture2D.whiteTexture);GUI.color=oldColor;
-                DrawPanel(new Rect(width/2-300,height/2-70,600,140));
-                GUI.Label(new Rect(width/2-280,height/2-48,560,96),game.CurrentStageIndex==0?"원정을 준비하는 중…":"봉인 너머로…\n장비와 성장은 이어집니다",titleStyle);
                 GUI.matrix = oldMatrix;
                 return;
             }
 
             var hasModal = game.IsGameOver || game.IsChoosingAccessory || game.IsInventoryOpen || game.IsStatsOpen ||
-                           game.IsUnlockOpen || game.IsManuallyPaused || game.IsMapOpen;
+                           game.IsManuallyPaused || game.IsMapOpen;
             if (!hasModal && !game.IsTown && !game.IsServiceOpen)
             {
                 DrawRunHud();
                 DrawMiniMap(width);
                 DrawQuickSlots(width, height);
                 DrawBossHealth(width);
-                DrawNotifications(width);
+                DrawWaveBanner(width);
+                DrawNotifications(height);
                 DrawStageGuidance(width, height);
             }
-            if (game.IsMapOpen) mapView.DrawExpanded(game, width, height, bodyStyle, centerStyle);
+            if (game.IsMapOpen) mapView.DrawExpanded(game, width, height);
 
+            if (!game.IsChoosingAccessory) choiceOpenedAt = -1f;
+            if (!game.IsGameOver) resultOpenedAt = -1f;
             if (game.IsGameOver)
             {
                 ClearInventoryDrag();
                 if (!game.IsVictory && game.Player != null && game.Player.IsDead && game.Player.DeathProgress < 1f)
                 { GUI.matrix = oldMatrix; return; }
-                if (game.IsUnlockOpen) DrawMetaUnlock(width, height);
-                else DrawResult(width, height);
+                if (!game.IsVictory && game.Player != null && !InkTransition.CoverForResult(game.Player.FeetPoint, () => game.IsGameOver))
+                { GUI.matrix = oldMatrix; return; }
+                DrawResult(width, height);
             }
             else
             {
@@ -135,7 +136,6 @@ namespace RuinRunner
                 else
                     ClearInventoryDrag();
                 if (game.IsStatsOpen) DrawStats(width, height);
-                if (game.IsUnlockOpen) DrawMetaUnlock(width, height);
                 if (game.IsManuallyPaused) DrawPause(width, height);
             }
 
@@ -161,6 +161,7 @@ namespace RuinRunner
                 GUI.DrawTexture(new Rect(0, 0, width, height), Texture2D.whiteTexture);
                 GUI.color = oldColor;
             }
+            MenuAmbience.Draw(width, height);
 
             if (game.CurrentFrontEndPage == FrontEndPage.SaveSlots)
                 DrawSaveSlots(width, height);
@@ -174,7 +175,7 @@ namespace RuinRunner
         {
             var logo = PixelUiSkin.MenuLogo;
             if (logo != null)
-                GUI.DrawTexture(new Rect(width / 2f - 250f, height / 2f - 286f, 500f, 232f), logo, ScaleMode.ScaleToFit, true);
+                GUI.DrawTexture(new Rect(width / 2f - 250f, height / 2f - 286f + Mathf.Round(Mathf.Sin(Time.unscaledTime * 1.1f) * 4f), 500f, 232f), logo, ScaleMode.ScaleToFit, true);
 
             var x = width / 2f - 150f;
             var y = height / 2f + 14f;
@@ -189,7 +190,6 @@ namespace RuinRunner
             var panel = new Rect(width / 2f - 440, height / 2f - 285, 880, 570);
             DrawPanel(panel);
             GUI.Label(new Rect(panel.x + 40, panel.y + 20, panel.width - 80, 48), "모험가 기록", titleStyle);
-            GUI.Label(new Rect(panel.x + 45, panel.y + 61, panel.width - 90, 25), "마을에서 준비한 뒤 출정합니다. 유산과 해금은 서버에 보존됩니다.", centerStyle);
 
             bool canSelect=GUI.enabled;
             GUI.enabled=canSelect&&!game.SessionOperationPending&&!game.BackendBusy&&game.ResetProfileSlot==0;
@@ -203,7 +203,7 @@ namespace RuinRunner
 
                 if (!summary.Exists)
                 {
-                    GUI.Label(new Rect(row.x + 145, row.y + 29, 330, 54), "빈 슬롯\n새로운 유산을 시작합니다.", detailStyle);
+                    GUI.Label(new Rect(row.x + 145, row.y + 29, 330, 54), "빈 슬롯", detailStyle);
                     if (GUI.Button(new Rect(row.x + row.width - 195, row.y + 27, 165, 54), "마을 입장", buttonStyle))
                     {
                         game.StartSlot(slotNumber);
@@ -211,7 +211,7 @@ namespace RuinRunner
                     continue;
                 }
 
-                var details = (summary.IsServerProfile ? summary.Name : "기존 기록 · 마을 입장 시 이관") +
+                var details = (summary.IsServerProfile ? summary.Name : "기존 기록") +
                               "\n도전 " + summary.TotalRuns + "회  ·  엔딩 " + summary.CampaignVictories + "회  ·  봉인 " + summary.BestCampaignStage + "/3" +
                               "\n처치 " + summary.TotalKills + "  ·  유산 조각 " + summary.LegacyShards;
                 GUI.Label(new Rect(row.x + 145, row.y + 12, 390, 88), details, detailStyle);
@@ -282,7 +282,6 @@ namespace RuinRunner
 
         private void DrawControlOptions(Rect panel)
         {
-            GUI.Label(new Rect(panel.x + 70, panel.y + 143, 760, 30), "행동을 선택한 뒤 새 키나 마우스 버튼을 누르세요.  ESC: 취소 · Backspace: 해제", detailStyle);
             GUI.Label(new Rect(panel.x + 350, panel.y + 171, 195, 28), "기본 키", centerStyle);
             GUI.Label(new Rect(panel.x + 565, panel.y + 171, 195, 28), "보조 키", centerStyle);
 
@@ -328,7 +327,6 @@ namespace RuinRunner
             GUI.Label(new Rect(panel.x + 130, panel.y + 205, 250, 52), "화면 모드", bodyStyle);
             var screenLabel = game.Settings.Fullscreen ? "전체 화면" : "창 모드";
             if (GUI.Button(new Rect(panel.x + 440, panel.y + 202, 300, 56), screenLabel, buttonStyle)) game.ToggleFullscreen();
-            GUI.Label(new Rect(panel.x + 130, panel.y + 295, 610, 60), "화면과 음량, 조작키 설정은 세이브 슬롯과 분리되어 모든 프로필에 공통 적용됩니다.", detailStyle);
         }
 
         private void DrawBindingButton(Rect rect, GameAction action, KeyCode key, bool alternate)
@@ -406,9 +404,48 @@ namespace RuinRunner
             }
         }
 
+        long goldShown;
+        float goldBumpAt = -9f;
+        private void DrawGold(float x, float y, GUIStyle style)
+        {
+            if (game.DisplayedGold > goldShown && Event.current.type == EventType.Repaint) goldBumpAt = Time.unscaledTime;
+            if (Event.current.type == EventType.Repaint) goldShown = game.DisplayedGold;
+            var bump = 1f + .35f * Mathf.Clamp01(1f - (Time.unscaledTime - goldBumpAt) / .16f);
+            ItemIconLibrary.DrawGUI(new Rect(x + 12 - 12 * bump, y + 12 - 12 * bump, 24 * bump, 24 * bump), IndividualArt.Texture("HUD/Gold"));
+            GUI.Label(new Rect(x + 30, y - 1, 200, 28), game.DisplayedGold.ToString(), style);
+        }
+
+        readonly System.Collections.Generic.Dictionary<PixelHudBarType, float> barMemory = new System.Collections.Generic.Dictionary<PixelHudBarType, float>();
+        readonly System.Collections.Generic.Dictionary<PixelHudBarType, float> barChangedAt = new System.Collections.Generic.Dictionary<PixelHudBarType, float>();
+        const float BarHoldSeconds = .28f, BarRunPerSecond = .7f, BarShakeSeconds = .26f, BarShakePixels = 4f;
+        float healthHitAt = -9f;
+
+        float RememberBar(PixelHudBarType type, float ratio)
+        {
+            if (!barMemory.TryGetValue(type, out var memory)) { barMemory[type] = ratio; barChangedAt[type] = -9f; return ratio; }
+            if (Event.current.type != EventType.Repaint) return memory;
+            if (!Mathf.Approximately(memory, ratio) && Time.unscaledTime - barChangedAt[type] > BarHoldSeconds + 1f) barChangedAt[type] = Time.unscaledTime;
+            if (type == PixelHudBarType.Health && ratio < memory - .001f && Time.unscaledTime - healthHitAt > BarShakeSeconds) healthHitAt = Time.unscaledTime;
+            if (Time.unscaledTime - barChangedAt[type] >= BarHoldSeconds)
+            {
+                memory = Mathf.MoveTowards(memory, ratio, BarRunPerSecond * Time.unscaledDeltaTime);
+                barMemory[type] = memory;
+                if (Mathf.Approximately(memory, ratio)) barChangedAt[type] = -9f;
+            }
+            return memory;
+        }
+
+        float HealthBarShake()
+        {
+            var left = 1f - (Time.unscaledTime - healthHitAt) / BarShakeSeconds;
+            return left <= 0f ? 0f : Mathf.Round(Mathf.Sin(Time.unscaledTime * 70f) * BarShakePixels * left);
+        }
+
         private void DrawPixelBar(Rect rect, float ratio, PixelHudBarType type, string label)
         {
             ratio = Mathf.Clamp01(ratio);
+            var memory = RememberBar(type, ratio);
+            if (type == PixelHudBarType.Health) rect.x += HealthBarShake();
             // The same image frame as the rest of the interface, preserving its corners.
             GUI.Box(rect, GUIContent.none, gaugeFrameStyle);
             var oldColor = GUI.color;
@@ -416,7 +453,22 @@ namespace RuinRunner
                 type == PixelHudBarType.Experience ? new Color(.72f, .88f, .38f) : new Color(.81f, .25f, .27f);
             const float padding = 5f;
             var fill = new Rect(rect.x + padding, rect.y + padding, Mathf.Floor((rect.width - padding * 2) * ratio), rect.height - padding * 2);
-            if (fill.width > 0) GUI.DrawTexture(fill, Texture2D.whiteTexture);
+            var full = rect.width - padding * 2;
+            if (memory > ratio)
+            {
+                // What was just lost stays lit for a moment, then runs down to the new level.
+                if (fill.width > 0) GUI.DrawTexture(fill, Texture2D.whiteTexture);
+                GUI.color = new Color(1f, .93f, .78f, 1f);
+                GUI.DrawTexture(new Rect(fill.xMax, fill.y, Mathf.Floor(full * memory) - fill.width, fill.height), Texture2D.whiteTexture);
+            }
+            else
+            {
+                // What was just gained arrives bright, ahead of the bar filling to meet it.
+                var settled = Mathf.Floor(full * memory);
+                if (settled > 0) GUI.DrawTexture(new Rect(fill.x, fill.y, settled, fill.height), Texture2D.whiteTexture);
+                GUI.color = Color.Lerp(GUI.color, Color.white, .7f);
+                if (fill.width > settled) GUI.DrawTexture(new Rect(fill.x + settled, fill.y, fill.width - settled, fill.height), Texture2D.whiteTexture);
+            }
             GUI.color = oldColor;
             if (!string.IsNullOrEmpty(label))
             {
@@ -452,13 +504,12 @@ namespace RuinRunner
                 ItemIconLibrary.DrawGUI(new Rect(rect.center.x - 26f, rect.y + 20f, 52f, 54f), icon);
                 if (slot.Weapon.AttackType == WeaponAttackType.Ranged)
                 {
-                    var ammo = slot.IsReloading ? "R" : slot.Ammo.ToString();
-                    GUI.Label(new Rect(rect.x + 6f, rect.y + 76f, 68f, 14f), ammo, quickAmmoStyle);
+                    GUI.Label(new Rect(rect.x + 6f, rect.y + 76f, 68f, 14f), slot.Ammo.ToString(), quickAmmoStyle);
                 }
             }
         }
 
-        private void DrawMiniMap(float width) => mapView.DrawMini(game, width, bodyStyle);
+        private void DrawMiniMap(float width) => mapView.DrawMini(game, width);
 
         private void DrawWaveBanner(float width)
         {
@@ -466,6 +517,11 @@ namespace RuinRunner
 
             var oldColor = GUI.color;
             GUI.color = new Color(1f, 1f, 1f, Mathf.Clamp01((game.WaveBannerUntil - Time.unscaledTime) * 2f));
+            GUI.color = Color.white;
+            // The stroke is as long as the words need: a short count should not cross the whole view.
+            var strokeWidth = Mathf.Clamp(titleStyle.CalcSize(new GUIContent(game.WaveBanner)).x + 200f, 300f, 720f);
+            UiFx.BrushStroke(new Rect(width / 2f - strokeWidth / 2f, 130, strokeWidth, 60), Time.unscaledTime - game.WaveBannerSince, game.WaveBannerUntil - Time.unscaledTime);
+            GUI.color = new Color(1f, 1f, 1f, Mathf.Clamp01((Time.unscaledTime - game.WaveBannerSince - .08f) / .14f) * Mathf.Clamp01((game.WaveBannerUntil - Time.unscaledTime) / .25f));
             GUI.Label(new Rect(width / 2f - 300, 125, 600, 70), game.WaveBanner, titleStyle);
             GUI.color = oldColor;
         }
@@ -480,13 +536,16 @@ namespace RuinRunner
                 Mathf.CeilToInt(game.Boss.Health) + " / " + Mathf.CeilToInt(game.Boss.MaxHealth));
         }
 
+        const float ChoiceStagger = .05f, ChoiceLand = .2f;
+        float choiceOpenedAt = -1f;
         private void DrawAccessorySelection(float width, float height)
         {
             var oldColor = GUI.color;
             GUI.color = new Color(.025f, .035f, .035f, .9f);
             GUI.DrawTexture(new Rect(0, 0, width, height), Texture2D.whiteTexture);
             GUI.color = oldColor;
-            GUI.Label(new Rect(width / 2f - 300, height / 2f - 282, 600, 44), "LEVEL UP — 장신구 선택", titleStyle);
+            if (choiceOpenedAt < 0f) { choiceOpenedAt = Time.unscaledTime; UiFx.Play("UiLevelUp", new Vector2(width / 2f, height / 2f), 460f); }
+            GUI.Label(new Rect(width / 2f - 300, height / 2f - 282, 600, 44), "레벨 업", titleStyle);
             var hovered = -1;
             for (var index = 0; index < game.CurrentAccessoryChoices.Length; index++)
             {
@@ -494,50 +553,46 @@ namespace RuinRunner
                 var angle = index * Mathf.PI * 2f / game.CurrentAccessoryChoices.Length;
                 var rect = new Rect(width / 2f + Mathf.Sin(angle) * 190f - 48f,
                     height / 2f - 5f - Mathf.Cos(angle) * 155f - 48f, 96f, 96f);
+                // Each one lands in its turn with a little overshoot.
+                var landing = Mathf.Clamp01((Time.unscaledTime - choiceOpenedAt - index * ChoiceStagger) / ChoiceLand);
+                var pop = landing * (1f + 1.1f * (1f - landing));
+                if (pop < .999f || pop > 1.001f) rect = new Rect(rect.center.x - rect.width * pop * .5f, rect.center.y - rect.height * pop * .5f, rect.width * pop, rect.height * pop);
                 var isHovered = rect.Contains(Event.current.mousePosition);
                 GUI.color = Color.Lerp(Color.white, definition.Color, .5f);
                 GUI.Box(rect, string.Empty, isHovered ? selectedSlotStyle : slotStyle);
                 GUI.color = oldColor;
                 var icon = InventoryIconFactory.Get(definition.Id, definition.Color, InventoryIconKind.Accessory);
-                ItemIconLibrary.DrawGUI(new Rect(rect.x + 16, rect.y + 16, 64, 64), icon);
+                ItemIconLibrary.DrawGUI(new Rect(rect.x + rect.width / 6f, rect.y + rect.height / 6f, rect.width * 2f / 3f, rect.height * 2f / 3f), icon);
                 GUI.Label(new Rect(rect.x-40,rect.yMax+3,rect.width+80,30),
                     "["+Key(GameSettingsService.AccessoryChoiceAction(index))+"]",centerStyle);
                 if (isHovered) hovered = index;
                 if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
                 {
+                    UiFx.Play("UiPick", rect.center, 260f);
                     game.SelectAccessory(definition);
                     return;
                 }
             }
-            GUI.Label(new Rect(width / 2f - 380, height / 2f + 235, 760, 64),
-                "장신구를 클릭하거나 표시된 키로 선택하세요.\n마우스를 올리면 효과와 세트 정보를 확인할 수 있습니다.", centerStyle);
             if (hovered >= 0) DrawItemTooltip(width, height, "C:" + hovered);
         }
 
-        private void DrawNotifications(float width)
+        // A corner note, out of the fight's way: as wide as its words and gone soon.
+        private void DrawNotifications(float height)
         {
-            if (Time.unscaledTime < game.LootMessageUntil)
-            {
-                var lineCount = game.LootMessage.Split('\n').Length;
-                var toastHeight = Mathf.Clamp(28f + lineCount * 24f, 76f, 190f);
-                DrawPanel(new Rect(width / 2f - 270, 88, 540, toastHeight));
-                GUI.Label(new Rect(width / 2f - 250, 94, 500, toastHeight - 12f), game.LootMessage, centerStyle);
-            }
+            if (Time.unscaledTime >= game.LootMessageUntil) return;
+            var words = new GUIContent(game.LootMessage);
+            var size = bodyStyle.CalcSize(words);
+            var box = new Rect(20f, height - 32f - size.y - 14f, size.x + 28f, size.y + 14f);
+            var oldColor = GUI.color;
+            GUI.color = new Color(1f, 1f, 1f, Mathf.Clamp01((game.LootMessageUntil - Time.unscaledTime) * 4f));
+            DrawPanel(box);
+            GUI.Label(new Rect(box.x + 14f, box.y + 7f, size.x, size.y), words, bodyStyle);
+            GUI.color = oldColor;
         }
 
         private void DrawStageGuidance(float width, float height)
         {
-            var goal = game.DungeonMap?.GetObjectiveText(game.DungeonMap.PhysicalRegion,game.IsStageResultReady,game.PendingStageRewards>0)??"유적을 탐색하세요.";
             GUI.Label(new Rect(20, 112, 300, 30), (game.CurrentStageIndex + 1) + "/3  " + game.CurrentStage.Name, bodyStyle);
-            GUI.Label(new Rect(20, 146, 300, 54), goal, detailStyle);
-            if (Time.unscaledTime < game.StageIntroUntil)
-            {
-                var instructions = Key(GameAction.Interact)+" 상호작용   ·   "+Key(GameAction.Map)+" 지도   ·   "+Key(GameAction.Inventory)+" 가방";
-                var intro = new Rect(width/2-290, 28, 580, 84);
-                DrawPanel(intro);
-                GUI.Label(new Rect(intro.x+20,intro.y+8,540,30), game.CurrentStage.Name, bodyStyle);
-                GUI.Label(new Rect(intro.x+20,intro.y+43,540,28), instructions, centerStyle);
-            }
             if (!game.IsStageResultReady || !game.IsNearStageExit) return;
             var prompt = new Rect(width / 2f - 270f, height - 168f, 540f, 58f);
             if (game.PendingStageRewards > 0)
@@ -549,7 +604,6 @@ namespace RuinRunner
             var action = game.CurrentStage.IsFinal ? "마지막 봉인 해제" : CampaignStage.Get(game.CurrentStageIndex + 1).Name + " 진입";
             if (GUI.Button(prompt, action + "  [" + Key(GameAction.Interact) + "]", buttonStyle)) game.ShowStageResult();
         }
-
 
         private void DrawInventory(float width, float height)
         {
@@ -626,7 +680,7 @@ namespace RuinRunner
                 if (icon == null)
                     continue;
 
-                ItemIconLibrary.DrawGUI(new Rect(cell.x + 7, cell.y + 7, cell.width - 14, cell.height - 14), icon);
+                ItemIconLibrary.DrawGUI(new Rect(cell.x + 3, cell.y + 3, cell.width - 6, cell.height - 6), icon);
                 DrawUpgradeBadge(cell, game.Inventory.GetOwnedCell(slotIndex));
                 if (hovered) hoverKey = key;
                 TryBeginInventoryDrag(cell, key, icon);
@@ -634,12 +688,9 @@ namespace RuinRunner
 
             if (GUI.Button(new Rect(panel.x + 650, panel.y + 12, 154, 36), "장비", inventorySetTab ? buttonStyle : selectedTabStyle)) inventorySetTab = false;
             if (GUI.Button(new Rect(panel.x + 816, panel.y + 12, 154, 36), "세트", inventorySetTab ? selectedTabStyle : buttonStyle)) inventorySetTab = true;
-            GUI.Label(new Rect(panel.x + 650, panel.y + 50, 320, 28), "골드 " + game.RunGold, detailStyle);
+            DrawGold(panel.x + 650, panel.y + 50, detailStyle);
             var equipmentRect = new Rect(panel.x + 650, panel.y + 80, 320, 410);
             if (inventorySetTab) DrawActiveSetEffects(equipmentRect); else DrawEquipmentMaintenance(equipmentRect);
-            GUI.Label(new Rect(panel.x + 42, panel.y + 514, 916, 66),
-                "이동 키: 가방·장착 장비 선택  ·  " + Key(GameAction.Weapon1) + "/" + Key(GameAction.Weapon2) + "/" + Key(GameAction.Weapon3) + ": 선택 무기 장착\n" +
-                Key(GameAction.Dismantle) + ": 버리기  ·  드래그: 이동·교환  ·  " + Key(GameAction.Inventory) + ": 닫기", detailStyle);
             if (!string.IsNullOrEmpty(hoverKey)) DrawItemTooltip(width, height, hoverKey);
             ProcessInventoryDrag(inventoryCells, quickSlotRects);
         }
@@ -670,28 +721,22 @@ namespace RuinRunner
         }
 
         private OwnedEquipment lastEquipmentDescription;
-        private bool lastEquipmentDetails;
         private void DrawEquipmentMaintenance(Rect rect)
         {
             PrepareTownStyles();GUI.Box(rect,"",slotStyle);var item=game.SelectedEquipment;
-            if(item==null){GUI.Label(new Rect(rect.x+20,rect.y+25,rect.width-40,100),"장비를 선택하면 효과와 변형을 확인합니다.",compactStyle);return;}
-            if(lastEquipmentDescription!=item||lastEquipmentDetails!=game.ShowItemDetails)
-            {equipmentScroll=Vector2.zero;lastEquipmentDescription=item;lastEquipmentDetails=game.ShowItemDetails;}
+            if(item==null){return;}
+            if(lastEquipmentDescription!=item){equipmentScroll=Vector2.zero;lastEquipmentDescription=item;}
             string id=item is OwnedWeapon w?w.Definition.Id:((OwnedAccessory)item).Definition.Id;
             DrawContentIcon(new Rect(rect.x+12,rect.y+12,72,72),id,item is OwnedWeapon?"weapon":"accessory");
             GUI.Label(new Rect(rect.x+96,rect.y+20,rect.width-112,60),WrapPanelText(item.Name,rect.width-112),compactStyle);
             string description=item is OwnedWeapon?ContentDescription(id,"weapon"):EquipmentUpgradeRules.AccessoryDescription((OwnedAccessory)item,game.Inventory);
-            if(!game.ShowItemDetails)description=ShortEffect(description);
-            // Mutation and oath progress remain visible in both modes; details expand the base action.
-            if(item is OwnedWeapon weapon)description+="\n"+EquipmentUpgradeRules.WeaponUpgradeText(weapon);
-            var viewport=new Rect(rect.x+20,rect.y+94,rect.width-40,190);
+            if(item is OwnedWeapon weapon)description=(description+"\n"+EquipmentUpgradeRules.WeaponUpgradeText(weapon)).TrimEnd();
+            var viewport=new Rect(rect.x+20,rect.y+94,rect.width-40,226);
             description=WrapPanelText(description,viewport.width-20);
             float textHeight=compactStyle.CalcHeight(new GUIContent(description),viewport.width-20);
             equipmentScroll=GUI.BeginScrollView(viewport,equipmentScroll,new Rect(0,0,viewport.width-20,textHeight));GUI.Label(new Rect(0,0,viewport.width-20,textHeight),description,compactStyle);GUI.EndScrollView();
-            if(GUI.Button(new Rect(rect.x+20,rect.y+292,rect.width-40,32),game.ShowItemDetails?"간단히":"상세 보기",compactButton))game.ShowItemDetails=!game.ShowItemDetails;
             if(game.HasDisassemblyConfirmation)
             {
-                GUI.Label(new Rect(rect.x+20,rect.y+330,rect.width-40,26),"버린 장비는 사라집니다.",compactStyle);
                 if(GUI.Button(new Rect(rect.x+20,rect.y+361,132,32),"버리기 확정",compactButton))game.ConfirmEquipmentDisassembly();
                 if(GUI.Button(new Rect(rect.x+164,rect.y+361,132,32),"취소",compactButton))game.CancelEquipmentDisassembly();
             }
@@ -818,15 +863,7 @@ namespace RuinRunner
                 var owned = parts[0] == "Q" ? game.Inventory.QuickSlots[index].Item : game.Inventory.OwnedWeapons[index];
                 title = weapon.Name;
                 category = weapon.Rarity + " · " + WeaponFamilyCatalog.GetName(weapon.Family);
-                description = "무기 공격력 " + weapon.AttackPower.ToString("0.0") + "   공격속도 x" + (1f / weapon.AttackDelayMultiplier).ToString("0.00");
-                if (weapon.AttackType == WeaponAttackType.Ranged)
-                    description += "\n탄창 " + weapon.MagazineSize + "   장전 " + weapon.ReloadSeconds.ToString("0.0") + "초   관통 " + weapon.ProjectilePierce;
-                else
-                    description += "\n" + MeleeComboCatalog.Get(weapon).LightSteps.Length + "연속 기본 콤보";
-                    if(System.Array.Exists(MeleeComboCatalog.Get(weapon).LightSteps,step=>step.Motion==MeleeAttackMotion.CrossCut))
-                        description+="\n마지막 교차베기 2타 · 총 피해 분산";
-                description += "\n무기 스킬: " + WeaponActionDescription(weapon, owned.UpgradeLevel);
-                description += "\n" + EquipmentUpgradeRules.WeaponUpgradeText(owned);
+                description = (ContentDescription(weapon.Id,"weapon") + "\n" + EquipmentUpgradeRules.WeaponUpgradeText(owned)).TrimEnd();
                 setType = weapon.SetType;
                 rarityColor = weapon.Color;
                 icon = InventoryIconFactory.Get(weapon.Id, weapon.Color, InventoryIconKind.Weapon);
@@ -840,19 +877,18 @@ namespace RuinRunner
                 category = item.Rarity + " · 장신구";
                 description = owned == null ? EquipmentUpgradeRules.AccessoryDescription(item, 0, game.Inventory) : EquipmentUpgradeRules.AccessoryDescription(owned, game.Inventory);
                 if (parts[0] == "C" && game.Inventory.StoredItemCount >= game.Inventory.UnlockedCapacity)
-                    description += "\n가방 가득 참 · 선택 시 필드에 드롭";
+                    description += "\n가방이 가득 찼습니다.";
                 setType = item.SetType;
                 rarityColor = item.Color;
                 icon = InventoryIconFactory.Get(item.Id, item.Color, InventoryIconKind.Accessory);
             }
             else return;
 
-            if(!game.ShowItemDetails)description=ShortEffect(description);
             float tooltipWidth = Mathf.Min(440f,width-16f);
             float contentWidth = tooltipWidth-66f;
             var descriptionHeight = detailStyle.CalcHeight(new GUIContent(description), contentWidth);
-            var setText = game.ShowItemDetails ? GetSetProgressText(setType) : "세트 · "+setType+"\n가방 장비 패널에서 상세 보기";
-            var setHeight = detailStyle.CalcHeight(new GUIContent(setText), contentWidth);
+            var setText = setType == ItemSetType.None ? "" : GetSetProgressText(setType);
+            var setHeight = setText.Length == 0 ? 0 : detailStyle.CalcHeight(new GUIContent(setText), contentWidth);
             var titleHeight=Mathf.Max(32,detailStyle.CalcHeight(new GUIContent(title),tooltipWidth-122));
             var categoryHeight=detailStyle.CalcHeight(new GUIContent(category),tooltipWidth-122);
             var layout=new ItemTooltipLayout(width,height,Event.current.mousePosition,titleHeight,categoryHeight,descriptionHeight,setHeight);
@@ -876,7 +912,6 @@ namespace RuinRunner
             GUI.Label(new Rect(0,0,layout.ContentWidth,descriptionHeight),description,detailStyle);
             GUI.Label(new Rect(0,layout.SetTop,layout.ContentWidth,setHeight),setText,detailStyle);
             GUI.EndScrollView();
-            if(layout.NeedsScroll)GUI.Label(new Rect(rect.x+24,layout.Viewport.yMax+3,rect.width-48,24),"휠로 자세히 보기",detailStyle);
         }
 
         private string GetSetProgressText(ItemSetType setType)
@@ -939,36 +974,56 @@ namespace RuinRunner
             GUI.Label(new Rect(left + 300, top + 190, 240, 34), stats.Luck.ToString("0.0") + "  (추가 무기 " + (WeaponLootTable.GetDoubleDropChance(stats.Luck) * 100f).ToString("0") + "%)", bodyStyle);
             GUI.Label(new Rect(left, top + 228, 280, 34), "이동 속도", bodyStyle);
             GUI.Label(new Rect(left + 300, top + 228, 240, 34), stats.MoveSpeed.ToString("0.00"), bodyStyle);
-            GUI.Label(new Rect(left, top + 266, 280, 34), "마나 재생 / 특수공격", bodyStyle);
+            GUI.Label(new Rect(left, top + 266, 280, 34), "마나 재생 / 무기 스킬", bodyStyle);
             GUI.Label(new Rect(left + 300, top + 266, 240, 34), stats.ManaRegeneration.ToString("0.0") + "/s  / x" + stats.SpecialDamageMultiplier.ToString("0.00"), bodyStyle);
 
             var weapon = game.Player.EquippedWeapon;
             var weaponText = weapon == null
-                ? "무기 없음 — 가방의 무기를 퀵슬롯으로 드래그하세요"
+                ? "무기 없음"
                 : weapon.Rarity + " " + weapon.Name + "\n" + Key(GameAction.Guard) + ": " + WeaponActionDescription(weapon, game.Player.WeaponUpgradeLevel).Split('\n')[0];
             GUI.Label(new Rect(left, top + 310, 540, 72), weaponText, detailStyle);
-            GUI.Label(new Rect(width / 2f - 260, height / 2f + 218, 520, 30), Key(GameAction.Stats) + " 또는 " + Key(GameAction.Pause) + "로 닫기", centerStyle);
         }
 
-        private void DrawMetaUnlock(float width,float height)
-        { GUI.Label(new Rect(width/2-300,height/2-40,600,80),"재능은 마을 수련지기에게 준비합니다.",centerStyle); }
-
+        float resultOpenedAt = -1f;
+        bool resultRewardShown;
+        const float ResultPopSeconds = .22f, RewardCountAfter = .3f, RewardCountSeconds = .8f;
         private void DrawResult(float width, float height)
+        {
+            if (resultOpenedAt < 0f)
+            {
+                resultOpenedAt = Time.unscaledTime;
+                resultRewardShown = false;
+                if (game.IsVictory) UiFx.Play("UiConfetti", new Vector2(width / 2f, height / 2f - 130f), 720f);
+            }
+            var opened = Time.unscaledTime - resultOpenedAt;
+            var settle = Mathf.Clamp01(opened / ResultPopSeconds);
+            var outerMatrix = GUI.matrix;
+            GUIUtility.ScaleAroundPivot(Vector2.one * Mathf.Lerp(.93f, 1f, 1f - (1f - settle) * (1f - settle)), new Vector2(width / 2f, height / 2f));
+            DrawResultPanel(width, height, opened);
+            GUI.matrix = outerMatrix;
+        }
+
+        private void DrawResultPanel(float width, float height, float opened)
         {
             DrawPanel(new Rect(width / 2f - 330, height / 2f - 190, 660, 380));
             GUI.Label(new Rect(width / 2f - 280, height / 2f - 155, 560, 60), game.IsVictory ? "유적의 봉인이 풀렸다" : "도전 실패", titleStyle);
             var reward = game.ResultSettlementConfirmed
-                ? "서버 정산 완료 · 유산 +"+game.LastMetaReward+"  (보유 "+game.MetaProgression.LegacyShards+")"
-                : "정산 확인 중 · 유산 보상은 아직 미확정";
+                ? "유산 +"+Mathf.RoundToInt(game.LastMetaReward*Mathf.Clamp01((opened-RewardCountAfter)/RewardCountSeconds))
+                : "";
+            if (!resultRewardShown && game.ResultSettlementConfirmed && game.LastMetaReward > 0 && opened >= RewardCountAfter + RewardCountSeconds)
+            {
+                resultRewardShown = true;
+                UiFx.Play("UiPick", new Vector2(width / 2f, height / 2f - 20f), 300f);
+                CombatAudio.Native("coin", AudioChannel.Interface, .4f);
+            }
             var result = "TIME  " + FormatTime(game.Stats.ElapsedSeconds) + "    KILLS  " + game.Stats.EnemiesDefeated + "\n" + reward;
             var message = game.IsVictory
                 ? "세 수호자의 빛이 잦아들고, 유적에 새벽이 돌아왔습니다.\n당신이 찾은 유산은 다음 탐험가의 길이 됩니다.\n" + result
-                : "회피 타이밍을 익혀 다시 도전하세요.\n" + result;
+                : result;
             GUI.Label(new Rect(width / 2f - 270, height / 2f - 75, 540, 120), message, detailStyle);
             bool enabled=GUI.enabled;GUI.enabled=!game.SessionOperationPending&&!game.BackendBusy;
-            if(GUI.Button(new Rect(width/2-240,height/2+60,225,52),game.ResultSettlementConfirmed?"마을로 귀환":"정산 확인 후 귀환",buttonStyle))game.ReturnToTown();
+            if(GUI.Button(new Rect(width/2-240,height/2+60,225,52),"마을로 귀환",buttonStyle))game.ReturnToTown();
             if(GUI.Button(new Rect(width/2+15,height/2+60,225,52),"메인 메뉴",buttonStyle))game.ReturnToMainMenu();GUI.enabled=enabled;
-            GUI.Label(new Rect(width/2-270,height/2+124,540,36),"런 골드는 소멸 · 유산과 해금은 보존",detailStyle);
 
         }
 

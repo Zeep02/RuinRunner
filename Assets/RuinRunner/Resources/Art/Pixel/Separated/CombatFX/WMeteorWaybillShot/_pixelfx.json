@@ -1,0 +1,28 @@
+{
+  "clip": "WMeteorWaybillShot",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.5,
+  "width": 11,
+  "height": 11,
+  "premultiplied": true,
+  "canvas": null,
+  "center": true,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/bolt",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 14,
+  "fps": 15,
+  "loop": true,
+  "frames": 5,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 11,
+  "origin": [
+    5,
+    5
+  ],
+  "optionsJson": "{\"palette\":[\"#101218\",\"#262a34\",\"#3e4452\",\"#5e6674\",\"#88909c\",\"#bcc2ca\",\"#f0f2f4\"],\"kind\":\"grenade\",\"size\":1,\"tail\":8}"
+}

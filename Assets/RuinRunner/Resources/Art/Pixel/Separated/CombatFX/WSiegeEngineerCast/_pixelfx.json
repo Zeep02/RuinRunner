@@ -1,0 +1,29 @@
+{
+  "clip": "WSiegeEngineerCast",
+  "ppu": 32,
+  "pivotX": 0.50205,
+  "pivotY": 0.28912,
+  "width": 244,
+  "height": 147,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "0.8",
+  "source": "pixelfx",
+  "effect": "impacts/ground-slam",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 73,
+  "fps": 30,
+  "loop": false,
+  "frames": 24,
+  "durationSeconds": 0.8,
+  "visibleDiameter": 225,
+  "origin": [
+    122,
+    104
+  ],
+  "optionsJson": "{\"palette\":[\"#201406\",\"#4a300c\",\"#7e5414\",\"#b8821c\",\"#e4ae34\",\"#f8d878\",\"#fff6d0\"]}"
+}

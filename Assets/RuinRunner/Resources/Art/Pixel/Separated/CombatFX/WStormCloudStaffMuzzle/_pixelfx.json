@@ -1,0 +1,28 @@
+{
+  "clip": "WStormCloudStaffMuzzle",
+  "ppu": 32,
+  "pivotX": 0.33871,
+  "pivotY": 0.48333,
+  "width": 31,
+  "height": 30,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/flash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 53,
+  "fps": 30,
+  "loop": false,
+  "frames": 6,
+  "durationSeconds": 0.2,
+  "visibleDiameter": 19,
+  "origin": [
+    10,
+    15
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0f2e\",\"#1a2050\",\"#2a3080\",\"#3f6cdf\",\"#7cc8ff\",\"#fff08a\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#fff08a\",\"#7cc8ff\",\"#3f6cdf\"],\"len\":9,\"wide\":4}"
+}

@@ -7,8 +7,6 @@ namespace RuinRunner
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Boot()
         {
-            // The asset-pack playground is a separate scene, not a replacement run.
-            if (Object.FindAnyObjectByType<DungeonGatheringTest>() != null) return;
 #if UNITY_6000_0_OR_NEWER
             if (Object.FindAnyObjectByType<GameController>() != null) return;
 #else
@@ -23,9 +21,14 @@ namespace RuinRunner
                 new GameObject("NativeHeroAtlasValidation").AddComponent<NativeHeroAtlasValidation>();
                 return;
             }
-            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--boss-sprite-validation") >= 0)
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), StageArtTour.Argument) >= 0)
             {
-                new GameObject("BossSpriteValidation").AddComponent<BossSpriteValidation>();
+                new GameObject("StageArtTour").AddComponent<StageArtTour>();
+                return;
+            }
+            if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), AudioLevelTour.Argument) >= 0)
+            {
+                new GameObject("AudioLevelTour").AddComponent<AudioLevelTour>();
                 return;
             }
             if (System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "--continuous-world-validation") >= 0)

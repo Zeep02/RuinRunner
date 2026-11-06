@@ -1,8 +1,8 @@
-param(
+﻿param(
     [ValidatePattern('^[a-z0-9][a-z0-9-]{1,40}$')][string]$Instance='goal-20261009',
     [ValidateRange(1024,65535)][int]$ApiPort=5196,
     [ValidateRange(1024,65535)][int]$DatabasePort=55439,
-    [string]$ContentVersion='campaign-v1',
+    [string]$ContentVersion='campaign-v5',
     [switch]$SkipBuild,
     [switch]$Stop
 )
@@ -37,7 +37,11 @@ $principal=[Security.Principal.WindowsIdentity]::GetCurrent().Name
 if($LASTEXITCODE -ne 0){throw 'Could not restrict isolated credentials directory'}
 $secretPath=Join-Path $private 'secrets.json'
 if(!(Test-Path -LiteralPath $secretPath)){
-    @{admin=[Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32));app=[Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(32))} | ConvertTo-Json | Set-Content -LiteralPath $secretPath -Encoding UTF8
+    function New-RandomSecret {
+        $bytes=New-Object byte[] 32;$random=[Security.Cryptography.RandomNumberGenerator]::Create()
+        try{$random.GetBytes($bytes);return [BitConverter]::ToString($bytes).Replace('-','')}finally{$random.Dispose()}
+    }
+    @{admin=New-RandomSecret;app=New-RandomSecret} | ConvertTo-Json | Set-Content -LiteralPath $secretPath -Encoding UTF8
 }
 $secrets=Get-Content -LiteralPath $secretPath -Raw -Encoding UTF8 | ConvertFrom-Json
 if(!(Test-Path -LiteralPath (Join-Path $data 'PG_VERSION'))){
@@ -49,6 +53,7 @@ if(!(Test-Path -LiteralPath (Join-Path $data 'PG_VERSION'))){
 & (Join-Path $pg 'pg_ctl.exe') '-D' $data 'status' *> $null
 if($LASTEXITCODE -ne 0){
     $start=Start-Process -FilePath (Join-Path $pg 'pg_ctl.exe') -ArgumentList @('-D',('"'+$data+'"'),'-l',('"'+(Join-Path $logs 'postgres.log')+'"'),'-w','start') -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logs 'pg-start.log') -RedirectStandardError (Join-Path $logs 'pg-start-error.log')
+    $null=$start.Handle # Windows PowerShell 5.1 reports no ExitCode unless the handle was read first.
     if(!$start.WaitForExit(30000) -or $start.ExitCode -ne 0){throw 'Isolated PostgreSQL start failed'}
 }
 $pgPass=Join-Path $private 'pgpass'

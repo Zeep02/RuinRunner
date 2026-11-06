@@ -1,0 +1,29 @@
+{
+  "clip": "StepFlooded",
+  "ppu": 32,
+  "pivotX": 0.52273,
+  "pivotY": 0.45,
+  "width": 22,
+  "height": 10,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "ink/step",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": false,
+  "frames": 15,
+  "durationSeconds": 0.5,
+  "visibleDiameter": 22,
+  "origin": [
+    11,
+    5
+  ],
+  "optionsJson": "{\"kind\":\"ripple\",\"palette\":[\"#1c6a7c\",\"#48aab8\",\"#a8e8e8\"]}"
+}

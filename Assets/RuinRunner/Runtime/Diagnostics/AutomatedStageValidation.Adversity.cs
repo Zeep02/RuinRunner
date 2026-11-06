@@ -66,18 +66,6 @@ namespace RuinRunner
             telegraphMovementChecked=false;telegraphMovementStarted=false;
             AdvanceJourney(6);return true;
         }
-        bool PrepareAdversityTalent()
-        {
-            if(!adversityScenario||!adversityDefeated||game.ActiveTalents.Has(TalentId.ReserveOffer))return false;
-            if(Array.IndexOf(game.SaveSlots.ActiveData.unlockedTalentIds,"reserve_offer")<0)
-            {
-                if(game.BackendProfile.state.totalRuns<1||game.BackendProfile.legacyShards<5)
-                {Finish(false,"normal defeat did not earn the ordinary requirements for reserve_offer");return true;}
-                game.UnlockTownChoice("talent","reserve_offer");
-            }
-            else game.ToggleTalent("reserve_offer");
-            journeyActionAt=Time.unscaledTime+.5f;return true;
-        }
         bool DriveAdversityCombat()
         {
             if(!adversityScenario||adversityDefeated||game.CurrentStageIndex!=0||game.Boss==null)return false;
@@ -93,23 +81,6 @@ namespace RuinRunner
             // XP can open an ordinary choice between the rejected pickup and
             // the inventory key. Let the normal choice driver finish it first.
             if(game.IsChoosingAccessory)return false;
-            if(game.IsRewardReserved)
-            {
-                if(!adversityReserved)
-                {
-                    adversityReserved=true;adversityReserveCount=game.Progression.PendingLevelRewards;
-                    AdversityEvent("Level reward held through active play; pending="+adversityReserveCount+", enemies="+game.EnemiesAlive+", paused="+game.IsPaused);
-                }
-                if(game.EnemiesAlive==0&&!game.IsPaused&&!game.IsEncounterTransitioning)
-                {
-                    game.ResolveReservedReward();
-                    if(game.IsChoosingAccessory&&!adversityResolved)
-                    {adversityResolved=true;AdversityEvent("Opened the reserved reward using its normal button handler in a cleared region.");}
-                    return true;
-                }
-            }
-            if(adversityResolved&&!adversityRedeemed&&!game.IsChoosingAccessory&&game.Progression.PendingLevelRewards<adversityReserveCount)
-            {adversityRedeemed=true;AdversityEvent("Reserved reward selected through its ordinary choice input; pending count consumed once.");}
             if(adversityProbeStep==0)return false;
             StageValidationInput.ReleaseAll();attackHeld=false;
             if(Time.unscaledTime<adversityProbeAfter)return true;
@@ -162,8 +133,8 @@ namespace RuinRunner
         bool ValidateAdversityCompletion(bool passed,string reason)
         {
             if(!adversityScenario)return passed;
-            bool complete=passed&&adversityDefeated&&adversityRetried&&adversityBagBlocked&&adversityBagVisible&&adversityReserved&&
-                adversityResolved&&adversityRedeemed&&adversityExitPending&&adversityLeftRewards;
+            bool complete=passed&&adversityDefeated&&adversityRetried&&adversityBagBlocked&&adversityBagVisible&&
+                adversityExitPending&&adversityLeftRewards;
             WriteAdversity(complete,complete?reason:"Adversity coverage incomplete: "+reason);return complete;
         }
     }

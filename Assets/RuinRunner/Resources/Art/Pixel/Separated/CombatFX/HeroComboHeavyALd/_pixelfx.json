@@ -1,0 +1,12 @@
+{
+  "clip": "HeroComboHeavyALd",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.34375,
+  "width": 64,
+  "height": 64,
+  "premultiplied": false,
+  "source": "pixellab",
+  "mirrored": true,
+  "frames": 9
+}

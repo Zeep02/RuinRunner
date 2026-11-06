@@ -1,0 +1,29 @@
+{
+  "clip": "EShotWaveHit",
+  "ppu": 32,
+  "pivotX": 0.31081,
+  "pivotY": 0.29592,
+  "width": 111,
+  "height": 49,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "impacts/hit-spark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 10,
+  "fps": 30,
+  "loop": false,
+  "frames": 16,
+  "durationSeconds": 0.533,
+  "visibleDiameter": 64,
+  "origin": [
+    34,
+    34
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"],\"height\":0}"
+}

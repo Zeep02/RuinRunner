@@ -20,7 +20,6 @@ namespace RuinRunner
         public bool IsPreparingTownArt { get; private set; }
         readonly CancellationTokenSource townArtLifetime = new CancellationTokenSource();
         public string SessionMessage { get; private set; }="";
-        public bool ShowItemDetails { get; set; }
         TownWorld town;
         EquipmentOathTracker oathTracker=new EquipmentOathTracker();
         bool legacyFixture;
@@ -29,7 +28,7 @@ namespace RuinRunner
         {
             if(!IsRunActive||IsTown||IsGameOver)return;
             sessionPhase=active?GameSessionPhase.BossIntro:GameSessionPhase.Expedition;
-            IsMapOpen=IsInventoryOpen=IsStatsOpen=IsUnlockOpen=false;RefreshTimeScale();
+            IsMapOpen=IsInventoryOpen=IsStatsOpen=false;RefreshTimeScale();
         }
         public async void OpenProfileTown(int slot)
         {
@@ -63,38 +62,62 @@ namespace RuinRunner
             sessionEpoch++;
             if(!legacyFixture){BindExchangeCatalog();WeaponLootTable.BindPinnedCatalog(BackendCatalog);AccessoryLootTable.BindPinnedCatalog(BackendCatalog);}
             BossEntrancePresentation.Cancel(this);
-            stageEpoch++;StopAllCoroutines();ResetTimeEffect();RuntimeSceneObjects.ClearSession();
+            stageEpoch++;StopAllCoroutines();ResetTimeEffect();RuntimeSceneObjects.ClearSession();CombatStain.ClearAll();UiFx.FilmBars(false);
             if(Player!=null)Destroy(Player.gameObject);
             if(DungeonMap?.Root!=null)Destroy(DungeonMap.Root);
             if(town!=null)Destroy(town.gameObject);
             DungeonMap=null;Boss=null;ActiveChest=null;Progression=null;EnemiesAlive=0;waveTransition=false;
             IsRunActive=true;sessionPhase=GameSessionPhase.Town;IsGameOver=IsVictory=false;IsStageTransitioning=false;
-            IsInventoryOpen=IsStatsOpen=IsUnlockOpen=IsMapOpen=IsChoosingAccessory=IsManuallyPaused=false;
+            IsInventoryOpen=IsStatsOpen=IsMapOpen=IsChoosingAccessory=IsManuallyPaused=false;
             IsStageClearPending=IsStageResultReady=IsExitOpen=false;OpenService=NearbyService=null;StageIntroUntil=0;
             MetaProgression=new MetaProgressionService(SaveSlots);ActiveTalents=new TalentLoadout(SaveSlots.ActiveData?.activeTalentIds);
             Inventory.Reset();ResetEquipmentSelection();
-            Inventory.TryAddConfirmed(SaveSlots.ActiveData?.startingWeaponId??"rust_sword",InventoryEntryKind.Weapon,"town-practice",true);
+            Inventory.TryAddConfirmed(SaveSlots.ActiveData?.startingWeaponId??"trainee_blade",InventoryEntryKind.Weapon,"town-practice",true);
             town=TownWorld.Create();
             Player=PlayerController.Create(TownWorld.Arrival,()=>IsPaused,()=>true,()=>{},CameraFollow,Inventory,Settings);
-            Player.ConfigureCombatGrowth(ActiveTalents.Has,NotifyCombatAction);Player.IsTrainingCombat=true;
+            Player.ConfigureMastery(SaveSlots.ActiveData?.unlockedTalentIds);Player.ConfigureCombatGrowth(ActiveTalents.Has,NotifyCombatAction);Player.IsTrainingCombat=true;
             Player.EquipWeapon(Inventory.EquippedWeapon);CameraFollow.Target=Player.transform;
             CameraFollow.FocusRoom(Vector2.zero,TownWorld.Size,true);
             TownTrainingTarget.Create(this,town.transform,TownWorld.TrainingPosition);
             PrototypeAudioController.SetStage(0);RefreshTimeScale();
-            SessionMessage=LastMetaReward>0?"잘 돌아왔어요. 유산 +"+LastMetaReward:"준비가 끝나면 동쪽 원정 입구로.";
+            SessionMessage=LastMetaReward>0?"유산 +"+LastMetaReward:"";
+            ScreenVignette.Ensure(this);
+            InkTransition.Hold();Player.SetEntranceLock(true);StartCoroutine(RevealTown());
+        }
+        async System.Threading.Tasks.Task CoverTownAsync(int epoch,string profileId)
+        {
+            var covering=true;
+            StartCoroutine(CoverTown(()=>covering=false));
+            while(covering&&SessionMatches(epoch,profileId))await System.Threading.Tasks.Task.Yield();
+        }
+        System.Collections.IEnumerator CoverTown(Action done)
+        {
+            if(Player!=null)yield return InkTransition.Cover(Player.FeetPoint,CampaignStage.Get(0).Name);
+            done();
+        }
+        System.Collections.IEnumerator RevealTown()
+        {
+            yield return InkTransition.Reveal(Player);
+            if(Player!=null)Player.SetEntranceLock(false);
         }
         public async void DepartTown()
         {
-            if(!IsTown||SessionOperationPending||BackendBusy||BackendHasPending||BackendHasUnfinishedRun)return;
+            if(!IsTown||SessionOperationPending||BackendBusy||BackendHasPending)return;
             int epoch=sessionEpoch;string profileId=BackendProfile?.profileId;
             SessionOperationPending=true;
             try
             {
+                if(!await SettleInterruptedRunAsync())return;
                 if(!await StartBackendRunAsync(SaveSlots.IsValidationProfile&&StageValidationInput.Enabled?StageValidationInput.RequestedSeed:null))return;
                 if(!SessionMatches(epoch,profileId)||!IsTown)return;
                 BindExchangeCatalog();WeaponLootTable.BindPinnedCatalog(BackendCatalog);AccessoryLootTable.BindPinnedCatalog(BackendCatalog);
                 ActiveTalents=new TalentLoadout(BackendRun.loadout.activeTalentIds);
-                CloseService();sessionPhase=GameSessionPhase.Transition;
+                CloseService();
+                // Still the town until the ink has covered it, so nothing starts drawing the run's HUD over it.
+                if(Player!=null)Player.SetEntranceLock(true);
+                await CoverTownAsync(epoch,profileId);
+                if(!SessionMatches(epoch,profileId)||!IsTown)return;
+                sessionPhase=GameSessionPhase.Transition;
                 if(town!=null){Destroy(town.gameObject);town=null;}
                 if(Player!=null){Destroy(Player.gameObject);Player=null;}
                 StartCoroutine(StartRun());
@@ -117,7 +140,7 @@ namespace RuinRunner
                 RefreshSettlementProjection();
                 EnterTown();
             }
-            catch(Exception e){Debug.LogException(e);SessionMessage="정산 대기 중입니다. 다시 시도할 수 있습니다.";}
+            catch(Exception e){Debug.LogException(e);SessionMessage="";}
             finally{SessionOperationPending=false;}
         }
         public async void ResolveInterruptedExpedition()
@@ -125,8 +148,15 @@ namespace RuinRunner
             if(!IsTown||!BackendHasUnfinishedRun||SessionOperationPending)return;
             int epoch=sessionEpoch;string runId=BackendRun.runId;
             SessionOperationPending=true;
-            try{if(await AbandonBackendRunAsync()&&SessionMatches(epoch,runId:runId)){MetaProgression=new MetaProgressionService(SaveSlots);SessionMessage="이전 원정을 정리했습니다. 새로 출정할 수 있습니다.";}}
+            try{if(await AbandonBackendRunAsync()&&SessionMatches(epoch,runId:runId)){MetaProgression=new MetaProgressionService(SaveSlots);SessionMessage="";}}
             finally{SessionOperationPending=false;}
+        }
+        // An expedition cut short can never be resumed, so the town settles it the moment it would get in the way.
+        async System.Threading.Tasks.Task<bool> SettleInterruptedRunAsync()
+        {
+            if(!BackendHasUnfinishedRun)return true;
+            if(!await AbandonBackendRunAsync())return false;
+            MetaProgression=new MetaProgressionService(SaveSlots);return true;
         }
         public async void ChooseStartingWeapon(string id)
         {
@@ -135,6 +165,7 @@ namespace RuinRunner
             SessionOperationPending=true;
             try
             {
+                if(!await SettleInterruptedRunAsync())return;
                 if(!await SaveBackendConfigurationAsync(id,ActiveTalents.Ids))return;
                 if(!SessionMatches(epoch,profileId)||!IsTown||Player==null)return;
                 Inventory.Reset();Inventory.TryAddConfirmed(id,InventoryEntryKind.Weapon,"town-practice",true);Player.EquipWeapon(Inventory.EquippedWeapon);
@@ -151,14 +182,15 @@ namespace RuinRunner
             if(!ids.Remove(id))
             {
                 ids.RemoveAll(v=>TalentCatalog.Find(v)?.Family==t.Family);
-                if(ids.Count>=TalentLoadout.MaximumActive){SessionMessage="활성 재능은 세 개까지입니다.";return;}ids.Add(id);
+                if(ids.Count>=TalentLoadout.MaximumActive)return;ids.Add(id);
             }
             SessionOperationPending=true;
             try
             {
+                if(!await SettleInterruptedRunAsync())return;
                 if(!await SaveBackendConfigurationAsync(SaveSlots.ActiveData.startingWeaponId,ids.ToArray()))return;
                 if(!SessionMatches(epoch,profileId)||!IsTown||Player==null)return;
-                ActiveTalents=new TalentLoadout(ids);Player.ConfigureCombatGrowth(ActiveTalents.Has,NotifyCombatAction);SessionMessage="수련 구성을 바꿨습니다.";
+                ActiveTalents=new TalentLoadout(ids);Player.ConfigureCombatGrowth(ActiveTalents.Has,NotifyCombatAction);SessionMessage="";
             }
             finally{SessionOperationPending=false;}
         }
@@ -166,7 +198,7 @@ namespace RuinRunner
         {
             if(!IsTown||SessionOperationPending)return;SessionOperationPending=true;
             int epoch=sessionEpoch;string profileId=BackendProfile?.profileId;
-            try{if(await UnlockBackendAsync(kind,id)&&SessionMatches(epoch,profileId)){MetaProgression=new MetaProgressionService(SaveSlots);SessionMessage="새 선택지가 열렸습니다.";}}
+            try{if(await SettleInterruptedRunAsync()&&await UnlockBackendAsync(kind,id)&&SessionMatches(epoch,profileId)){MetaProgression=new MetaProgressionService(SaveSlots);if(Player!=null){Player.ConfigureMastery(SaveSlots.ActiveData?.unlockedTalentIds);Player.ConfigureCombatGrowth(ActiveTalents.Has,NotifyCombatAction);}SessionMessage="";}}
             finally{SessionOperationPending=false;}
         }
         public void CloseService(){OpenService=null;modalCloseFrame=Time.frameCount;RefreshTimeScale();}
@@ -176,8 +208,8 @@ namespace RuinRunner
             if(Player==null||IsGameOver||IsStageTransitioning||sessionPhase==GameSessionPhase.BossIntro)return;
             if(IsServiceOpen){if(EconomyOperationPending||SessionOperationPending)return;if(Settings.GetKeyDown(GameAction.Pause)||Settings.GetKeyDown(GameAction.Interact))CloseService();return;}
             if(IsPaused||EnemiesAlive>0||waveTransition)return;
-            float nearest=2f;
-            foreach(var obj in RuntimeSceneObjects.FindAll<FieldServiceObject>())
+            float nearest=FieldServiceObject.TownServiceReach;
+            foreach(var obj in FieldServiceObject.Present)
             {
                 if(obj.RegionIndex>=0&&(DungeonMap==null||DungeonMap.Regions[obj.RegionIndex].Phase!=EncounterRegionPhase.Cleared))continue;
                 float d=Vector2.Distance(Player.transform.position,obj.transform.position);

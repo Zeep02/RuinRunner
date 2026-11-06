@@ -8,6 +8,8 @@ Unity 6000.6.0f1 기반 Windows 싱글플레이 탑다운 액션 로그라이트
 
 서버 포함 패키지의 `Start Local Game.cmd`를 실행합니다. 포함된 PostgreSQL과 API가 준비된 뒤 게임이 열립니다. 게임 종료 후 `Stop Local Backend.cmd`로 백엔드를 종료합니다. 프로필과 DB는 패키지 밖 `%LOCALAPPDATA%/RuinRunner/LocalBackend`에 보존됩니다. 실행 파일만 사용할 때는 먼저 API를 실행하고 공개 주소를 `RUINRUNNER_API_URL`에 지정해야 합니다.
 
+서버와 게임을 다른 PC에서 실행하려면 서버 PC에서 `Start Server.cmd`, 게임 PC에서 `Join Server.cmd`를 실행하고 안내된 주소를 입력합니다. 게임 PC와 같은 네트워크(공유기 내부, VPN)여야 하며 암호화 없는 HTTP는 사설 주소에서만 허용합니다. 자세한 내용은 패키지의 `SERVER-README.txt`에 있습니다. 데이터베이스는 항상 서버 PC 안에서만 접속합니다.
+
 현재 패키지는 `deliverables/RuinRunner-Candidate-20261025-184044`입니다. 최신 후보와 검증 범위는 [마감 기록 — 2026-10-25 갱신](Docs/GoalFinish-20261021.md)을 참조합니다. 정상 자동 입력 완주, 실제 마우스·키보드 검사, 공급 상태 기능 검사, 연속 모션·음향 평가는 별도로 기록합니다. [2026-10-09 통합 기록](Docs/GoalIntegration-20261009.md)의 기존 네 성향 완주·구매/정산 재실행 복구 근거를 보존합니다.
 
 ## 게임 흐름

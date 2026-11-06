@@ -1,0 +1,14 @@
+{
+  "clip": "PickupPotion",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.48438,
+  "width": 32,
+  "height": 32,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "bbb8e0b3-ccf1-47a5-995d-0ac04bd1338d",
+  "fps": 1,
+  "loop": true,
+  "frames": 1
+}

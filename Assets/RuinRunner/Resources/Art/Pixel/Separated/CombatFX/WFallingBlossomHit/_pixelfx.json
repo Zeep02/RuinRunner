@@ -1,0 +1,28 @@
+{
+  "clip": "WFallingBlossomHit",
+  "ppu": 32,
+  "pivotX": 0.5119,
+  "pivotY": 0.54255,
+  "width": 42,
+  "height": 47,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 18,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 23,
+  "origin": [
+    21,
+    21
+  ],
+  "optionsJson": "{\"palette\":[\"#2c0e20\",\"#5e1c40\",\"#a03068\",\"#d85a90\",\"#ff90b8\",\"#ffc8dc\",\"#fff4f8\"],\"sparks\":[\"#fff4f8\",\"#ffc8dc\",\"#ff90b8\",\"#d85a90\"],\"len\":13}"
+}

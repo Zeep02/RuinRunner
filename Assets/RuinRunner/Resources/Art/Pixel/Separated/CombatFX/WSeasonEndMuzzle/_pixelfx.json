@@ -1,0 +1,28 @@
+{
+  "clip": "WSeasonEndMuzzle",
+  "ppu": 32,
+  "pivotX": 0.375,
+  "pivotY": 0.48333,
+  "width": 28,
+  "height": 30,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/flash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 62,
+  "fps": 30,
+  "loop": false,
+  "frames": 6,
+  "durationSeconds": 0.2,
+  "visibleDiameter": 13,
+  "origin": [
+    10,
+    15
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1a0e\",\"#163418\",\"#225224\",\"#357530\",\"#4f9a3a\",\"#7cc048\",\"#d4f090\"],\"sparks\":[\"#d4f090\",\"#7cc048\",\"#4f9a3a\",\"#357530\"],\"len\":9,\"wide\":4}"
+}

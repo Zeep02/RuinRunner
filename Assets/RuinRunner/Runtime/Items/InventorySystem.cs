@@ -70,8 +70,6 @@ namespace RuinRunner
             foreach (var item in ownedAccessories) if (item.Identity == identity) return item;
             return null;
         }
-        public bool IsEquipped(long identity)
-        { foreach (var slot in quickSlots) if (slot.Item != null && slot.Item.Identity == identity) return true; return false; }
         public int GetAccessoryUpgradeLevel(AccessoryType type) => 0;
         int FindEmptyCell() { for (int i = 0; i < UnlockedCapacity; i++) if (cells[i] == null) return i; return -1; }
         public bool MoveBagItem(int source, int destination)
@@ -89,8 +87,13 @@ namespace RuinRunner
         public bool AddWeapon(WeaponDefinition definition)
         {
             if (definition == null) return false;
-            foreach (var slot in quickSlots)
-                if (slot.Item == null) { slot.AssignItem(new OwnedWeapon(definition)); ContentChanged(InventoryChangeKind.Acquired); return true; }
+            for (int i = 0; i < quickSlots.Length; i++)
+                if (quickSlots[i].Item == null)
+                {
+                    quickSlots[i].AssignItem(new OwnedWeapon(definition));
+                    if (ActiveSlot.Item == null) ActiveSlotIndex = i;
+                    ContentChanged(InventoryChangeKind.Acquired); return true;
+                }
             int cell = FindEmptyCell(); if (cell < 0) return false;
             cells[cell] = new InventoryCell(InventoryEntryKind.Weapon, ownedWeapons.Count);
             var item = new OwnedWeapon(definition); ownedWeapons.Add(item); storedWeapons.Add(item.Weapon);

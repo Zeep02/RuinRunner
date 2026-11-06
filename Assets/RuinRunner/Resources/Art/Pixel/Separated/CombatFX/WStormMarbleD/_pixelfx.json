@@ -1,0 +1,29 @@
+{
+  "clip": "WStormMarbleD",
+  "ppu": 32,
+  "pivotX": 0.525,
+  "pivotY": 0.475,
+  "width": 20,
+  "height": 20,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 14,
+  "origin": [
+    10,
+    10
+  ],
+  "optionsJson": "{\"palette\":[\"#0a0f2e\",\"#172a78\",\"#2550d0\",\"#3f8cff\",\"#7cc8ff\",\"#c8f0ff\",\"#ffffff\"],\"shape\":\"cross\",\"size\":1.6}"
+}

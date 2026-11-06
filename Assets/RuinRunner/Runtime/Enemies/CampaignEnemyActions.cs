@@ -13,24 +13,10 @@ namespace RuinRunner
         readonly CampaignBossBrain campaignBrain = new CampaignBossBrain();
         bool CampaignSecondPhase => Health < MaxHealth * .5f;
 
-        private void UpdateTidecaller(Vector2 delta, Vector2 direction)
-        {
-            if (acting) return;
-            SetPlanar(SteerAround(delta.magnitude < 4 ? -direction : delta.magnitude > 7 ? direction : Vector2.zero) * speed);
-            if (specialTimer <= 0 && delta.magnitude < 10) StartCoroutine(CallTide(false));
-        }
-        private void UpdateSentinel(Vector2 delta, Vector2 direction)
-        {
-            if (acting) return;
-            var tangent = new Vector2(-direction.y,direction.x) * strafeDirection;
-            SetPlanar(SteerAround(delta.magnitude > 3.5f ? direction : tangent) * speed * .75f);
-            // The cut reaches 1.8 + 3.8/2 = 3.7 units. Starting at five units
-            // repeatedly whiffed and retreated before ever reaching the player.
-            if (specialTimer <= 0 && delta.magnitude < 3.6f) StartCoroutine(SentinelCut(direction));
-        }
         private void UpdateTidekeeper(Vector2 delta, Vector2 direction)
         {
             if (acting) return;
+            if (TryBeginPhaseShift()) return;
             SetPlanar(SteerAround(delta.magnitude > 6 ? direction : delta.magnitude<2.5f ? -direction : Vector2.zero) * speed * .7f);
             if (specialTimer > 0) return;
             bossPatternIndex++;
@@ -39,12 +25,17 @@ namespace RuinRunner
                 case 0:StartCoroutine(TideLanes());break;
                 case 1:StartCoroutine(CallTide(true));break;
                 case 2:StartCoroutine(TideFan(direction));break;
-                default:StartCoroutine(TideSurge(direction));break;
+                case 3:StartCoroutine(TideSurge(direction));break;
+                case 4:StartCoroutine(TideMaelstrom());break;
+                case 5:StartCoroutine(TideWaveWall());break;
+                case 6:StartCoroutine(TideDive());break;
+                default:StartCoroutine(TideGeyserChase());break;
             }
         }
         private void UpdateSealHeart(Vector2 delta, Vector2 direction)
         {
             if (acting) return;
+            if (TryBeginPhaseShift()) return;
             var tangent=new Vector2(-direction.y,direction.x)*(bossPatternIndex%2==0?1:-1);
             SetPlanar(SteerAround(delta.magnitude > 5.5f ? direction : delta.magnitude<2 ? -direction : tangent*.25f) * speed * .65f);
             if(specialTimer>0)return;
@@ -54,7 +45,11 @@ namespace RuinRunner
                 case 0:StartCoroutine(SealSweep(direction));break;
                 case 1:StartCoroutine(SealCharge(direction));break;
                 case 2:StartCoroutine(SealCross());break;
-                default:StartCoroutine(SealVolley(direction));break;
+                case 3:StartCoroutine(SealVolley(direction));break;
+                case 4:StartCoroutine(SealBeams());break;
+                case 5:StartCoroutine(SealBlinkCuts());break;
+                case 6:StartCoroutine(SealJudgment());break;
+                default:StartCoroutine(SealBloom());break;
             }
         }
         private void BeginCampaignAction(Vector2 direction,CampaignBossAction action=CampaignBossAction.None,float warning=.8f)
@@ -68,10 +63,12 @@ namespace RuinRunner
         {AttackVisualPhase=1;CampaignPhaseDuration=duration;}
         private IEnumerator Recover(float seconds)
         {
+            // A boss should be hit in its openings, not stood around waiting for them.
+            seconds*=CampaignSecondPhase?.55f:.75f;
             AttackVisualPhase = 2; CampaignPhaseDuration=seconds; collisionAttackActive = false;
             SetPlanar(Vector2.zero,true);
             yield return new WaitForSeconds(seconds);
-            EndAction(); specialTimer = .45f;
+            EndAction(); specialTimer = .3f;
         }
         private IEnumerator CallTide(bool boss)
         {
@@ -81,7 +78,7 @@ namespace RuinRunner
             var arena=arenaBounds ?? new Rect(center-Vector2.one*10,Vector2.one*20);
             var pattern=new TidePoolPattern(arena,center,boss,navigationTerrain);
             foreach(var point in pattern.Centers)
-                ArenaHazard.Create(this,player,point,Vector2.one*(pattern.Radius*2),0,true,.95f,.48f,contactDamage,normalColor,ArenaHazardStyle.TidePool);
+                ArenaHazard.Create(this,player,point,Vector2.one*(pattern.Radius*2),0,true,.95f,.48f,contactDamage,DangerTint,ArenaHazardStyle.TidePool);
             yield return new WaitForSeconds(.95f); CampaignRelease(.48f);
             CombatAudio.Native("hazard-water", AudioChannel.Monster, boss?.42f:.28f);
             yield return new WaitForSeconds(.5f);
@@ -92,9 +89,9 @@ namespace RuinRunner
             BeginCampaignAction(direction);
             var target=(Vector2)transform.position+direction*1.8f;
             var angle=Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg;
-            ArenaHazard.Create(this,player,target,new Vector2(3.8f,1.25f),angle,false,.65f,.22f,contactDamage,normalColor);
+            ArenaHazard.Create(this,player,target,new Vector2(3.8f,1.25f),angle,false,.65f,.22f,contactDamage,DangerTint);
             yield return new WaitForSeconds(.65f); CampaignRelease(.22f);
-            BossNativeEffect.Create(this,"CutStreak",target,.24f,angle);
+            CutAlong("ESentinelCut",target,3.8f,angle,.26f);
             yield return new WaitForSeconds(.24f);
             AttackVisualPhase=2;
             yield return Rush(-direction,1.4f,.25f);
@@ -110,7 +107,7 @@ namespace RuinRunner
             var vertical=CampaignSecondPhase && bossPatternIndex%2!=0;
             var pattern=new TideLanePattern(arena,player.transform.position,vertical,bossPatternIndex%2==0);
             foreach(var flooded in new[]{pattern.First,pattern.Second})
-                ArenaHazard.Create(this,player,flooded.center,flooded.size,0,false,TideLanePattern.WarningSeconds,.58f,contactDamage,normalColor,ArenaHazardStyle.TideLane);
+                ArenaHazard.Create(this,player,flooded.center,flooded.size,0,false,TideLanePattern.WarningSeconds,.58f,contactDamage,DangerTint,ArenaHazardStyle.TideLane);
             yield return new WaitForSeconds(TideLanePattern.WarningSeconds); CampaignRelease(.58f);
             CombatAudio.Native("hazard-water", AudioChannel.Monster, .42f, .9f);
             yield return new WaitForSeconds(.62f);
@@ -122,14 +119,16 @@ namespace RuinRunner
             bool secondPhase=CampaignSecondPhase;
             BeginCampaignAction(direction,CampaignBossAction.TideFan,.85f);
             var origin=(Vector2)transform.position+direction*.6f;
-            ArenaHazard.Create(this,player,origin,Vector2.one*9,Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg,
-                true,.85f,.08f,0,normalColor,arcDegrees:secondPhase?84:60);
-            yield return new WaitForSeconds(.85f);CampaignRelease(secondPhase?.65f:.35f);
             int[] offsets=secondPhase?new[]{-36,-18,0,18,36}:new[]{-24,0,24};
+            // The shots fly until a wall stops them, so the warning follows each real path.
+            foreach(int angle in offsets)AimLine(origin,Quaternion.Euler(0,0,angle)*direction,.85f);
+            Fx("ECastSeal",origin,.85f);
+            yield return new WaitForSeconds(.85f);CampaignRelease(secondPhase?.65f:.35f);
             foreach(int angle in offsets)BossRuneProjectile.Create(this,player,origin,Quaternion.Euler(0,0,angle)*direction,6.5f,contactDamage,true);
             CombatAudio.Native("hazard-water",AudioChannel.Monster,.35f,1.15f);
             if(secondPhase)
             {
+                foreach(int angle in new[]{-27,-9,9,27})AimLine(origin,Quaternion.Euler(0,0,angle)*direction,.3f);
                 yield return new WaitForSeconds(.3f);
                 foreach(int angle in new[]{-27,-9,9,27})BossRuneProjectile.Create(this,player,origin,Quaternion.Euler(0,0,angle)*direction,6.5f,contactDamage,true);
             }
@@ -141,13 +140,13 @@ namespace RuinRunner
             BeginCampaignAction(direction,CampaignBossAction.TideSurge,.85f);
             float distance=GetSafeTravelDistance(direction,4.5f);
             var origin=(Vector2)transform.position;
-            ArenaHazard.CreateChargeRoute(this,player,origin,direction,distance,.85f,.5f,normalColor);
+            ArenaHazard.CreateChargeRoute(this,player,origin,direction,distance,.85f,.5f,DangerTint,ContactRadius);
             yield return new WaitForSeconds(.85f);CampaignRelease(.5f);collisionAttackActive=true;
             BossNativeEffect.Create(this,"TideSplash",origin,.55f);
             yield return CampaignRush(direction,distance,.5f,true);
             collisionAttackActive=false;
             if(CampaignSecondPhase)
-                ArenaHazard.Create(this,player,transform.position,Vector2.one*3,0,true,.5f,.4f,contactDamage,normalColor,ArenaHazardStyle.TidePool);
+                ArenaHazard.Create(this,player,transform.position,Vector2.one*3,0,true,.5f,.4f,contactDamage,DangerTint,ArenaHazardStyle.TidePool);
             yield return Recover(1.25f);
         }
         private IEnumerator SealSweep(Vector2 direction)
@@ -156,7 +155,7 @@ namespace RuinRunner
             BeginCampaignAction(direction,CampaignBossAction.SealSweep,.7f);
             float angle=Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg;
             ArenaHazard.Create(this,player,transform.position,Vector2.one*4.8f,angle,true,.7f,.3f,
-                contactDamage,normalColor,ArenaHazardStyle.SealSweep,false,135);
+                contactDamage,DangerTint,ArenaHazardStyle.SealSweep,false,135);
             yield return new WaitForSeconds(.7f);CampaignRelease(.3f);
             CombatAudio.Native("heavy-impact",AudioChannel.Monster,.4f,1.05f);
             yield return new WaitForSeconds(.34f);
@@ -171,7 +170,7 @@ namespace RuinRunner
             BeginCampaignAction(direction,CampaignBossAction.SealCharge,.85f);
             float distance=GetSafeTravelDistance(direction,6.5f);
             var origin=(Vector2)transform.position;
-            ArenaHazard.CreateChargeRoute(this,player,origin,direction,distance,.85f,.44f,normalColor);
+            ArenaHazard.CreateChargeRoute(this,player,origin,direction,distance,.85f,.44f,DangerTint,ContactRadius);
             yield return new WaitForSeconds(.85f);CampaignRelease(.44f);collisionAttackActive=true;
             CombatAudio.Native("heavy-impact",AudioChannel.Monster,.3f,.8f);
             yield return CampaignRush(direction,distance,.44f,false);
@@ -204,7 +203,7 @@ namespace RuinRunner
             float length=Mathf.Min(14,Mathf.Max(8,Mathf.Min(arena.width,arena.height)-2));
             for(int i=0;i<angles.Length;i++)
                 ArenaHazard.Create(this,player,position,new Vector2(length,1.35f),angles[i],false,1.05f,.4f,
-                    contactDamage,normalColor,ArenaHazardStyle.SealRift,i>0);
+                    contactDamage,DangerTint,ArenaHazardStyle.SealRift,i>0);
             yield return new WaitForSeconds(1.05f);CampaignRelease(.4f);
             CombatAudio.Native("heavy-impact",AudioChannel.Monster,.4f,.9f);
             yield return new WaitForSeconds(.45f);yield return Recover(1.25f);
@@ -215,13 +214,14 @@ namespace RuinRunner
             bool secondPhase=CampaignSecondPhase;
             BeginCampaignAction(direction,CampaignBossAction.SealVolley,.9f);
             var origin=(Vector2)transform.position+direction*.65f;
-            float angle=Mathf.Atan2(direction.y,direction.x)*Mathf.Rad2Deg;
-            ArenaHazard.Create(this,player,origin,Vector2.one*10,angle,true,.9f,.06f,0,normalColor,arcDegrees:secondPhase?60:44);
+            foreach(int spread in new[]{-16,0,16})AimLine(origin,Quaternion.Euler(0,0,spread)*direction,.9f);
+            Fx("ECastSeal",origin,.9f);
             yield return new WaitForSeconds(.9f);CampaignRelease(secondPhase?.66f:.36f);
             foreach(int spread in new[]{-16,0,16})BossRuneProjectile.Create(this,player,origin,Quaternion.Euler(0,0,spread)*direction,7,contactDamage);
             CombatAudio.Native("heavy-impact",AudioChannel.Monster,.27f,1.35f);
             if(secondPhase)
             {
+                foreach(int spread in new[]{-24,-8,8,24})AimLine(origin,Quaternion.Euler(0,0,spread)*direction,.3f);
                 yield return new WaitForSeconds(.3f);
                 foreach(int spread in new[]{-24,-8,8,24})BossRuneProjectile.Create(this,player,origin,Quaternion.Euler(0,0,spread)*direction,7,contactDamage);
             }

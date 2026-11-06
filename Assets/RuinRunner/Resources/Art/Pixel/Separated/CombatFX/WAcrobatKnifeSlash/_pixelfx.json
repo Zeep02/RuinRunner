@@ -1,0 +1,29 @@
+{
+  "clip": "WAcrobatKnifeSlash",
+  "ppu": 32,
+  "pivotX": 0.36513,
+  "pivotY": 0.4927,
+  "width": 152,
+  "height": 137,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hero-slash",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 15,
+  "fps": 60,
+  "loop": false,
+  "frames": 35,
+  "durationSeconds": 0.583,
+  "visibleDiameter": 123,
+  "origin": [
+    55,
+    69
+  ],
+  "optionsJson": "{\"palette\":[\"#141820\",\"#2a3240\",\"#4a5468\",\"#7a8698\",\"#b4bfcf\",\"#e4eaf2\",\"#ffffff\"],\"R\":53,\"W\":26}"
+}

@@ -1,0 +1,29 @@
+{
+  "clip": "AmbButterfly",
+  "ppu": 32,
+  "pivotX": 0.50417,
+  "pivotY": 0.48795,
+  "width": 120,
+  "height": 83,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "critters/butterfly",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 30,
+  "loop": true,
+  "frames": 96,
+  "durationSeconds": 3.2,
+  "visibleDiameter": 77,
+  "origin": [
+    60,
+    42
+  ],
+  "optionsJson": "{}"
+}

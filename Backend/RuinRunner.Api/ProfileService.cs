@@ -89,6 +89,7 @@ public sealed class ProfileService(Database db, CatalogStore catalogs)
         var talents=request.ActiveTalentIds??[];
         Wire.Require(talents.Length<=catalog.MaxActiveTalents && talents.Distinct().Count()==talents.Length,"talent_limit","선택할 수 있는 재능 수를 확인하세요.");
         Wire.Require(talents.All(t=>p.State.UnlockedTalentIds.Contains(t) && catalog.Talents.Any(x=>x.Id==t)),"talent_locked","아직 해금하지 않은 재능입니다.");
+        Wire.Require(talents.All(t=>catalog.Talents.Single(x=>x.Id==t).Branch!="mastery"),"talent_locked","수련은 선택 재능이 아닙니다.");
         Wire.Require(talents.Select(t=>catalog.Talents.Single(x=>x.Id==t).Branch).Distinct().Count()==talents.Length,"talent_branch","한 계열에서 재능 하나만 선택하세요.");
         p.State.StartingWeaponId=request.StartingWeaponId; p.State.ActiveTalentIds=talents;
         return await Save(c,p);
@@ -108,6 +109,7 @@ public sealed class ProfileService(Database db, CatalogStore catalogs)
         {
             var definition=catalog.Talents.SingleOrDefault(t=>t.Id==request.ContentId)??throw new ApiFailure(404,"content_missing","재능을 찾을 수 없습니다."); cost=definition.UnlockCost;
             Wire.Require(p.State.TotalRuns>=definition.RequiredRuns,"achievement_required","먼저 원정을 완료하세요.",409);
+            Wire.Require(definition.Requires==null||p.State.UnlockedTalentIds.Contains(definition.Requires),"talent_prerequisite","이전 단계를 먼저 해금하세요.",409);
             Wire.Require(!p.State.UnlockedTalentIds.Contains(request.ContentId),"already_unlocked","이미 해금되었습니다.",409);
             p.State.UnlockedTalentIds=[..p.State.UnlockedTalentIds,request.ContentId];
         }

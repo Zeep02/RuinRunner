@@ -21,7 +21,10 @@ import * as fire_fire_tornado from "./fire/fire-tornado.js";
 import * as fire_fireball from "./fire/fireball.js";
 import * as fire_flame_pillar from "./fire/flame-pillar.js";
 import * as fire_flamethrower from "./fire/flamethrower.js";
+import * as fire_lamp_glow from "./fire/lamp-glow.js";
 import * as fire_meteor from "./fire/meteor.js";
+import * as fire_prop_embers from "./fire/prop-embers.js";
+import * as fire_skull_brazier from "./fire/skull-brazier.js";
 import * as fire_spirit_flame from "./fire/spirit-flame.js";
 import * as fire_torch from "./fire/torch.js";
 import * as explosions_barrel_explosion from "./explosions/barrel-explosion.js";
@@ -40,6 +43,8 @@ import * as water_bubbles from "./water/bubbles.js";
 import * as water_drip from "./water/drip.js";
 import * as water_fountain from "./water/fountain.js";
 import * as water_geyser from "./water/geyser.js";
+import * as water_pipe_drip from "./water/pipe-drip.js";
+import * as water_prop_bubbles from "./water/prop-bubbles.js";
 import * as water_rain_splash from "./water/rain-splash.js";
 import * as water_ripples from "./water/ripples.js";
 import * as water_splash from "./water/splash.js";
@@ -84,6 +89,7 @@ import * as scifi_warp_out from "./scifi/warp-out.js";
 import * as melee_claw_swipe from "./melee/claw-swipe.js";
 import * as melee_dagger_flurry from "./melee/dagger-flurry.js";
 import * as melee_double_slash from "./melee/double-slash.js";
+import * as melee_flower_bloom from "./melee/flower-bloom.js";
 import * as melee_hammer_smash from "./melee/hammer-smash.js";
 import * as melee_heavy_cleave from "./melee/heavy-cleave.js";
 import * as melee_scythe_reap from "./melee/scythe-reap.js";
@@ -104,6 +110,16 @@ import * as impacts_impact_frame from "./impacts/impact-frame.js";
 import * as impacts_parry from "./impacts/parry.js";
 import * as impacts_ricochet from "./impacts/ricochet.js";
 import * as impacts_shield_block from "./impacts/shield-block.js";
+import * as ink_banner from "./ink/banner.js";
+import * as ink_cover from "./ink/cover.js";
+import * as ink_recede from "./ink/recede.js";
+import * as ink_rise from "./ink/rise.js";
+import * as ink_stain from "./ink/stain.js";
+import * as ink_step from "./ink/step.js";
+import * as enemies_beam from "./enemies/beam.js";
+import * as enemies_cut from "./enemies/cut.js";
+import * as enemies_gore from "./enemies/gore.js";
+import * as enemies_sweep from "./enemies/sweep.js";
 import * as projectiles_arrow from "./projectiles/arrow.js";
 import * as projectiles_bullet_tracer from "./projectiles/bullet-tracer.js";
 import * as projectiles_cannonball from "./projectiles/cannonball.js";
@@ -132,6 +148,7 @@ import * as arcane_arcane_missiles from "./arcane/arcane-missiles.js";
 import * as arcane_arcane_orb from "./arcane/arcane-orb.js";
 import * as arcane_blink_in from "./arcane/blink-in.js";
 import * as arcane_blink_out from "./arcane/blink-out.js";
+import * as arcane_crystal_glints from "./arcane/crystal-glints.js";
 import * as arcane_magic_circle_cast from "./arcane/magic-circle-cast.js";
 import * as arcane_mana_burst from "./arcane/mana-burst.js";
 import * as arcane_portal from "./arcane/portal.js";
@@ -146,6 +163,7 @@ import * as holy_halo from "./holy/halo.js";
 import * as holy_heal from "./holy/heal.js";
 import * as holy_heal_aoe from "./holy/heal-aoe.js";
 import * as holy_holy_pillar from "./holy/holy-pillar.js";
+import * as holy_light_spear from "./holy/light-spear.js";
 import * as holy_resurrection from "./holy/resurrection.js";
 import * as holy_smite from "./holy/smite.js";
 import * as holy_sunburst from "./holy/sunburst.js";
@@ -180,6 +198,7 @@ import * as nature_earth_spike from "./nature/earth-spike.js";
 import * as nature_healing_bloom from "./nature/healing-bloom.js";
 import * as nature_leaf_storm from "./nature/leaf-storm.js";
 import * as nature_poison_cloud from "./nature/poison-cloud.js";
+import * as nature_prop_spores from "./nature/prop-spores.js";
 import * as nature_quake from "./nature/quake.js";
 import * as nature_root_snare from "./nature/root-snare.js";
 import * as nature_spore_burst from "./nature/spore-burst.js";
@@ -244,6 +263,37 @@ import * as critters_jellyfish from "./critters/jellyfish.js";
 import * as critters_slime from "./critters/slime.js";
 import * as critters_snake from "./critters/snake.js";
 import * as critters_wisp from "./critters/wisp.js";
+import * as bosses_warden_boulder from "./bosses/warden-boulder.js";
+import * as bosses_warden_charge from "./bosses/warden-charge.js";
+import * as bosses_warden_death from "./bosses/warden-death.js";
+import * as bosses_warden_entrance from "./bosses/warden-entrance.js";
+import * as bosses_warden_hit from "./bosses/warden-hit.js";
+import * as bosses_warden_idle from "./bosses/warden-idle.js";
+import * as bosses_warden_leap from "./bosses/warden-leap.js";
+import * as bosses_warden_pound from "./bosses/warden-pound.js";
+import * as bosses_warden_punch from "./bosses/warden-punch.js";
+import * as bosses_warden_roar from "./bosses/warden-roar.js";
+import * as bosses_warden_spike from "./bosses/warden-spike.js";
+import * as bosses_warden_walk from "./bosses/warden-walk.js";
+import * as game_cut_flash from "./game/cut-flash.js";
+import * as game_hit_ring from "./game/hit-ring.js";
+import * as weapons_arc from "./weapons/arc.js";
+import * as weapons_bolt from "./weapons/bolt.js";
+import * as weapons_burst from "./weapons/burst.js";
+import * as weapons_chain_long from "./weapons/chain-long.js";
+import * as weapons_flash from "./weapons/flash.js";
+import * as weapons_gate_open from "./weapons/gate-open.js";
+import * as weapons_hero_slash from "./weapons/hero-slash.js";
+import * as weapons_hitstar from "./weapons/hitstar.js";
+import * as weapons_line from "./weapons/line.js";
+import * as weapons_line_loop from "./weapons/line-loop.js";
+import * as weapons_mark from "./weapons/mark.js";
+import * as weapons_puff from "./weapons/puff.js";
+import * as weapons_ring from "./weapons/ring.js";
+import * as weapons_spike from "./weapons/spike.js";
+import * as weapons_stab from "./weapons/stab.js";
+import * as weapons_zap from "./weapons/zap.js";
+import * as weapons_zone from "./weapons/zone.js";
 
 export { categories } from "./categories.js";
 
@@ -269,7 +319,10 @@ export const effects = {
   "fire/fireball": fire_fireball,
   "fire/flame-pillar": fire_flame_pillar,
   "fire/flamethrower": fire_flamethrower,
+  "fire/lamp-glow": fire_lamp_glow,
   "fire/meteor": fire_meteor,
+  "fire/prop-embers": fire_prop_embers,
+  "fire/skull-brazier": fire_skull_brazier,
   "fire/spirit-flame": fire_spirit_flame,
   "fire/torch": fire_torch,
   "explosions/barrel-explosion": explosions_barrel_explosion,
@@ -288,6 +341,8 @@ export const effects = {
   "water/drip": water_drip,
   "water/fountain": water_fountain,
   "water/geyser": water_geyser,
+  "water/pipe-drip": water_pipe_drip,
+  "water/prop-bubbles": water_prop_bubbles,
   "water/rain-splash": water_rain_splash,
   "water/ripples": water_ripples,
   "water/splash": water_splash,
@@ -332,6 +387,7 @@ export const effects = {
   "melee/claw-swipe": melee_claw_swipe,
   "melee/dagger-flurry": melee_dagger_flurry,
   "melee/double-slash": melee_double_slash,
+  "melee/flower-bloom": melee_flower_bloom,
   "melee/hammer-smash": melee_hammer_smash,
   "melee/heavy-cleave": melee_heavy_cleave,
   "melee/scythe-reap": melee_scythe_reap,
@@ -352,6 +408,16 @@ export const effects = {
   "impacts/parry": impacts_parry,
   "impacts/ricochet": impacts_ricochet,
   "impacts/shield-block": impacts_shield_block,
+  "ink/banner": ink_banner,
+  "ink/cover": ink_cover,
+  "ink/recede": ink_recede,
+  "ink/rise": ink_rise,
+  "ink/stain": ink_stain,
+  "ink/step": ink_step,
+  "enemies/beam": enemies_beam,
+  "enemies/cut": enemies_cut,
+  "enemies/gore": enemies_gore,
+  "enemies/sweep": enemies_sweep,
   "projectiles/arrow": projectiles_arrow,
   "projectiles/bullet-tracer": projectiles_bullet_tracer,
   "projectiles/cannonball": projectiles_cannonball,
@@ -380,6 +446,7 @@ export const effects = {
   "arcane/arcane-orb": arcane_arcane_orb,
   "arcane/blink-in": arcane_blink_in,
   "arcane/blink-out": arcane_blink_out,
+  "arcane/crystal-glints": arcane_crystal_glints,
   "arcane/magic-circle-cast": arcane_magic_circle_cast,
   "arcane/mana-burst": arcane_mana_burst,
   "arcane/portal": arcane_portal,
@@ -394,6 +461,7 @@ export const effects = {
   "holy/heal": holy_heal,
   "holy/heal-aoe": holy_heal_aoe,
   "holy/holy-pillar": holy_holy_pillar,
+  "holy/light-spear": holy_light_spear,
   "holy/resurrection": holy_resurrection,
   "holy/smite": holy_smite,
   "holy/sunburst": holy_sunburst,
@@ -428,6 +496,7 @@ export const effects = {
   "nature/healing-bloom": nature_healing_bloom,
   "nature/leaf-storm": nature_leaf_storm,
   "nature/poison-cloud": nature_poison_cloud,
+  "nature/prop-spores": nature_prop_spores,
   "nature/quake": nature_quake,
   "nature/root-snare": nature_root_snare,
   "nature/spore-burst": nature_spore_burst,
@@ -492,4 +561,35 @@ export const effects = {
   "critters/slime": critters_slime,
   "critters/snake": critters_snake,
   "critters/wisp": critters_wisp,
+  "bosses/warden-boulder": bosses_warden_boulder,
+  "bosses/warden-charge": bosses_warden_charge,
+  "bosses/warden-death": bosses_warden_death,
+  "bosses/warden-entrance": bosses_warden_entrance,
+  "bosses/warden-hit": bosses_warden_hit,
+  "bosses/warden-idle": bosses_warden_idle,
+  "bosses/warden-leap": bosses_warden_leap,
+  "bosses/warden-pound": bosses_warden_pound,
+  "bosses/warden-punch": bosses_warden_punch,
+  "bosses/warden-roar": bosses_warden_roar,
+  "bosses/warden-spike": bosses_warden_spike,
+  "bosses/warden-walk": bosses_warden_walk,
+  "game/cut-flash": game_cut_flash,
+  "game/hit-ring": game_hit_ring,
+  "weapons/arc": weapons_arc,
+  "weapons/bolt": weapons_bolt,
+  "weapons/burst": weapons_burst,
+  "weapons/chain-long": weapons_chain_long,
+  "weapons/flash": weapons_flash,
+  "weapons/gate-open": weapons_gate_open,
+  "weapons/hero-slash": weapons_hero_slash,
+  "weapons/hitstar": weapons_hitstar,
+  "weapons/line": weapons_line,
+  "weapons/line-loop": weapons_line_loop,
+  "weapons/mark": weapons_mark,
+  "weapons/puff": weapons_puff,
+  "weapons/ring": weapons_ring,
+  "weapons/spike": weapons_spike,
+  "weapons/stab": weapons_stab,
+  "weapons/zap": weapons_zap,
+  "weapons/zone": weapons_zone,
 };

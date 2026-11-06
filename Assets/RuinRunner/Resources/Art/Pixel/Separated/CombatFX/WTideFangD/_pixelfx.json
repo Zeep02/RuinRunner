@@ -1,0 +1,29 @@
+{
+  "clip": "WTideFangD",
+  "ppu": 32,
+  "pivotX": 0.50424,
+  "pivotY": 0.49359,
+  "width": 118,
+  "height": 78,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.1",
+  "source": "pixelfx",
+  "effect": "water/whirlpool",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 5,
+  "fps": 30,
+  "loop": true,
+  "frames": 33,
+  "durationSeconds": 1.1,
+  "visibleDiameter": 108,
+  "origin": [
+    59,
+    39
+  ],
+  "optionsJson": "{\"palette\":[\"#081830\",\"#0e2e5a\",\"#14508c\",\"#1c8ebc\",\"#36c2d0\",\"#88e8e0\",\"#e0fff8\"]}"
+}

@@ -1,0 +1,29 @@
+{
+  "clip": "WWhetstoneOrbCast",
+  "ppu": 32,
+  "pivotX": 0.50291,
+  "pivotY": 0.16667,
+  "width": 172,
+  "height": 147,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "arcane/mana-burst",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 82,
+  "fps": 30,
+  "loop": false,
+  "frames": 38,
+  "durationSeconds": 1.267,
+  "visibleDiameter": 140,
+  "origin": [
+    86,
+    122
+  ],
+  "optionsJson": "{\"palette\":[\"#0e0e12\",\"#1c1c24\",\"#2c2c38\",\"#42424f\",\"#6a6a78\",\"#9c9caa\",\"#d8d8e0\"]}"
+}

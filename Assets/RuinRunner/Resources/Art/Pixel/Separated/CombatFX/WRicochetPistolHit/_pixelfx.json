@@ -1,0 +1,28 @@
+{
+  "clip": "WRicochetPistolHit",
+  "ppu": 32,
+  "pivotX": 0.40244,
+  "pivotY": 0.59756,
+  "width": 41,
+  "height": 41,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/hitstar",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 61,
+  "fps": 30,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.333,
+  "visibleDiameter": 27,
+  "origin": [
+    16,
+    16
+  ],
+  "optionsJson": "{\"palette\":[\"#201406\",\"#4a300c\",\"#7e5414\",\"#b8821c\",\"#e4ae34\",\"#f8d878\",\"#fff6d0\"],\"sparks\":[\"#fff6d0\",\"#f8d878\",\"#e4ae34\",\"#b8821c\"],\"len\":10}"
+}

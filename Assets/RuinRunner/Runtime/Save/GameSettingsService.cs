@@ -166,10 +166,10 @@ namespace RuinRunner
                 case GameAction.Attack: return "일반 공격";
                 case GameAction.SpecialAttack: return "사용 안 함 (레거시 기술)";
                 case GameAction.Dash: return "대시";
-                case GameAction.Guard: return "무기 고유 행동";
+                case GameAction.Guard: return "무기 스킬";
                 case GameAction.Interact: return "상호작용";
-                case GameAction.Inventory: return "인벤토리";
-                case GameAction.Map: return "탐사 지도";
+                case GameAction.Inventory: return "가방";
+                case GameAction.Map: return "지도";
                 case GameAction.Stats: return "상세 스탯";
                 case GameAction.Legacy: return "유산 특성";
                 case GameAction.Weapon1: return "무기 슬롯 1";
@@ -178,7 +178,7 @@ namespace RuinRunner
                 case GameAction.Reward4: return "성장 선택 4";
                 case GameAction.Reward5: return "성장 선택 5";
                 case GameAction.Reward6: return "성장 선택 6";
-                case GameAction.Reload: return "장전·강화";
+                case GameAction.Reload: return "장전";
                 case GameAction.Dismantle: return "장비 분해";
                 default: return "일시정지";
             }

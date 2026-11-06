@@ -1,0 +1,28 @@
+{
+  "clip": "FxEarthSpike",
+  "ppu": 32,
+  "pivotX": 0.53614,
+  "pivotY": 0.11702,
+  "width": 249,
+  "height": 141,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "nature/earth-spike",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 52,
+  "durationSeconds": 3.467,
+  "visibleDiameter": 216,
+  "origin": [
+    133,
+    124
+  ],
+  "optionsJson": "{}"
+}

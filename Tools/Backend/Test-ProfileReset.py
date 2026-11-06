@@ -79,7 +79,7 @@ def main(instance):
     check("foreign owner cannot confirm reset", confirm(first, token=foreign, status=404)["code"] == "profile_missing")
     check("challenge is bound to exact profile", call("POST", "/v1/profiles/" + other["profileId"] + "/reset", dict(operationId=uid(), expectedRevision=other["revision"], challengeId=first["challengeId"]), owner, 409)["code"] == "reset_challenge_missing")
     stale = begin()
-    p = call("PUT", path + "/configuration", dict(operationId=uid(), expectedRevision=p["revision"], startingWeaponId="rust_sword", activeTalentIds=[]), owner)
+    p = call("PUT", path + "/configuration", dict(operationId=uid(), expectedRevision=p["revision"], startingWeaponId="trainee_blade", activeTalentIds=[]), owner)
     check("profile change invalidates earlier confirmation", confirm(stale, status=409)["code"] == "revision_conflict")
     expiry = begin()
     sql("UPDATE profile_reset_challenges SET expires_utc=now()-interval '1 second' WHERE id='" + expiry["challengeId"] + "'")
@@ -98,7 +98,7 @@ def main(instance):
     p = a["profile"]
     check("concurrent same-operation confirmations return identical receipt", a == b)
     check("reset preserves identity name and slot", all(p[k] == old_profile[k] for k in ("profileId", "playerId", "slot", "name")))
-    check("reset clears counters and restores current defaults", p["legacyShards"] == catalog["startingLegacy"] and p["state"]["totalRuns"] == 0 and p["state"]["totalKills"] == 0 and p["state"]["unlockedWeaponIds"] == ["rust_sword"] and p["state"]["activeTalentIds"] == catalog["defaultUnlockedTalentIds"])
+    check("reset clears counters and restores current defaults", p["legacyShards"] == catalog["startingLegacy"] and p["state"]["totalRuns"] == 0 and p["state"]["totalKills"] == 0 and p["state"]["unlockedWeaponIds"] == ["trainee_blade"] and p["state"]["activeTalentIds"] == catalog["defaultUnlockedTalentIds"])
     check("reset increments revision and permanent import tombstone", p["revision"] == old_profile["revision"] + 1 and p["state"]["resetCount"] == 1 and p["state"]["legacyImportBlocked"])
     check("reset retry after lost reply is stable", confirm(challenge, operation, old_profile["revision"]) == a)
     check("used challenge cannot reset twice", confirm(challenge, status=409)["code"] in ("revision_conflict", "reset_challenge_used"))
@@ -110,7 +110,7 @@ def main(instance):
     check("other slot is unchanged", call("GET", "/v1/profiles/" + other["profileId"], token=owner) == other)
     fresh = call("POST", "/v1/runs", dict(operationId=uid(), profileId=p["profileId"], expectedProfileRevision=p["revision"], requestedSeed=20261010, contentVersion=catalog["version"], generatorVersion="modules-v1.0.0", buildId="isolated-reset-check"), owner)
     check("reset profile can depart again", fresh["runId"] != run["runId"] and fresh["status"] == "active")
-    check("stale pre-reset operation cannot replace new progress", call("PUT", path + "/configuration", dict(operationId=uid(), expectedRevision=old_profile["revision"], startingWeaponId="rust_sword", activeTalentIds=[]), owner, 409)["code"] == "revision_conflict")
+    check("stale pre-reset operation cannot replace new progress", call("PUT", path + "/configuration", dict(operationId=uid(), expectedRevision=old_profile["revision"], startingWeaponId="trainee_blade", activeTalentIds=[]), owner, 409)["code"] == "revision_conflict")
     report = {"status": "PASS", "normalGameplay": False, "scope": "isolated HTTP/PostgreSQL profile reset", "instance": instance, "checks": RESULTS}
     filename = "profile-reset-" + datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%S") + ".json"
     output = ROOT / "Backend/Validation" / filename

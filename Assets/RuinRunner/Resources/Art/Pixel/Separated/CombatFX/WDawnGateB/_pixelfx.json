@@ -1,0 +1,28 @@
+{
+  "clip": "WDawnGateB",
+  "ppu": 32,
+  "pivotX": 0.09615,
+  "pivotY": 0.49242,
+  "width": 78,
+  "height": 66,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/line",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 39,
+  "fps": 30,
+  "loop": false,
+  "frames": 11,
+  "durationSeconds": 0.367,
+  "visibleDiameter": 64,
+  "origin": [
+    7,
+    33
+  ],
+  "optionsJson": "{\"palette\":[\"#2a1c08\",\"#5a3e10\",\"#9a6c18\",\"#d8a428\",\"#ffd84a\",\"#fff09a\",\"#fffbe6\"],\"style\":\"beam\",\"W\":15,\"taper\":false}"
+}

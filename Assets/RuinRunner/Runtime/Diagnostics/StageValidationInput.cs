@@ -110,6 +110,11 @@ namespace RuinRunner
             foreach (var argument in Environment.GetCommandLineArgs())
             {
                 if (!string.Equals(argument, CommandLineArgument, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(argument, CombatSandbox.TourArgument, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(argument, CombatSandbox.PassiveTourArgument, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(argument, CombatSandbox.SkillTourArgument, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(argument, MeleeTrailTour.Argument, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(argument, BossMoveTour.Argument, StringComparison.OrdinalIgnoreCase) &&
                     !string.Equals(argument, "--motion-validation", StringComparison.OrdinalIgnoreCase) &&
                     !string.Equals(argument, "--continuous-world-validation", StringComparison.OrdinalIgnoreCase) &&
                     !string.Equals(argument, "--map-validation", StringComparison.OrdinalIgnoreCase) &&

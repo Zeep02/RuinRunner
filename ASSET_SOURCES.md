@@ -133,3 +133,67 @@ Kronovi / Dark Pixel의 무료 Mecha-Stone Golem: https://darkpixel-kronovi.itch
 - `External/ChampiDungeon/Paving/00..15`, `Ground`는 원본 사각 영역을 Unity API로 추출한 개별 PNG. 재샘플링·재도색 없이 원본 RGBA를 대조했다. `core-floor/native-import.json`에 18개 비교 추출 기록이 있다. `Seal`은 비교용 미사용 후보이며 기존 CoreMosaic는 유지한다.
 - 표시만 `CoreStone` 공용 머티리얼로 대비와 색을 조정하고 포석 마모에 공간별 알파를 적용한다. 원본 픽셀·피벗·32 PPU·Point 설정은 유지한다.
 - 배포 고지: `Assets/StreamingAssets/ThirdPartyNotices/ChampiSDungeon.txt`.
+
+## 무기 70종 (2026-11-03)
+
+- 무기 이미지 `Resources/Art/Pixel/Separated/Equipment/Weapon/<id>.png`: PixelLab MCP 생성물. 생성 요청은 `Tools/Art/Staging/PixelLab/20261103-weapons70/request.json`과 `Tools/Art/Staging/PixelLab/20261103-ember_claw/request.json`, 고른 후보는 `Tools/Art/build_weapons70.py`의 `PICK`. PixelLab 구독 Tier 1 사용.
+- 이펙트 `Resources/Art/Pixel/Separated/CombatFX/W*`: `Tools/pixelfx/src/fx/weapons/` 레시피를 무기별 옵션으로 내보낸 pixelfx 클립(MIT). 무기별 옵션은 `Tools/Art/weapons70-fx.mjs`, 클립별 출처와 seed는 각 폴더의 `_pixelfx.json`.
+- 명세 원본은 `Tools/Art/weapons70.json`.
+- 2026-11-05 스킬 리메이크: 우클릭 클립 표는 `Tools/Art/weapons70-skillfx.mjs`. 직접 쓴 pixelfx 효과는 `Tools/pixelfx/src/fx/melee/flower-bloom.js`, `holy/light-spear.js`, `weapons/zone.js`, `weapons/chain-long.js`, `weapons/mark.js`의 `deploy`·`spear`. 화면 기록은 `Logs/Validation/20261105-weapon-skill-remake/`.
+
+## 남은 적 리스프라이트 (2026-11-03)
+
+- `Resources/Art/Pixel/Separated/Pilot/{Shooter,Leaper,Tidecaller,Sentinel,Tidekeeper,SealHeart}`: PixelLab MCP 생성물(`create_character_pro_flash` + `animate_character` v3). 화풍 기준은 주인공 `External/SscaryMale/idle/down/00.png`. 요금제는 Tier 1 Pixel Apprentice 구독, 이용약관은 https://pixellab.ai/termsofservice.
+- 요청 기록은 `Tools/Art/Staging/PixelLab/20261103-remaining/<이름>/request.json`, 내려받은 원본은 같은 폴더의 `character.zip`과 `download/`, 반려본은 `rejected-*`에 있다. 생성·설치 도구는 `Tools/Art/generate_remaining_enemies_20261103.py`, `Tools/Art/install_remaining_enemies_20261103.py`.
+- 재샘플링 없음. 설치 때 서쪽은 동쪽의 좌우 반전이고, 공격·피격의 작은 불티는 지우며, 효과가 그려진 프레임은 가까운 깨끗한 프레임으로 대체한다. SealHeart 대기·피격과 Tidekeeper 피격은 AI 결과의 형태가 무너져, 생성된 기준 스프라이트의 분리된 조각을 정수 픽셀로 움직여 만들었다.
+- 대체된 옛 그림(CraftPix Slime2·3, Vampires2·3, Kronovi Golem, 내부 SealCoreV4)은 삭제하지 않고 그대로 둔다. 게임은 더 이상 불러오지 않는다.
+- Tidekeeper·SealHeart의 대기·이동·시전·피격은 `Tools/Art/author_boss_rigs_20261103.py`가 위 생성물의 기준 스프라이트 조각을 정수 픽셀로 움직여 만든다. 빛나는 픽셀의 밝기만 바꾸고 재샘플링은 없다. 사망만 PixelLab 생성 클립이다.
+
+## 장신구 30종 (2026-11-03)
+
+- `Resources/Art/Pixel/Separated/Equipment/Accessory/<id>.png`: PixelLab MCP `create_1_direction_object` 생성물로 교체. 파일 이름과 `.meta`(GUID)는 유지했다. 이전 아이콘(Snoopeth, Alex, Shade 등의 무료 원본)은 git 이력과 위 항목의 출처 기록에 남는다.
+- 요청 기록과 후보 64장은 `Tools/Art/Staging/PixelLab/20261103-accessories/`(`request.json`, `candidates/`, `candidates-sheet.png`). 고른 후보는 `request.json`의 `picked_slots`, 생성·설치 도구는 `Tools/Art/generate_accessories_20261103.py`, `Tools/Art/install_accessories_20261103.py`. 재샘플링 없이 보이는 픽셀로 자르고 작은 불티만 지웠다.
+
+## 패시브 장신구 20종 (2026-11-04)
+
+- `Equipment/Accessory/<id>.png` 20개: PixelLab MCP `create_1_direction_object`. 요청 기록과 후보 60장은 `Tools/Art/Staging/PixelLab/20261104-passive-accessories/`, 설치 도구는 `Tools/Art/install_passive_accessories_20261104.py`. 재샘플링 없이 보이는 픽셀로 자르고 작은 불티만 지웠다.
+- `CombatFX/WAcc*` 클립 25개: `Tools/pixelfx` 완성 이펙트를 `Tools/Art/accessories-fx.mjs`로 칠해 내보냈다.
+
+## 2026-11-03 Warden, 일반 적 재생성, 소품, 포탈, 잠금 기둥, 몬스터 공격 이펙트
+
+- `Pilot/Warden`과 Grunt·Charger·Sporeling·RuneTotem·TideCrab·Wisp·SealKnight·Hexer의 `Pilot/<이름>` 클립: PixelLab MCP 생성물. 요청 기록은 `Tools/Art/Staging/PixelLab/20261103-remaining/<이름>/request.json`, 원본은 같은 폴더의 `character.zip`. Warden 후보 기록은 `Warden/character.json`. 설치 때 재샘플링은 없고, 효과가 그려진 프레임은 가까운 깨끗한 프레임으로 대체하며, Hexer 보석의 흰 픽셀은 자홍색으로 바꾼다.
+- `Campaign/Dressing/<Outer|Flooded|Core>`: PixelLab MCP `create_1_direction_object`. 요청과 후보는 `Tools/Art/Staging/PixelLab/20261103-dressing/`. 바닥 소품은 어두운 외곽선을 지운다. `flat-coins`, Core `flat-crack`, `stand-crate`, `stand-chest`는 게임에서 쓰지 않는다.
+- `Campaign/Landmark/<Outer|Flooded|Core>`: PixelLab MCP `create_1_direction_object`. 기존 소품과 같은 방식에 테마별 기존 그림에서 뽑은 팔레트(`palettes.json`)를 준다. 설치 도구와 요청 목록은 `Tools/Art/install_landmarks_20261103.py`, 원본은 `Tools/Art/Staging/PixelLab/20261103-landmarks/set-*`. 같은 폴더의 다른 PNG는 화풍이 맞지 않아 쓰지 않은 `create_map_object` 후보다. 설치 때 투명 여백만 자른다.
+- `Campaign/Gate`, `Campaign/Seal/<테마>`: PixelLab MCP. 요청과 원본은 `Tools/Art/Staging/PixelLab/20261103-gate/`. 잠금 기둥의 8프레임은 원본 윗부분부터 드러나도록 잘라 만든다.
+- `CombatFX/E*`, `CombatFX/FxTrail*`: pixelfx(MIT, patch-gg/pixelfx). 표는 `Tools/Art/enemy-attack-fx.mjs`와 `Tools/Art/hero-trail-fx.mjs`, 내보내기 기록은 `Tools/Art/Staging/PixelFx/<클립>/`. 적 전용 휘두르기·베기·광선은 프로젝트에서 작성한 `Tools/pixelfx/src/fx/enemies/`이고, 근접 레시피는 pixelfx에 포함된 Sprite Fusion slash(MIT) 각색본이다.
+- `CombatFX/ItemThunder/03.png`: 검은 프레임을 같은 클립의 밝은 색으로 칠했다.
+- 요금제는 Tier 1 Pixel Apprentice 구독, 이용약관은 https://pixellab.ai/termsofservice.
+
+## 2026-11-05 움직이는 소품
+
+- `CombatFX/PropBrazier`, `PropCandles`, `PropCrystal`, `PropChains`: `Campaign/Dressing/Core/stand-*`를 32×40으로 여백만 주어 첫 프레임으로 넣은 PixelLab MCP `animate_image` 결과. 요청과 원본은 `Tools/Art/Staging/PixelLab/20261105-animated-props/`. 설치 때 재샘플링은 없고, 불꽃·사슬 밖의 변화는 원본 픽셀로 되돌리며, 수정의 빛은 42%로 줄인다.
+- `CombatFX/PropMushrooms`, `PropGrass`, `PropBush`, `PropStumpIvy`, `PropReeds`, `PropCoral`, `PropBarrel`: 외곽·회랑의 `stand-*`로 같은 방식. 요청과 원본도 같은 폴더. 잔떨림과 윤곽 밖의 조각은 지우고, 담쟁이는 앞뒤로 왕복한다. 파이프는 물줄기가 나오지 않아 프레임을 쓰지 않는다.
+- `CombatFX/FxPropEmbers`, `FxPropEmbersTeal`, `FxPropCrystalGlints`, `FxPropSpores`, `FxPropPollen`, `FxPropBubbles`, `FxPropPipeDrip`: pixelfx(MIT, patch-gg/pixelfx). 프로젝트에서 작성한 `Tools/pixelfx/src/fx/fire/prop-embers.js`, `arcane/crystal-glints.js`, `nature/prop-spores.js`, `water/prop-bubbles.js`, `water/pipe-drip.js`이고, 표는 `Tools/Art/presentation-fx.mjs`.
+- `CombatFX/HeroCombo*`: 주인공 `External/SscaryMale/idle/{right_down,right_up}/00.png`를 64×64에 놓아 첫·끝 프레임으로 넣은 PixelLab MCP `animate_image` 결과이자 그 좌우 반전. 요청과 원본은 `Tools/Art/Staging/PixelLab/20261105-melee-combo/`, 먼저 만든 카타나 원본은 `20261105-katana-combo/`. 외부 원본에서 파생한 그림이다. 사용자가 2026-11-05에 Sscary 원본 페이지를 확인했고, 무료·상업용 모두 사용 가능하며 자유롭게 수정할 수 있다고 명시되어 있다고 전했다. 생성 도구 입력을 따로 다룬 조항은 전달받지 않았다.
+- `CombatFX/PropDummy`, `PropWagon`, `PropBundle`: PixelLab MCP `create_object_pro_flash`(마을 `External/TownRefuge/barrel.png`, `crate.png`를 화풍 기준으로 입력)로 만든 원본에 `animate_image`를 입힌 결과. `CombatFX/PickupPotion`은 같은 도구의 단일 그림. 요청과 원본은 `Tools/Art/Staging/PixelLab/20261105-npc-landmarks/`. 재샘플링은 없고, 잔떨림과 바닥에 닿는 줄은 원본 픽셀로 되돌리며, 더미는 앞뒤로 왕복한다.
+- `CombatFX/EShotRockBig`, `EQuakeRift`, `EWhirlpool`, `EWaveCrash`, `EGeyserBlast`, `EShotWave`, `ESealBeamLoop`, `ESmite`, `ESealCircle`, `EManaBurst`, `EShotOrbit`, `FxPotionHeal`: pixelfx(MIT, patch-gg/pixelfx) 완성 이펙트를 칠해 내보낸 클립. 표는 `Tools/Art/enemy-attack-fx.mjs`, 회복은 `holy/heal-aoe`. 클립을 더한 뒤에는 `python Tools/Art/list_blank_fx_frames.py`로 `BlankFrames.txt`를 다시 만든다. 빠지면 재생 속도를 몰라 일회성 클립이 첫 프레임에서 사라진다.
+- 요금제는 Tier 1 Pixel Apprentice 구독, 이용약관은 https://pixellab.ai/termsofservice.
+
+The PixelLab coin draft stays only in `Tools/Art/Staging/PixelLab/20261104-hud/`; the game uses `HUD/Gold.png` (`Tools/Art/author_gold_ui.py`) and `Feedback/Gold/00-07`. This historical image is preserved; the active pickup now uses the locally authored yellow orb described below. `Audio/Combat/level-up.wav` (0.26 s) and `coin.wav` (0.1 s) are synthesized for this project with numpy and carry no third-party license; `upgrade.wav` stays in place but is no longer played. Talent effects `CombatFX/Talent*` are pixelfx exports (MIT, patch-gg/pixelfx).
+
+### Gold pickup orb — 2026-11-04
+
+At the user's request, `Separated/Feedback/Gold/00.png`–`07.png` are directly authored pixel rows, with no image-generation service call. Source: `Tools/Art/author_gold_coin.py`; provenance and previews: `Tools/Art/Staging/Authored/20261104-gold/`. Each transparent 32×32 frame contains a 6×6 yellow luminous cluster, matching the small experience orb's visible size. Eight brightness poses play at 10 fps with 32 PPU, Point filtering, no mipmaps or compression, and no runtime stretching. No external artwork or third-party license was introduced. Actual game-window review remains pending.
+
+Map icons (`Separated/Map/*.png`, 32×32) are PixelLab `create_image_pixflux` generations under the user's PixelLab account; requests: `Tools/Art/Staging/PixelLab/20261104-map-icons/request.json`.
+
+## 스테이지 몹 15종과 연출 클립 (2026-11-04)
+
+- `Pilot/<BoneShield|VineLasher|RuinRat|MossArcher|PowderBeetle|Drowned|EelSpitter|CoralGuard|JellyLamp|TideSiren|InkShade|SealGolem|GildedBolter|ChainWarden|SealPriest>`: PixelLab MCP 생성물. 요청 기록은 `Tools/Art/Staging/PixelLab/20261104-mobs/<이름>/request.json`, 원본은 같은 폴더의 `character.zip`. 생성·설치 도구는 `Tools/Art/generate_stage_mobs_20261104.py`, `Tools/Art/install_stage_mobs_20261104.py`. 설치 규칙은 2026-11-03 적 리스프라이트와 같다.
+- `CombatFX/Ink*`, `Banner*`, `Stain*`, `Step*`: 프로젝트 자체 pixelfx 레시피 `Tools/pixelfx/src/fx/ink/`. 움직임의 기준은 사용자가 준 `연출용임시.gif`이고, 그 이미지 자체는 쓰지 않는다.
+- `CombatFX/AmbSkull*`, `CombatFX/AmbLamp*`: 프로젝트 자체 pixelfx 레시피 `fire/skull-brazier`, `fire/lamp-glow`. 불꽃 레이어는 pixelfx `fire/_lib`의 `flameTongue`(Sprite Fusion 공개 fire, MIT).
+- `CombatFX/Amb*`, `Break*`, `Spawn*`, `DeathPuff*`, `LootBeam`, `LevelUpBurst`, `RoomClearRing`, `BossFall`, `Ui*`: `Tools/pixelfx` 완성 이펙트를 `Tools/Art/presentation-fx.mjs`로 칠해 내보낸 클립(MIT). 클립별 출처와 seed는 각 폴더의 `_pixelfx.json`.
+
+## 무기 다시 뽑기 (2026-11-05)
+
+- `Equipment/Weapon/` 중 `Tools/Art/install_weapon_picks_20261105.py`의 `PICKS`에 있는 52종: PixelLab MCP `create_1_direction_object`. 후보와 요청 기록은 `Tools/Art/Staging/PixelLab/20261105-weapons-cool/`, `20261105-weapons-clean/`(총과 단검, `max_colors` 제한). 재샘플링은 없고, 칸에 다른 조각이 같이 있으면 가장 큰 덩어리만 남긴다. 비교표는 `Tools/Art/compare_weapons_20261105.py`.

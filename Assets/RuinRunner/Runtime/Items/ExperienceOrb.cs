@@ -18,7 +18,6 @@ namespace RuinRunner
         private float homingSpeed = 4f;
         private float echoTimer;
         private bool collected;
-        public int Amount => amount;
         public bool IsCollected => collected;
         public static string SizeForAmount(int value) => value <= 5 ? "Small" : value <= 14 ? "Medium" : "Large";
 
@@ -101,10 +100,10 @@ namespace RuinRunner
                 return;
             }
 
-            var delta = (Vector2)(target.transform.position - transform.position);
-            if (delta.magnitude < 5f)
+            // Nothing left to fight here, so nothing is lost by walking off: it comes to the hero from anywhere.
+            homingSpeed = Mathf.MoveTowards(homingSpeed, 16f, 22f * Time.deltaTime);
+            if (((Vector2)(target.transform.position - transform.position)).sqrMagnitude < 25f)
             {
-                homingSpeed = Mathf.MoveTowards(homingSpeed, 16f, 22f * Time.deltaTime);
                 echoTimer -= Time.deltaTime;
                 if (echoTimer <= 0f)
                 {
@@ -112,13 +111,8 @@ namespace RuinRunner
                     TransientSpriteEffect.Create(view.sprite, view.transform.position, Vector3.one * .85f,
                         new Color(.85f, 1f, .55f, .4f), .16f, 13);
                 }
-                transform.position = Vector2.MoveTowards(transform.position, target.transform.position, homingSpeed * Time.deltaTime);
             }
-            else
-            {
-                transform.position += (Vector3)(drift * Time.deltaTime);
-                drift = Vector2.Lerp(drift, Vector2.zero, 3f * Time.deltaTime);
-            }
+            transform.position = Vector2.MoveTowards(transform.position, target.transform.position, homingSpeed * Time.deltaTime);
 
             if (Vector2.Distance(transform.position, target.transform.position) <= .42f) Collect();
         }

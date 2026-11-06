@@ -8,14 +8,25 @@ namespace RuinRunner
     public sealed partial class EnemyController : MonoBehaviour
     {
         public EnemyType Type { get; private set; }
+        private bool muteNextHitFx, muteDeathFlash;
         public float Health { get; private set; }
         public float MaxHealth { get; private set; }
         public float Armor { get; private set; }
         public int ExperienceReward { get; private set; }
         public bool IsActing => acting;
-        public int AttackVisualPhase { get; private set; } // 0 anticipation, 1 active, 2 recovery
+        private const float StrikeHoldSeconds = .2f, MaxAimLine = 14f;
+        // Every attack warning reads as one colour, whatever the enemy's own colour or the stage's floor.
+        private static readonly Color DangerTint = new Color(1f, .3f, .2f);
+        private int attackVisualPhase;
+        private float strikeShownAt;
+        public int AttackVisualPhase // 0 anticipation, 1 active, 2 recovery
+        {
+            get => attackVisualPhase;
+            private set { if (value == 1 && attackVisualPhase != 1) strikeShownAt = Time.time; attackVisualPhase = value; }
+        }
         public bool IsDead => dead;
         public bool IntroLocked { get; private set; }
+        private bool roarInvulnerable;
         public bool AnimationPaused => IntroLocked || (isPaused != null && isPaused());
         public void SetIntroLocked(bool locked)
         {
@@ -35,7 +46,20 @@ namespace RuinRunner
         public Vector2 VisualAimDirection => !acting && Velocity.sqrMagnitude>.0225f ? Velocity :
             player==null?Vector2.down:(Vector2)(player.transform.position-transform.position);
         public bool IsBoss => EnemyRoles.IsBoss(Type);
-        public const float ChargeContactRadius = 1.35f;
+        // How far a rushing body reaches. The route warning is drawn from this, and it follows the body's real width.
+        public float ContactRadius
+        {
+            get
+            {
+                if (IsBoss) return 1.35f;
+                switch (Type)
+                {
+                    case EnemyType.Grunt: return .75f;
+                    case EnemyType.Charger: return 1f;
+                    default: return .85f;
+                }
+            }
+        }
         public float PresentationScale => IsBoss || (int)Type >= (int)EnemyType.Tidecaller ? 1f : .75f;
         public static float SlamRadius(bool isBoss) => isBoss ? 2.4f : 1.5f;
 
@@ -43,7 +67,11 @@ namespace RuinRunner
         private BoxCollider2D enemyCollider;
         private BoxCollider2D damageCollider;
         private Transform healthBarRoot;
-        private SpriteRenderer healthBackRenderer,healthFillRenderer,heroBodyRenderer;
+        private SpriteRenderer healthBackRenderer,healthFillRenderer,healthTrailRenderer,healthShineRenderer,heroBodyRenderer;
+        private Transform healthTrail;
+        private float healthShownRatio=1,healthBarHideAt;
+        // One outline pixel on each side of a bar this many world units wide.
+        const float HealthInner=.92f;
         private EnemyBalanceData presentationBalance;
         public Collider2D DamageCollider => damageCollider;
         public static EnemyController DamageTarget(Collider2D collider)
@@ -57,7 +85,6 @@ namespace RuinRunner
         private Vector3 leapVisualBasePosition;
         private bool airborneVisual;
         private Transform healthFill;
-        private Transform eye;
         private GameObject landingTelegraph;
         private PlayerController player;
         private Func<bool> isPaused;
@@ -79,12 +106,12 @@ namespace RuinRunner
         private float hitFlashRemaining;
         private int hitFlashFrame;
         private static readonly Color HitTint = new Color(1f, .68f, .5f);
-        private bool usesPixelArt;
         private StageTerrainLayout navigationTerrain;
         private readonly List<Vector2> coverRoute = new List<Vector2>();
-        private float nextCoverRouteAt;
-        private Color RestingColor => usesPixelArt ? Color.white : normalColor;
-        private const string AnimationResourcePath = "Animation/EnemyAnimationLibrary";
+        private float nextCoverRouteAt, lastRouteStepAt, routeProgressAt, sidestepUntil;
+        private Vector2 routeProgressPoint;
+        private static Color RestingColor => Color.white;
+        private const float WardenVisualScale = 1f; // Clips are drawn at their real on-screen size.
 
         private Vector2 LinearVelocity
         {
@@ -140,10 +167,10 @@ namespace RuinRunner
             ApplyBalance(GameBalance.Current.GetEnemy(Type));
             if (Type == EnemyType.Tidekeeper) TidekeeperArt.Preload();
             if (Type == EnemyType.SealHeart) SealHeartArt.Preload();
-            usesPixelArt = PixelArtAtlas.GetEnemyFrames(Type, 0) != null;
+            PreloadGrandMoves();
             var visualTarget = new GameObject("VisualRoot");
             visualTarget.transform.SetParent(transform);
-            visualTarget.transform.localPosition = usesPixelArt ? new Vector3(0f, -.35f, 0f) : Vector3.zero;
+            visualTarget.transform.localPosition = new Vector3(0f, -.35f, 0f);
             visualRoot = visualTarget.transform;
             visualRoot.localScale *= PresentationScale;
             if(ExternalCreatureArt.Supports(Type))
@@ -154,6 +181,12 @@ namespace RuinRunner
                 visualRoot.localPosition=new Vector3(0,-.2f/Mathf.Abs(scale.y),0);
             }
             if ((int)Type >= (int)EnemyType.Tidekeeper) visualRoot.localPosition = Vector3.zero;
+            if (Type == EnemyType.Boss)
+            {
+                // Uniform on screen despite the legacy nonuniform physics root: a boss should tower over the hero.
+                visualRoot.localScale = new Vector3(WardenVisualScale / transform.lossyScale.x, WardenVisualScale / transform.lossyScale.y, 1f);
+                visualRoot.localPosition = new Vector3(0f, -.42f / transform.lossyScale.y, 0f);
+            }
             if (Type == EnemyType.Tidekeeper || Type == EnemyType.SealHeart)
             {
                 var shadow = new GameObject("NativeGroundShadow");
@@ -168,6 +201,7 @@ namespace RuinRunner
             var collider = gameObject.AddComponent<BoxCollider2D>();
             collider.size = new Vector2(.78f, .46f);
             collider.offset = new Vector2(0f, -.2f);
+            collider.sharedMaterial = GameLayers.Frictionless;
             enemyCollider = collider;
             body = gameObject.AddComponent<Rigidbody2D>();
             body.gravityScale = 0f;
@@ -177,19 +211,14 @@ namespace RuinRunner
             specialTimer = .9f;
             decisionTimer = .55f;
             strafeDirection = (int)Type % 2 == 0 ? 1f : -1f;
-            AddFace(visualTarget.transform);
-            if (usesPixelArt)
+            spriteRenderer.sprite = PixelArtAtlas.GetEnemyFrames(Type, 0)[0];
+            spriteRenderer.color = Color.white;
+            if (Type == EnemyType.Boss)
             {
-                spriteRenderer.sprite = PixelArtAtlas.GetEnemyFrames(Type, 0)[0];
-                spriteRenderer.color = Color.white;
-                if (eye != null) eye.gameObject.SetActive(false);
-                if (Type == EnemyType.Boss)
-                {
-                    bossAnimator = gameObject.AddComponent<BossSpriteAnimator>();
-                    bossAnimator.Initialize(this, spriteRenderer);
-                }
-                else gameObject.AddComponent<EnemyPixelAnimator>().Initialize(this, spriteRenderer);
+                bossAnimator = gameObject.AddComponent<BossSpriteAnimator>();
+                bossAnimator.Initialize(this, spriteRenderer);
             }
+            else gameObject.AddComponent<EnemyPixelAnimator>().Initialize(this, spriteRenderer);
             damageCollider = gameObject.AddComponent<BoxCollider2D>();
             damageCollider.isTrigger = true;
             AddHealthBar();
@@ -251,8 +280,17 @@ namespace RuinRunner
                 case EnemyType.Sentinel:
                     MaxHealth = 90; speed = 3.3f; contactDamage = 9; ExperienceReward = 16;
                     normalColor = new Color(.8f, .6f, .3f); break;
+                case EnemyType.Sporeling: normalColor = new Color(.35f, .9f, .75f); break;
+                case EnemyType.RuneTotem: normalColor = new Color(1f, .72f, .25f); break;
+                case EnemyType.TideCrab: normalColor = new Color(.3f, .85f, .9f); break;
+                case EnemyType.Wisp: normalColor = new Color(.55f, .95f, 1f); break;
+                case EnemyType.SealKnight: normalColor = new Color(.95f, .75f, .3f); break;
+                case EnemyType.Hexer: normalColor = new Color(.72f, .4f, 1f); break;
             }
         }
+
+        // Sandbox tours: a target that stays up, so skills that build on repeated hits have something to build on.
+        internal void MakeTrainingDummy(float health = 1000000f) { MaxHealth = Health = health; UpdateHealthBar(); }
 
         public void ApplyBalance(EnemyBalanceData balance)
         {
@@ -279,6 +317,8 @@ namespace RuinRunner
             UpdateVisualPresentation();
         }
 
+        // The measured body table is rounded to hundredths; this keeps its edge outside the art's.
+        const float BodyMeasureMargin = .03f;
         public void UpdateVisualPresentation()
         {
             if (damageCollider == null || spriteRenderer == null || spriteRenderer.sprite == null) return;
@@ -292,14 +332,15 @@ namespace RuinRunner
                 case EnemyType.Shooter: size=new Vector2(.55f,.80f); centerY=.40f; break;
                 case EnemyType.Charger: size=new Vector2(.95f,.72f); centerY=.36f; break;
                 case EnemyType.Leaper: size=new Vector2(.80f,.82f); centerY=.41f; break;
-                case EnemyType.Boss: size=new Vector2(1.7f,2f); centerY=1.03f; break;
-                case EnemyType.Tidekeeper: size=new Vector2(1.35f,1.40f); centerY=1.47f; break;
-                case EnemyType.SealHeart: size=new Vector2(1.05f,1.28f); centerY=.64f; break;
+                // Idle art around the foot pivot: a blow that touches the drawn body lands.
+                case EnemyType.Boss: size=new Vector2(3.34f,2.19f); centerY=1.08f; break;
+                case EnemyType.Tidekeeper: size=new Vector2(2.5f,2.45f); centerY=1.43f; break;
+                case EnemyType.SealHeart: size=new Vector2(2.6f,2.47f); centerY=1.19f; break;
                 default: size=new Vector2(.65f,.85f); centerY=.35f; break;
             }
             var tuning = balance == null ? 1f : Mathf.Max(.1f,balance.hurtboxScale)/1.08f;
             if(ExternalCreatureArt.Supports(Type))
-            {size=ExternalCreatureArt.BodySize(Type);centerY=size.y*.5f;}
+            {size=ExternalCreatureArt.BodySize(Type)+Vector2.one*BodyMeasureMargin;centerY=ExternalCreatureArt.BodyCenterY(Type);}
             var rootScale = new Vector2(Mathf.Abs(transform.lossyScale.x),Mathf.Abs(transform.lossyScale.y));
             damageCollider.size = new Vector2(size.x/rootScale.x,size.y/rootScale.y)*tuning;
             damageCollider.offset = (Vector2)visualRoot.localPosition + new Vector2(0,centerY/rootScale.y) +
@@ -321,6 +362,19 @@ namespace RuinRunner
             }
             if (!dead && ExternalCreatureArt.Supports(Type)) UpdateCreatureHealthBarPosition();
             UpdateHealthBarDepth();
+            ApplyHitPunch();
+        }
+
+        // Struck bodies squash for a beat. Only the visual changes, never the hurtbox.
+        private float hitPunch, hitStun;
+        private Vector3 restingVisualScale;
+        private void ApplyHitPunch()
+        {
+            if (visualRoot == null) return;
+            if (restingVisualScale == Vector3.zero) restingVisualScale = visualRoot.localScale;
+            hitPunch = Mathf.Max(0f, hitPunch - Time.deltaTime * 7f);
+            var strength = IsBoss ? .1f : .26f;
+            visualRoot.localScale = Vector3.Scale(restingVisualScale, new Vector3(1f + hitPunch * strength, 1f - hitPunch * strength * .8f, 1f));
         }
 
         private void UpdateHealthBarDepth()
@@ -330,7 +384,7 @@ namespace RuinRunner
             // World-space bars follow the enemy's depth. They must never stripe
             // across the hero's face during a close stab or dagger lunge.
             if(heroBodyRenderer!=null)order=Mathf.Min(order,heroBodyRenderer.sortingOrder-4);
-            healthBackRenderer.sortingOrder=order;healthFillRenderer.sortingOrder=order+1;
+            healthBackRenderer.sortingOrder=order;healthTrailRenderer.sortingOrder=order+1;healthFillRenderer.sortingOrder=order+2;healthShineRenderer.sortingOrder=order+3;
         }
 
         private void UpdateCreatureHealthBarPosition()
@@ -349,41 +403,47 @@ namespace RuinRunner
             if (damageCollider != null) { Gizmos.color = new Color(1f, .55f, .1f); Gizmos.DrawWireCube(damageCollider.bounds.center, damageCollider.bounds.size); }
         }
 
-        private void AddFace(Transform parent)
-        {
-            var eyeObject = new GameObject("Eye");
-            eyeObject.transform.SetParent(parent);
-            eyeObject.transform.localPosition = new Vector3(-.22f, .18f, 0f);
-            eyeObject.transform.localScale = new Vector3(.13f, .14f, 1f);
-            PrototypeVisuals.AddSprite(eyeObject, Color.white, 9);
-            eye = eyeObject.transform;
-        }
-
         private void AddHealthBar()
         {
             var back = new GameObject("HealthBack");
             back.transform.SetParent(transform);
             healthBarRoot = back.transform;
             back.transform.localPosition = new Vector3(0f, .7f, 0f);
-            back.transform.localScale = new Vector3(PresentationScale, .09f * PresentationScale, 1f);
-            PrototypeVisuals.AddSprite(back, new Color(.12f, .08f, .12f), spriteRenderer.sortingOrder+2);
+            back.transform.localScale = new Vector3(.9f * PresentationScale, .16f * PresentationScale, 1f);
+            PrototypeVisuals.AddSprite(back, new Color(.07f, .05f, .1f), spriteRenderer.sortingOrder+2);
             healthBackRenderer=back.GetComponent<SpriteRenderer>();
 
+            var trail = new GameObject("HealthTrail");
+            trail.transform.SetParent(back.transform,false);
+            trail.transform.localPosition = new Vector3(0f, 0f, -.005f);
+            trail.transform.localScale = new Vector3(HealthInner, .6f, 1f);
+            PrototypeVisuals.AddSprite(trail, new Color(1f, .93f, .78f), spriteRenderer.sortingOrder+3);
+            healthTrailRenderer=trail.GetComponent<SpriteRenderer>();
+            healthTrail=trail.transform;
+
             var fill = new GameObject("HealthFill");
-            fill.transform.SetParent(back.transform);
+            fill.transform.SetParent(back.transform,false);
             fill.transform.localPosition = new Vector3(0f, 0f, -.01f);
-            fill.transform.localScale = Vector3.one;
-            PrototypeVisuals.AddSprite(fill, new Color(.3f, 1f, .42f), spriteRenderer.sortingOrder+3);
+            fill.transform.localScale = new Vector3(HealthInner, .6f, 1f);
+            PrototypeVisuals.AddSprite(fill, new Color(.78f, .16f, .2f), spriteRenderer.sortingOrder+4);
             healthFillRenderer=fill.GetComponent<SpriteRenderer>();
+
+            var shine = new GameObject("HealthShine");
+            shine.transform.SetParent(fill.transform,false);
+            shine.transform.localPosition = new Vector3(0f, .28f, -.01f);
+            shine.transform.localScale = new Vector3(1f, .44f, 1f);
+            PrototypeVisuals.AddSprite(shine, new Color(1f, .42f, .38f), spriteRenderer.sortingOrder+5);
+            healthShineRenderer=shine.GetComponent<SpriteRenderer>();
             heroBodyRenderer=player==null?null:player.transform.Find("VisualRoot")?.GetComponent<SpriteRenderer>();
             UpdateHealthBarDepth();
             healthFill = fill.transform;
-            if (IsBoss) back.SetActive(false); // Boss already has a dedicated screen HUD.
+            back.SetActive(false); // Shown once hit. The boss keeps its dedicated screen HUD instead.
         }
 
         private void Update()
         {
             if (dead || player == null || AnimationPaused) return;
+            TickHealthBar();
 
             attackTimer -= Time.deltaTime;
             specialTimer -= Time.deltaTime;
@@ -391,215 +451,62 @@ namespace RuinRunner
             var delta = (Vector2)(player.transform.position - transform.position);
             var direction = delta.sqrMagnitude > .001f ? delta.normalized : Vector2.right;
 
-            if (collisionAttackActive && delta.magnitude < ChargeContactRadius &&
+            // Scripted moves carry their momentum in instead of stopping on a dime.
+            if (acting) LinearVelocity = Vector2.MoveTowards(LinearVelocity, Vector2.zero, 26f * Time.deltaTime);
+            // A struck enemy reels: it slides with the blow and cannot walk or start a move.
+            if (hitStun > 0f && !acting)
+            {
+                hitStun -= Time.deltaTime;
+                LinearVelocity = Vector2.MoveTowards(LinearVelocity, Vector2.zero, 20f * Time.deltaTime);
+                spriteRenderer.sortingOrder = 900 - Mathf.RoundToInt(transform.position.y * 100f);
+                return;
+            }
+
+            if (collisionAttackActive && Vector2.Distance(player.FeetPoint, transform.position) < ContactRadius &&
                 !Physics2D.Linecast(transform.position, player.transform.position, 1 << GameLayers.Ground).collider)
                 ContactAttack(direction);
 
             // Being in attack range does not mean the target is reachable.
             // Reposition around cover instead of repeatedly charging/shooting
             // into the same solid module forever.
-            if (!acting && !StageNavigation.HasCombatLane(transform.position, player.transform.position, .3f))
+            if (!acting && Type != EnemyType.RuneTotem && !HasLaneToPlayer)
             {
                 SetPlanar(NavigateAroundCover(player.transform.position) * speed);
                 SetFacing(LinearVelocity.x);
-                Face(facingDirection);
                 spriteRenderer.sortingOrder = 900 - Mathf.RoundToInt(transform.position.y * 100f);
                 return;
             }
 
             switch (Type)
             {
-                case EnemyType.Grunt: UpdateGrunt(delta, direction); break;
-                case EnemyType.Shooter: UpdateShooter(delta, direction); break;
-                case EnemyType.Charger: UpdateCharger(delta, direction); break;
-                case EnemyType.Leaper: UpdateLeaper(delta, direction); break;
                 case EnemyType.Boss: UpdateBoss(delta, direction); break;
                 case EnemyType.Tidekeeper: UpdateTidekeeper(delta, direction); break;
                 case EnemyType.SealHeart: UpdateSealHeart(delta, direction); break;
-                case EnemyType.Tidecaller: UpdateTidecaller(delta, direction); break;
-                case EnemyType.Sentinel: UpdateSentinel(delta, direction); break;
+                default: UpdateBrain(delta, direction); break;
             }
 
             if (!acting) SetFacing(Mathf.Abs(LinearVelocity.x) > .05f ? LinearVelocity.x : direction.x);
-            Face(facingDirection);
             spriteRenderer.sortingOrder = 900 - Mathf.RoundToInt(transform.position.y * 100f);
-        }
-
-        private void UpdateGrunt(Vector2 delta, Vector2 direction)
-        {
-            if (acting) return;
-
-            if (delta.magnitude > 2.05f)
-                SetPlanar(SteerAround(direction) * speed);
-            else
-                SetPlanar(Vector2.zero);
-
-            if (specialTimer <= 0f && delta.magnitude <= 2.2f)
-                StartCoroutine(GruntLunge(direction));
-        }
-
-        private void UpdateShooter(Vector2 delta, Vector2 direction)
-        {
-            if (acting) return;
-
-            var distance = delta.magnitude;
-            if (distance < 4.2f)
-                SetPlanar(SteerAround(-direction) * speed);
-            else if (distance > 7f)
-                SetPlanar(SteerAround(direction) * speed);
-            else
-            {
-                if (decisionTimer <= 0f)
-                {
-                    decisionTimer = 1.05f;
-                    strafeDirection *= -1f;
-                }
-                var tangent = new Vector2(-direction.y, direction.x) * strafeDirection;
-                SetPlanar(SteerAround(tangent) * speed * .55f);
-            }
-
-            if (specialTimer <= 0f && distance < 9f)
-                StartCoroutine(ShooterVolley());
-        }
-
-        private void UpdateCharger(Vector2 delta, Vector2 direction)
-        {
-            if (acting) return;
-
-            var distance = delta.magnitude;
-            if (specialTimer <= 0f && distance > 2f && distance < 8.5f)
-            {
-                StartCoroutine(ChargeAttack(direction, false));
-                return;
-            }
-
-            if (distance > 5.5f) SetPlanar(SteerAround(direction) * speed);
-            else if (distance < 3.2f) SetPlanar(SteerAround(-direction) * speed * .7f);
-            else SetPlanar(Vector2.zero);
-        }
-
-        private void UpdateLeaper(Vector2 delta, Vector2 direction)
-        {
-            if (acting) return;
-
-            if (specialTimer <= 0f)
-            {
-                StartCoroutine(LeapSlam(direction, false));
-                return;
-            }
-
-            SetPlanar(SteerAround(delta.magnitude > 3f ? direction : -direction) * speed * (delta.magnitude > 3f ? .55f : .25f));
         }
 
         private void UpdateBoss(Vector2 delta, Vector2 direction)
         {
             if (acting) return;
 
+            if (TryBeginPhaseShift()) return;
             var distance = delta.magnitude;
             if (specialTimer <= 0f)
             {
-                // A nearby target may change the opening, never erase the rest
-                // of the cycle. Replacing every close-range choice with charge
-                // let melee players suppress all three other tells indefinitely.
-                if (bossPatternIndex == 0 && distance < 2.4f) bossPatternIndex = 2;
-                var pattern = bossPatternIndex++ % 4;
-
-                switch (pattern)
-                {
-                    case 0: StartCoroutine(BossRadialBurst()); break;
-                    case 1: StartCoroutine(BossAimedVolley()); break;
-                    case 2: StartCoroutine(ChargeAttack(direction, true)); break;
-                    default: StartCoroutine(LeapSlam(direction, true)); break;
-                }
+                WardenChooseMove(distance, direction);
                 return;
             }
 
-            if (distance > 5.2f) SetPlanar(SteerAround(direction) * speed);
-            else if (distance < 2.8f) SetPlanar(SteerAround(-direction) * speed * .8f);
-            else
-            {
-                if (decisionTimer <= 0f)
-                {
-                    decisionTimer = .9f;
-                    strafeDirection *= -1f;
-                }
-                var tangent = new Vector2(-direction.y, direction.x) * strafeDirection;
-                SetPlanar(SteerAround(tangent) * speed * .45f);
-            }
-        }
-
-        private IEnumerator GruntLunge(Vector2 direction)
-        {
-            SetFacing(direction.x);
-            acting = true;
-            AttackVisualPhase = 0;
-            specialTimer = 1.05f;
-            SetPlanar(Vector2.zero, true);
-            SetPresentationTint(new Color(1f, .9f, .25f));
-            yield return new WaitForSeconds(.22f);
-
-            collisionAttackActive = true;
-            AttackVisualPhase = 1;
-            yield return Rush(direction, 1.65f, .2f);
-            collisionAttackActive = false;
-            AttackVisualPhase = 2;
-            yield return new WaitForSeconds(.22f);
-            EndAction();
-        }
-
-        private IEnumerator ShooterVolley()
-        {
-            acting = true;
-            AttackVisualPhase = 0;
-            specialTimer = Health < MaxHealth * .5f ? 1.15f : 1.55f;
-            SetPlanar(Vector2.zero, true);
-            SetPresentationTint(Color.white);
-            yield return new WaitForSeconds(.2f);
-
-            AttackVisualPhase = 1;
-            var shots = Health < MaxHealth * .5f ? 3 : 2;
-            for (var shot = 0; shot < shots; shot++)
-            {
-                if (player == null) break;
-                var aim = ((Vector2)player.transform.position - (Vector2)transform.position).normalized;
-                var angle = shot == 0 ? 0f : (shot % 2 == 0 ? 7f : -7f);
-                EnemyProjectile.Create(transform.position + Vector3.up * .15f, Rotate(aim, angle), 7.2f, contactDamage, normalColor);
-                PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .32f);
-                yield return new WaitForSeconds(.13f);
-            }
-
-            AttackVisualPhase = 2;
-            yield return new WaitForSeconds(.18f);
-            EndAction();
-        }
-
-        private IEnumerator ChargeAttack(Vector2 direction, bool isBoss)
-        {
-            SetFacing(direction.x);
-            acting = true;
-            AttackVisualPhase = 0;
-            specialTimer = isBoss ? 2f : 2.25f;
-            SetPlanar(Vector2.zero, true);
-            if (!isBoss) SetPresentationTint(new Color(1f, .82f, .18f));
-            else bossAnimator.Play(BossPose.Charge, 0, 1, .48f);
-            float travelDistance = GetSafeTravelDistance(direction, isBoss ? 6.6f : 5.1f);
-            if (isBoss)
-                ArenaHazard.CreateChargeRoute(this, player, transform.position, direction, travelDistance, .48f, .48f, normalColor);
-            else PrototypeVisuals.Burst(transform.position + Vector3.down * .4f, normalColor, 8);
-            yield return new WaitForSeconds(isBoss ? .48f : .38f);
-
-            collisionAttackActive = true;
-            AttackVisualPhase = 1;
-            if (isBoss) bossAnimator.Play(BossPose.Charge, 2, 4, .48f);
-            if (isBoss) yield return CampaignRush(direction, travelDistance, .48f, false);
-            else yield return Rush(direction, travelDistance, .4f);
-            collisionAttackActive = false;
-            AttackVisualPhase = 2;
-            if (isBoss) bossAnimator.Play(BossPose.Charge, 5, 7, .35f);
-            SetPlanar(Vector2.zero, true);
-            if (cameraFollow != null) cameraFollow.Shake(isBoss ? .25f : .12f);
-            yield return new WaitForSeconds(.35f);
-            EndAction();
+            // It hunts: it stalks in fast from afar, never backs away, and answers anyone hugging it.
+            hugTime = distance < 2.7f ? hugTime + Time.deltaTime : 0f;
+            if (hugTime > .85f) { hugTime = 0f; StartCoroutine(WardenShove()); return; }
+            if (distance > 5.2f) SetPlanar(SteerAround(direction) * speed * 1.55f);
+            else if (distance > 2.7f) SetPlanar(SteerAround(direction) * speed);
+            else SetPlanar(Vector2.zero);
         }
 
         private IEnumerator LeapSlam(Vector2 direction, bool isBoss)
@@ -616,7 +523,9 @@ namespace RuinRunner
             var start = body.position;
             var target = start + direction * travelDistance;
             CreateLeapShadow(target, isBoss);
-            yield return new WaitForSeconds(isBoss ? .38f : .26f);
+            // Fills up over the whole wind-up and flight, reaching the rim as the body lands.
+            ArenaHazard.Create(this, player, target, Vector2.one * (2f * SlamRadius(isBoss)), 0, true, (isBoss ? .38f + .52f : .44f + .42f), .02f, 0, DangerTint);
+            yield return new WaitForSeconds(isBoss ? .38f : .44f);
 
             AttackVisualPhase = 1;
             if (isBoss) bossAnimator.Play(BossPose.Leap, 2, 4, .52f);
@@ -646,28 +555,18 @@ namespace RuinRunner
             AttackVisualPhase = 2;
             if (isBoss) bossAnimator.Play(BossPose.Leap, 5, 7, .32f);
             LinearVelocity = Vector2.zero;
-            var projectileCount = isBoss ? 0 : 2; // Boss slam is a landing-area attack, with no bullets.
+            var projectileCount = isBoss ? 0 : 6; // Boss slam is a landing-area attack, with no bullets.
             for (var index = 0; index < projectileCount; index++)
             {
-                Vector2 projectileDirection;
-                if (isBoss)
-                {
-                    var angle = index * Mathf.PI * 2f / projectileCount;
-                    projectileDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                }
-                else
-                {
-                    projectileDirection = index == 0 ? Rotate(direction, -90f) : Rotate(direction, 90f);
-                }
-
-                EnemyProjectile.Create(transform.position, projectileDirection, isBoss ? 6.2f : 5.5f, contactDamage * .85f, normalColor, .25f);
+                var angle = index * Mathf.PI * 2f / projectileCount;
+                Shoot(transform.position, new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)), 5.5f, contactDamage * .85f, .25f);
             }
 
-            if (Vector2.Distance(player.transform.position, transform.position) < SlamRadius(isBoss))
+            if (Vector2.Distance(player.FeetPoint, transform.position) < SlamRadius(isBoss))
                 ContactAttack(direction);
+            GroundSlam(transform.position, SlamRadius(isBoss));
             if (isBoss)
             {
-                BossNativeEffect.Create(this, "SlamDust", transform.position, .42f);
                 for (int i = 0; i < 4; i++)
                 {
                     float angle = (i * 90f + 45f) * Mathf.Deg2Rad;
@@ -675,75 +574,9 @@ namespace RuinRunner
                     BossNativeEffect.Create(this, "StoneChip", ground, .28f);
                 }
             }
-            else PrototypeVisuals.Burst(transform.position + Vector3.down * .5f, normalColor, 12);
             PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Monster, isBoss ? .65f : .4f);
             if (cameraFollow != null) cameraFollow.Shake(isBoss ? .35f : .18f);
             yield return new WaitForSeconds(.32f);
-            EndAction();
-        }
-
-        private IEnumerator BossRadialBurst()
-        {
-            acting = true;
-            AttackVisualPhase = 0;
-            specialTimer = Health < MaxHealth * .5f ? 1.45f : 2f;
-            SetPlanar(Vector2.zero, true);
-            SetPresentationTint(Color.white);
-            bossAnimator.Play(BossPose.Radial, 0, 2, .38f);
-            yield return new WaitForSeconds(.38f);
-
-            var rings = Health < MaxHealth * .5f ? 2 : 1;
-            for (var ring = 0; ring < rings; ring++)
-            {
-                AttackVisualPhase = 1;
-                bossAnimator.Play(BossPose.Radial, 3, 4, .28f);
-                var count = Health < MaxHealth * .5f ? 12 : 9;
-                for (var index = 0; index < count; index++)
-                {
-                    var angle = (index + ring * .5f) * Mathf.PI * 2f / count;
-                    var direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-                    EnemyProjectile.Create(transform.position, direction, 5.2f, contactDamage * .8f, normalColor, .27f, EnemyProjectileArt.BossRadial);
-                }
-                PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .7f);
-                yield return new WaitForSeconds(.28f);
-            }
-
-            if (cameraFollow != null) cameraFollow.Shake(.28f);
-            AttackVisualPhase = 2;
-            bossAnimator.Play(BossPose.Radial, 5, 7, .25f);
-            yield return new WaitForSeconds(.25f);
-            EndAction();
-        }
-
-        private IEnumerator BossAimedVolley()
-        {
-            acting = true;
-            AttackVisualPhase = 0;
-            specialTimer = 1.8f;
-            SetPlanar(Vector2.zero, true);
-            SetPresentationTint(Color.white);
-            SetFacing(player.transform.position.x - transform.position.x);
-            bossAnimator.Play(BossPose.Volley, 0, 2, .3f);
-            yield return new WaitForSeconds(.3f);
-
-            var volleys = Health < MaxHealth * .5f ? 4 : 3;
-            for (var volley = 0; volley < volleys; volley++)
-            {
-                if (player == null) break;
-                var aim = ((Vector2)player.transform.position - (Vector2)transform.position).normalized;
-                SetFacing(aim.x);
-                AttackVisualPhase = 1;
-                bossAnimator.Play(BossPose.Volley, 3, 5, .25f);
-                foreach (var angle in new[] { -10f, 0f, 10f })
-                    EnemyProjectile.Create(transform.position, Rotate(aim, angle), 7f, contactDamage * .75f, normalColor, .24f, EnemyProjectileArt.BossAimed);
-
-                PrototypeAudio.Play(PrototypeSound.Shoot, AudioChannel.Monster, .5f);
-                yield return new WaitForSeconds(.25f);
-            }
-
-            AttackVisualPhase = 2;
-            bossAnimator.Play(BossPose.Volley, 6, 7, .25f);
-            yield return new WaitForSeconds(.25f);
             EndAction();
         }
 
@@ -758,6 +591,19 @@ namespace RuinRunner
             nextCoverRouteAt = 0f;
         }
 
+        // Measured feet to feet, thinner than either pair of feet. A body's root sits at the top of its feet, so from the roots
+        // anyone standing with their back to a wall or a pillar looked cut off from everything: enemies would crowd a hero
+        // doing that without ever attacking.
+        private const float LaneRadius = .12f;
+        public bool HasLaneToPlayer => StageNavigation.HasCombatLane(enemyCollider.bounds.center, player.FeetPoint, LaneRadius);
+        internal string RouteReport()
+        {
+            var path = navigationTerrain == null ? null : StageNavigation.FindPath(navigationTerrain, body.position, player.transform.position);
+            var cast = Physics2D.CircleCast(enemyCollider.bounds.center, LaneRadius, player.FeetPoint - (Vector2)enemyCollider.bounds.center, Vector2.Distance(player.FeetPoint, enemyCollider.bounds.center), 1 << GameLayers.Ground);
+            return "foot " + enemyCollider.bounds.size + " velocity " + LinearVelocity + " acting " + acting + " route " + (path == null ? "none" : path.Count + " points, next " + (path.Count > 1 ? path[1] : path[0])) +
+                " kept " + coverRoute.Count + (coverRoute.Count > 0 ? " toward " + coverRoute[0] : "") + " wall " + (cast.collider == null ? "none" : cast.collider.name + " at " + cast.point);
+        }
+
         private Vector2 NavigateAroundCover(Vector2 destination)
         {
             // Long cover routes may deliberately pass along a wall. Only the
@@ -770,11 +616,9 @@ namespace RuinRunner
             if (navigationTerrain == null) return SteerAround(destination - body.position);
             if (Time.time >= nextCoverRouteAt)
             {
-                nextCoverRouteAt = Time.time + 1f;
-                var barriers = new List<Bounds>();
-                foreach (var seal in RuntimeSceneObjects.FindAll<EncounterBarrier>())
-                    if (seal.IsClosed) barriers.Add(seal.GetComponent<Collider2D>().bounds);
-                var path = StageNavigation.FindPath(navigationTerrain, body.position, destination, barriers.ToArray());
+                // Spread out, so a room of blocked enemies doesn't all search on one frame.
+                nextCoverRouteAt = Time.time + .85f + (GetHashCode() & 7) * .04f;
+                var path = StageNavigation.FindPath(navigationTerrain, body.position, destination);
                 coverRoute.Clear();
                 if (path != null) coverRoute.AddRange(path);
             }
@@ -783,7 +627,13 @@ namespace RuinRunner
             if (coverRoute.Count == 0) return SteerAround(destination - body.position);
             // Follow grid-clear waypoints directly; local tangent steering can
             // repeatedly choose the same blocked side of a large island.
-            return (coverRoute[0] - body.position).normalized;
+            var heading = (coverRoute[0] - body.position).normalized;
+            // The grid doesn't know about other bodies. Walking square into a totem would otherwise go on forever.
+            if (Time.time - lastRouteStepAt > .2f || (body.position - routeProgressPoint).sqrMagnitude > .04f)
+            { routeProgressPoint = body.position; routeProgressAt = Time.time; }
+            lastRouteStepAt = Time.time;
+            if (Time.time - routeProgressAt > .5f) { routeProgressAt = Time.time; sidestepUntil = Time.time + .35f; strafeDirection *= -1f; }
+            return Time.time < sidestepUntil ? Rotate(heading, 75f * strafeDirection) : heading;
         }
 
         private Vector2 ClampToArena(Vector2 root)
@@ -799,10 +649,44 @@ namespace RuinRunner
 
         private void FixedUpdate()
         {
-            if (dead || body == null || !arenaBounds.HasValue) return;
+            if (dead || body == null) return;
+            StopAtPlayerBody();
+            KeepOnFloor();
+            if (!arenaBounds.HasValue) return;
             var bounded = ClampToArena(body.position);
             if ((bounded - body.position).sqrMagnitude > .0001f) body.position = bounded;
             LinearVelocity = (ClampToArena(body.position + LinearVelocity * Time.fixedDeltaTime) - body.position) / Time.fixedDeltaTime;
+        }
+
+        private Collider2D playerFeet;
+        private Vector2 lastFloorPoint;
+        private bool hasFloorPoint;
+        private float offFloorSeconds;
+
+        private void StopAtPlayerBody()
+        {
+            if (player == null || enemyCollider == null) return;
+            if (playerFeet == null) playerFeet = player.GetComponent<Collider2D>();
+            if (((Vector2)player.transform.position - body.position).sqrMagnitude > 36f) return;
+            LinearVelocity = BodyContact.Stop(enemyCollider, playerFeet, LinearVelocity, Time.fixedDeltaTime, out _);
+        }
+
+        // Nothing should carry a body past the walls, but one that gets out can never be hit again and holds the room shut.
+        private void KeepOnFloor()
+        {
+            if (navigationTerrain == null || enemyCollider == null) return;
+            if (navigationTerrain.IsOpen(enemyCollider.bounds.center))
+            {
+                lastFloorPoint = body.position;
+                hasFloorPoint = true;
+                offFloorSeconds = 0f;
+                return;
+            }
+            offFloorSeconds += Time.fixedDeltaTime;
+            if (!hasFloorPoint || offFloorSeconds < .2f) return;
+            body.position = lastFloorPoint;
+            LinearVelocity = Vector2.zero;
+            offFloorSeconds = 0f;
         }
 
         private void MoveSafely(Vector2 destination)
@@ -855,10 +739,19 @@ namespace RuinRunner
             var start = body.position;
             var target = start + direction * distance;
             var elapsed = 0f;
+            var lastDust = start;
+            var trailClip = collisionAttackActive && distance > 1f ? "ERushDust" : null;
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
-                MoveSafely(Vector2.Lerp(start, target, Mathf.Clamp01(elapsed / duration)));
+                // Bursts out and bleeds speed at the end, rather than gliding at one rate.
+                var progress = Mathf.Clamp01(elapsed / duration);
+                MoveSafely(Vector2.Lerp(start, target, 1f - Mathf.Pow(1f - progress, 2.4f)));
+                if (trailClip != null && Vector2.Distance(body.position, lastDust) >= .7f)
+                {
+                    BossNativeEffect.CreateOnFloor(trailClip, body.position, .34f);
+                    lastDust = body.position;
+                }
                 yield return new WaitForFixedUpdate();
             }
             MoveSafely(target);
@@ -896,7 +789,7 @@ namespace RuinRunner
             landingTelegraph = null;
         }
 
-        private void OnDestroy() => ClearLandingTelegraph();
+        private void OnDestroy() { ClearLandingTelegraph(); LeaveSquad(); }
 
         private static Vector2 Rotate(Vector2 direction, float degrees)
         {
@@ -913,23 +806,16 @@ namespace RuinRunner
             if (Mathf.Abs(direction) > .05f) facingDirection = Mathf.Sign(direction);
         }
 
-        private void Face(float direction)
-        {
-            if (!usesPixelArt) spriteRenderer.flipX = direction < 0f;
-            if (eye != null)
-            {
-                var position = eye.localPosition;
-                position.x = Mathf.Abs(position.x) * -direction;
-                eye.localPosition = position;
-            }
-        }
-
         private void ContactAttack(Vector2 direction)
         {
             if (attackTimer > 0f) return;
             attackTimer = .75f;
             player.TakeDamage(contactDamage, direction.sqrMagnitude > .001f ? direction.normalized : Vector2.zero);
         }
+
+        // A weapon that draws its own contact asks for the next hit to skip the shared spark and death flash.
+        public void MuteNextHitFx() => muteNextHitFx = true;
+        public void Stagger(float seconds) { if (!IsBoss && Type != EnemyType.RuneTotem && !Unstoppable) hitStun = Mathf.Max(hitStun, seconds); }
 
         public void TakeDamage(float amount, Vector2 knockback, bool critical = false)
         {
@@ -943,11 +829,16 @@ namespace RuinRunner
 
         private void ApplyDamage(float amount, Vector2 knockback, bool critical, bool originalImpact)
         {
-            if (dead || IntroLocked) return;
+            var muteHitFx = muteNextHitFx;
+            muteNextHitFx = false;
+            if (dead || IntroLocked || roarInvulnerable) return;
 
+            if (player != null) amount *= player.TalentDamageAgainst(this);
+            amount = StageMobDamage(amount);
             var appliedDamage = Mathf.Max(1f, amount * 100f / (100f + Armor));
             BossCombatObservation.RecordDamage(this, appliedDamage, originalImpact, critical);
             Health -= appliedDamage;
+            DamageNumber.Show(transform.position, appliedDamage, critical, originalImpact);
             if (!collisionAttackActive && !IsBoss) LinearVelocity = knockback;
             UpdateHealthBar();
             // Weapon contact/projectile impact and item actions already emit
@@ -959,6 +850,9 @@ namespace RuinRunner
             {
                 PrototypeAudio.Play(PrototypeSound.Hit, AudioChannel.Monster, critical || Type == EnemyType.Boss ? .55f : .35f);
                 if (cameraFollow != null) cameraFollow.Impact(critical, IsBoss);
+                if (Health > 0f && !muteHitFx) Fx(critical ? "FxBluntHit" : "FxHitSpark", (Vector2)transform.position + Vector2.up * .4f, critical ? .3f : .2f, AngleOf(knockback));
+                hitPunch = critical ? 1f : .65f;
+                if (!IsBoss && Type != EnemyType.RuneTotem && !Unstoppable && !acting) hitStun = critical ? .32f : .22f;
             }
             // One owned clock: an older contact must not clear a newer flash,
             // and a hit must not permanently replace an attack's warning tint.
@@ -970,15 +864,31 @@ namespace RuinRunner
             if (Health <= 0f)
             {
                 if (IsBoss) BeginBossDeath(Mathf.Max(1f, Health + appliedDamage));
-                else Die();
+                else { muteDeathFlash = muteHitFx; Die(); }
             }
         }
 
         private void UpdateHealthBar()
         {
             var ratio = Mathf.Clamp01(Health / MaxHealth);
-            healthFill.localScale = new Vector3(ratio, 1f, 1f);
-            healthFill.localPosition = new Vector3((ratio - 1f) * .5f, 0f, -.01f);
+            healthFill.localScale = new Vector3(ratio * HealthInner, .6f, 1f);
+            healthFill.localPosition = new Vector3((ratio - 1f) * .5f * HealthInner, 0f, -.01f);
+            if (ratio < healthShownRatio && !IsBoss && !dead && healthBarRoot != null)
+            { healthBarHideAt = Time.time + 3f; healthBarRoot.gameObject.SetActive(true); }
+            if (ratio > healthShownRatio) healthShownRatio = ratio;
+            PlaceHealthTrail();
+        }
+        private void PlaceHealthTrail()
+        {
+            healthTrail.localScale = new Vector3(healthShownRatio * HealthInner, .6f, 1f);
+            healthTrail.localPosition = new Vector3((healthShownRatio - 1f) * .5f * HealthInner, 0f, -.005f);
+        }
+        private void TickHealthBar()
+        {
+            if (healthBarRoot == null || !healthBarRoot.gameObject.activeSelf) return;
+            var ratio = Mathf.Clamp01(Health / MaxHealth);
+            if (healthShownRatio > ratio) { healthShownRatio = Mathf.MoveTowards(healthShownRatio, ratio, Time.deltaTime * .9f); PlaceHealthTrail(); }
+            if (Time.time >= healthBarHideAt) healthBarRoot.gameObject.SetActive(false);
         }
 
         private void SetPresentationTint(Color color)
@@ -992,11 +902,16 @@ namespace RuinRunner
         private void Die()
         {
             dead = true;
+            LeaveSquad();
             ClearLandingTelegraph();
+            if (!IsBoss)
+            {
+                SigFx.Play("DeathPuff" + StageFx.Theme, transform.position, 0, -1, true, false, .7f);
+                CombatStain.Place(transform.position, "Stain" + StageFx.Theme, Mathf.Clamp(MaxHealth / 120f, .7f, 1.3f));
+            }
             StopAllCoroutines();
-            // Let the authored collapse/dissolve read. The generic square burst
-            // covered those frames and looked identical on unrelated creatures.
-            if (!usesPixelArt) PrototypeVisuals.Burst(transform.position, normalColor, 14);
+            if (!muteDeathFlash) BossNativeEffect.CreateOverActors(null, "FxBluntHit", (Vector2)transform.position + Vector2.up * .3f, .36f);
+            if (cameraFollow != null && Type != EnemyType.Sporeling) cameraFollow.KillImpact();
             if (onDied != null) onDied(this);
             if (ExternalCreatureArt.Supports(Type) || (int)Type >= (int)EnemyType.Tidecaller)
             {
@@ -1059,6 +974,9 @@ namespace RuinRunner
             LinearVelocity = Vector2.zero;
             if (body != null) body.simulated = false;
             if (cameraFollow != null) cameraFollow.BossDefeated();
+            BossFallPresentation.Play(transform.position, cameraFollow);
+            // The stage is only declared clear once the collapse ends. What it already fired must not win the fight in the meantime.
+            RuntimeSceneObjects.ClearProjectiles();
             StartCoroutine(BossDeathSequence(drainFromHealth));
         }
 
@@ -1066,7 +984,6 @@ namespace RuinRunner
         {
             const float duration = 1.05f;
             var elapsed = 0f;
-            var startScale = transform.localScale;
             var deathVisualStart = visualRoot == null ? Vector3.zero : visualRoot.localPosition;
             spriteRenderer.color = Color.white;
             if (bossAnimator != null) bossAnimator.Death(0);
@@ -1101,21 +1018,12 @@ namespace RuinRunner
                         spriteRenderer.sprite=frames[Mathf.Min(frames.Length-1,Mathf.FloorToInt(progress*frames.Length))];
                     }
                 }
-                else
-                {
-                    var pulse = 1f + Mathf.Sin(progress * Mathf.PI * 12f) * .045f;
-                    transform.localScale = Vector3.Scale(startScale, new Vector3(pulse, Mathf.Lerp(pulse, .08f, progress * progress), 1f));
-                    transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Sin(progress * Mathf.PI * 8f) * 7f);
-                }
 
-                if (!usesPixelArt && Mathf.FloorToInt(elapsed * 12f) != Mathf.FloorToInt((elapsed - Time.deltaTime) * 12f))
-                    PrototypeVisuals.Burst(transform.position + (Vector3)UnityEngine.Random.insideUnitCircle, normalColor, 3);
                 yield return null;
             }
 
             Health = 0f;
             UpdateHealthBar();
-            if (!usesPixelArt) PrototypeVisuals.Burst(transform.position, normalColor, 42);
             if (onDied != null) onDied(this);
             Destroy(gameObject);
         }

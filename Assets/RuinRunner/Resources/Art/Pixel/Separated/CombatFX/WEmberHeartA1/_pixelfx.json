@@ -1,0 +1,28 @@
+{
+  "clip": "WEmberHeartA1",
+  "ppu": 32,
+  "pivotX": 0.525,
+  "pivotY": 0.475,
+  "width": 20,
+  "height": 20,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 8,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 14,
+  "origin": [
+    10,
+    10
+  ],
+  "optionsJson": "{\"palette\":[\"#14060a\",\"#380a10\",\"#6e1210\",\"#ac2410\",\"#e8501a\",\"#ff8c2a\",\"#ffd25a\"],\"shape\":\"coal\",\"size\":1,\"fill\":0.2}"
+}

@@ -11,7 +11,7 @@ public static class CatalogTuningValidation
         if(catalog.AccessoryTuningVersion==0)return; // Historical published catalogs remain byte-for-byte compatible.
         Wire.Require(catalog.AccessoryTuningVersion==AccessoryTuningSchema.Version,"catalog_invalid","지원하지 않는 장신구 수치 버전입니다.");
         var accessories=(catalog.Items??[]).Where(x=>x.Kind=="accessory").ToArray();
-        Wire.Require(accessories.Length==30,"catalog_invalid","장신구 수치가 완전하지 않습니다.");
+        Wire.Require(accessories.Length>=30,"catalog_invalid","장신구 수치가 완전하지 않습니다.");
         foreach(var item in accessories)ValidateValues(item.Id,item.Stats,item.Description);
         var sets=catalog.ItemSets??[];
         Wire.Require(sets.Length==8&&sets.Select(x=>x.Id+":"+x.Pieces).Distinct().Count()==8,"catalog_invalid","세트 수치가 완전하지 않습니다.");

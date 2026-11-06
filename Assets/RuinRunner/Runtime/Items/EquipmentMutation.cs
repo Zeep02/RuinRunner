@@ -18,19 +18,21 @@ namespace RuinRunner
         public static string Name(EquipmentMutation mutation)
         { switch(mutation){case EquipmentMutation.LongFinisher:return "뻗는 마무리";case EquipmentMutation.WideFinisher:return "휘도는 마무리";case EquipmentMutation.Ricochet:return "도약탄";case EquipmentMutation.AnchorRound:return "머무는 탄두";default:return "원형";} }
         public static string Summary(EquipmentMutation mutation)
-        { switch(mutation){case EquipmentMutation.LongFinisher:return "마지막 기본 베기가 좁고 길어집니다.";case EquipmentMutation.WideFinisher:return "마지막 기본 베기가 짧고 넓어집니다.";case EquipmentMutation.Ricochet:return "기본 탄환이 벽에서 한 번 반사됩니다.";case EquipmentMutation.AnchorRound:return "기본 탄환의 자리에 탄두가 남고 다음 직접 공격으로 회수됩니다.";default:return "변형 없음";} }
+        { switch(mutation){case EquipmentMutation.LongFinisher:return "콤보 마지막 베기가 좁고 길어집니다.";case EquipmentMutation.WideFinisher:return "콤보 마지막 베기가 짧고 넓어집니다.";case EquipmentMutation.Ricochet:return "기본 탄환이 벽에서 한 번 반사됩니다.";case EquipmentMutation.AnchorRound:return "기본 탄환이 맞은 자리에 탄두가 남고, 다음 공격이 탄두를 터뜨립니다.";default:return "변형 없음";} }
         public static bool Compatible(OwnedWeapon item,EquipmentMutation mutation)
         {
             if(item==null||item.Mutation!=EquipmentMutation.None||mutation==EquipmentMutation.None)return false;
+            // Orb strikes and cannon lobs fire no straight round for these to change.
+            if(item.Definition.Family==WeaponFamily.Orb||item.Definition.Family==WeaponFamily.Cannon)return false;
             bool melee=item.Definition.AttackType==WeaponAttackType.Melee;
             return melee?(mutation==EquipmentMutation.LongFinisher||mutation==EquipmentMutation.WideFinisher):(mutation==EquipmentMutation.Ricochet||mutation==EquipmentMutation.AnchorRound);
         }
         public static string OathName(EquipmentOath oath)
         { switch(oath){case EquipmentOath.CounterDiscipline:return "받아내는 약속";case EquipmentOath.CrossWeaponChain:return "이어지는 무장";case EquipmentOath.FinisherHunt:return "마무리의 자취";case EquipmentOath.SteadyVolley:return "한 탄창의 약속";default:return "서약 없음";} }
         public static string OathCondition(EquipmentOath oath)
-        { switch(oath){case EquipmentOath.CounterDiscipline:return "막은 뒤 2초 안에 서로 다른 적 3마리 반격 명중";case EquipmentOath.CrossWeaponChain:return "다른 무기와 3초 안에 연계해 서로 다른 적 3마리 명중";case EquipmentOath.FinisherHunt:return "기본 콤보 마무리로 서로 다른 적 5마리 명중";case EquipmentOath.SteadyVolley:return "피격 없이 한 탄창에서 직접 3회 명중 후 빈 탄창 장전 3회";default:return "";} }
+        { switch(oath){case EquipmentOath.CounterDiscipline:return "막은 뒤 2초 안에 서로 다른 적 3마리 맞히기";case EquipmentOath.CrossWeaponChain:return "무기를 바꿔 3초 안에 서로 다른 적 3마리 맞히기";case EquipmentOath.FinisherHunt:return "콤보 마지막 공격으로 서로 다른 적 5마리 맞히기";case EquipmentOath.SteadyVolley:return "맞지 않고 한 탄창으로 3번 맞힌 뒤 빈 탄창 장전하기, 3번";default:return "";} }
         public static string OathResult(EquipmentOath oath)
-        { switch(oath){case EquipmentOath.CounterDiscipline:return "각성 · 반격에 가느다란 관통 검격이 이어집니다.";case EquipmentOath.CrossWeaponChain:return "각성 · 무기 교체 후 첫 특수행동이 이전 무기의 흔적을 잇습니다.";case EquipmentOath.FinisherHunt:return "각성 · 기본 마무리의 궤적이 되돌아옵니다.";case EquipmentOath.SteadyVolley:return "각성 · 빈 탄창 장전 후 첫 탄이 표식을 남기고 다음 직접 공격이 회수합니다.";default:return "";} }
+        { switch(oath){case EquipmentOath.CounterDiscipline:return "각성 · 반격에 가느다란 관통 검격이 이어집니다.";case EquipmentOath.CrossWeaponChain:return "각성 · 무기를 바꾸고 처음 쓰는 무기 스킬이 이전 무기의 흔적을 잇습니다.";case EquipmentOath.FinisherHunt:return "각성 · 콤보 마지막 공격의 궤적이 되돌아옵니다.";case EquipmentOath.SteadyVolley:return "각성 · 빈 탄창을 장전한 뒤 첫 탄이 표식을 남기고, 다음 공격이 표식을 터뜨립니다.";default:return "";} }
         public static int Required(EquipmentOath oath)=>oath==EquipmentOath.FinisherHunt?5:3;
         public static bool Compatible(OwnedWeapon item,EquipmentOath oath,InventorySystem inventory)
         {

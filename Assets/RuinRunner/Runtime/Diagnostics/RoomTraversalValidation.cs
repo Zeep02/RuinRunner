@@ -18,7 +18,7 @@ namespace RuinRunner
             Application.runInBackground = true;
             GameBalance.ApplyLive();
             var inventory = new InventorySystem();
-            inventory.AddWeapon(WeaponLootTable.FindFirst(WeaponFamily.Longsword));
+            inventory.AddWeapon(WeaponLootTable.FindFirst(WeaponFamily.Katana));
             var camera = CameraFollow.Create();
             player = PlayerController.Create(Vector2.zero, () => false, () => true, () => { }, camera, inventory, new GameSettingsService());
             player.EquipWeapon(inventory.EquippedWeapon);

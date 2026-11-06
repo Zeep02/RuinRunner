@@ -27,17 +27,6 @@ namespace RuinRunner
             Debug.Log("[Run Generation] seed="+seed+" version="+RuinRunner.Generation.ProceduralStageGenerator.Version+" explicit="+explicitSeed+" repeatedRecent="+repeats);
             return seed;
         }
-        public static RoomTemplate[] CreateDemoRun()
-        {
-            var ids = new[] { "hall_broken", "low_pit", "green_steps", "warden_throne" };
-            var result = new RoomTemplate[ids.Length];
-            for (var i = 0; i < ids.Length; i++)
-            {
-                result[i] = Resources.Load<RoomTemplate>("Rooms/" + ids[i]);
-                if (result[i] == null) throw new InvalidOperationException("Missing demo encounter: " + ids[i]);
-            }
-            return result;
-        }
         public static RoomTemplate[] CreateRandomRun()
         {
             var normals = new System.Collections.Generic.List<RoomTemplate>();

@@ -1,0 +1,28 @@
+{
+  "clip": "WDawnGateA",
+  "ppu": 32,
+  "pivotX": 0.50694,
+  "pivotY": 0.04605,
+  "width": 72,
+  "height": 76,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/gate-open",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 32,
+  "fps": 24,
+  "loop": false,
+  "frames": 16,
+  "durationSeconds": 0.667,
+  "visibleDiameter": 73,
+  "origin": [
+    36,
+    72
+  ],
+  "optionsJson": "{\"palette\":[\"#2a1c08\",\"#5a3e10\",\"#9a6c18\",\"#d8a428\",\"#ffd84a\",\"#fff09a\",\"#fffbe6\"]}"
+}

@@ -110,7 +110,7 @@ def main(package, api_port, database_port):
         catalog = call("GET", "/v1/catalogs/current", token=token)
         old_catalog = call("GET", "/v1/catalogs/campaign-v1", token=token)
         check("explicit v2 current and immutable v1 remain available",
-              catalog["version"] == "campaign-v2" and old_catalog["version"] == "campaign-v1")
+              catalog["version"] == "campaign-v5" and old_catalog["version"] == "campaign-v1")
         profile = call("POST", "/v1/profiles", {"operationId": str(uuid.uuid4()), "slot": 1,
                        "name": "패키지 저장 검사"}, token)
         profile_path = "/v1/profiles/" + profile["profileId"]

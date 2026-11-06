@@ -1,0 +1,28 @@
+{
+  "clip": "WMeteorWaybillA1",
+  "ppu": 32,
+  "pivotX": 0.52083,
+  "pivotY": 0.30556,
+  "width": 24,
+  "height": 18,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/mark",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 35,
+  "fps": 12,
+  "loop": true,
+  "frames": 10,
+  "durationSeconds": 0.833,
+  "visibleDiameter": 24,
+  "origin": [
+    12,
+    12
+  ],
+  "optionsJson": "{\"palette\":[\"#2a0a10\",\"#5c1212\",\"#a4231a\",\"#e2481c\",\"#ff8a2a\",\"#ffd166\",\"#fff3c4\"],\"shape\":\"coord\",\"size\":1,\"count\":1}"
+}

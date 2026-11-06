@@ -1,0 +1,14 @@
+{
+  "clip": "PropWagon",
+  "ppu": 32,
+  "pivotX": 0.48958,
+  "pivotY": 0.09375,
+  "width": 96,
+  "height": 64,
+  "premultiplied": false,
+  "source": "pixellab",
+  "jobId": "7257033f-89a6-4cd7-986e-d4eac6ce135b",
+  "fps": 10,
+  "loop": true,
+  "frames": 9
+}

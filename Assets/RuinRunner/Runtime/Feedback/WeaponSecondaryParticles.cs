@@ -19,7 +19,7 @@ namespace RuinRunner
                 root.transform.localScale=Vector3.one*scale;
                 var fx=root.AddComponent<WeaponSecondaryParticles>();fx.duration=lifetime*(.85f+(i%3)*.12f);fx.gravity=gravity;
                 fx.velocity=new Vector2(Mathf.Cos(rad),Mathf.Sin(rad))*speed*(.72f+(i%4)*.12f);fx.tint=color;
-                fx.view=root.AddComponent<SpriteRenderer>();fx.view.sprite=frames[i%frames.Length];fx.view.color=color;fx.view.sortingOrder=order;
+                fx.view=root.AddComponent<SpriteRenderer>();fx.view.sprite=frames[i%frames.Length];fx.view.color=color;fx.view.sortingOrder=order;PixelFxMaterial.Apply(fx.view,clip);
                 fx.caster=owner;if(owner!=null){fx.view.sortingLayerID=owner.sortingLayerID;fx.view.sortingOrder=owner.sortingOrder-2;}
                 active++;
             }

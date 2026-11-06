@@ -1,0 +1,28 @@
+{
+  "clip": "FxSporeBurst",
+  "ppu": 32,
+  "pivotX": 0.5041,
+  "pivotY": 0.11468,
+  "width": 122,
+  "height": 109,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "nature/spore-burst",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 1,
+  "fps": 15,
+  "loop": false,
+  "frames": 49,
+  "durationSeconds": 3.267,
+  "visibleDiameter": 102,
+  "origin": [
+    61,
+    96
+  ],
+  "optionsJson": "{}"
+}

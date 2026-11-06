@@ -88,6 +88,7 @@ namespace RuinRunner
             ReleaseTimedInputs();
             CaptureValidationFrame();
             if (completionLogged) return;
+            TickDemo();
             if (recoveryTicket != null) { DriveRecoveryJourney(); return; }
 
             if (Time.unscaledTime - startedAt > RunTimeoutSeconds)
@@ -169,6 +170,7 @@ namespace RuinRunner
             {
                 currentIntent = "choose level upgrade";
                 ReleaseMovement();
+                if (HoldDemoChoice()) return;
                 var choice = SelectUpgrade();
                 Tap(GameSettingsService.AccessoryChoiceAction(choice));
                 return;
@@ -286,7 +288,7 @@ namespace RuinRunner
             if (!finishingOath && Time.unscaledTime >= nextWeaponActionAt && distance < (ranged ? 7f : 2.4f))
             {
                 Tap(GameAction.Guard);
-                nextWeaponActionAt = Time.unscaledTime + (preferSkills ? 1.6f : 5.5f);
+                nextWeaponActionAt = Time.unscaledTime + (preferSkills || demoRun ? 1.6f : 5.5f);
             }
 
             if (Time.unscaledTime >= nextDashAt && (escape.sqrMagnitude > .01f || distance > 5.5f || player.Health <= player.MaxHealth * .45f && distance < 2.5f))
@@ -420,6 +422,7 @@ namespace RuinRunner
             var stopDistance = interactWhenClose ? .45f : .22f;
             SetMove(delta.magnitude > stopDistance ? NavigateToward(destination) : Vector2.zero);
             UpdateStallTimer(player.transform.position);
+            DashWhileTravelling(delta.magnitude);
 
             if (stalledFor > .8f && delta.magnitude > .5f && Time.unscaledTime >= nextDashAt)
             {
@@ -552,15 +555,14 @@ namespace RuinRunner
 
         private Vector2 NavigateContinuous(Vector2 destination)
         {
+            if (demoRun) return DemoNavigate(destination);
             var body = game.Player.GetComponent<Rigidbody2D>();
             var position = body.position;
             if (routeRoom != game.CurrentRoom || Vector2.Distance(routeDestination, destination) > .75f ||
                 (route.Count == 0 || stalledFor > .6f) && Time.unscaledTime >= nextRouteAt)
             {
                 routeRoom = game.CurrentRoom; routeDestination = destination; nextRouteAt = Time.unscaledTime + .6f;
-                var seals = RuntimeSceneObjects.FindAll<EncounterBarrier>(); var blocked = new List<Bounds>();
-                foreach (var seal in seals) if (seal.IsClosed) blocked.Add(seal.GetComponent<Collider2D>().bounds);
-                var path = StageNavigation.FindPath(game.DungeonMap.Terrain, position, destination, blocked.ToArray());
+                var path = StageNavigation.FindPath(game.DungeonMap.Terrain, position, destination);
                 route.Clear(); if (path != null) route.AddRange(path);
                 brakingAtWaypoint = false;
             }
@@ -688,6 +690,7 @@ namespace RuinRunner
 
         private bool EquipStoredUpgrade()
         {
+            if (HoldDemoInventory()) return true;
             var bestRank = float.NegativeInfinity;
             var weakestRank = float.PositiveInfinity;
             var replaceSlot = 0;
@@ -716,7 +719,7 @@ namespace RuinRunner
             StageValidationInput.ReleaseAll();
             attackHeld = false;
             currentIntent = "equip stored weapon through inventory keys";
-            if (!game.IsInventoryOpen) { Tap(GameAction.Inventory); return true; }
+            if (!game.IsInventoryOpen) { Tap(GameAction.Inventory); demoKeyAt = Time.unscaledTime + DemoMenuSeconds; return true; }
             var focus = game.InventoryFocusCell;
             if (game.InventoryFocusQuickSlot >= 0) { Tap(GameAction.MoveDown); return true; }
             var dx = InventorySystem.BagColumn(cell) - InventorySystem.BagColumn(focus);

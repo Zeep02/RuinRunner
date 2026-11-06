@@ -1,0 +1,28 @@
+{
+  "clip": "WFrostFangThrust",
+  "ppu": 32,
+  "pivotX": 0.00909,
+  "pivotY": 0.48333,
+  "width": 55,
+  "height": 30,
+  "premultiplied": true,
+  "canvas": null,
+  "center": false,
+  "from": null,
+  "until": null,
+  "source": "pixelfx",
+  "effect": "weapons/stab",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 9,
+  "fps": 45,
+  "loop": false,
+  "frames": 10,
+  "durationSeconds": 0.222,
+  "visibleDiameter": 45,
+  "origin": [
+    0,
+    15
+  ],
+  "optionsJson": "{\"palette\":[\"#0c1430\",\"#1f4f94\",\"#2f7fcc\",\"#58b4ec\",\"#9bdcff\",\"#d8f4ff\",\"#ffffff\"],\"sparks\":[\"#ffffff\",\"#d8f4ff\",\"#9bdcff\",\"#58b4ec\"]}"
+}
