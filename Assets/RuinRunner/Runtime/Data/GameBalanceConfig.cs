@@ -64,6 +64,10 @@ namespace RuinRunner
     {
         [HideInInspector] public int weaponDamageVersion;
         public PlayerBalanceData player = new PlayerBalanceData();
+        // Global difficulty knobs on top of the per-type table, so one number retunes every stage.
+        [Range(.5f, 3f)] public float enemyHealthMultiplier = 1.35f;
+        [Range(.5f, 3f)] public float bossHealthMultiplier = 1.4f;
+        [Range(.1f, 2f)] public float experienceGainMultiplier = .7f;
         public EnemyBalanceData[] enemies =
         {
             new EnemyBalanceData(EnemyType.Grunt, 77f, 6f, 0f, 3.4f, 9),

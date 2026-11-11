@@ -69,6 +69,7 @@ namespace RuinRunner
                 if (!string.IsNullOrEmpty(game.SessionMessage))
                     GUI.Label(new Rect(width / 2 - 350, 108, 700, 30), game.SessionMessage, compactCenter);
                 DrawQuickSlots(width, height);
+                DrawTownControls(height);
             }
             if (game.NearbyService != null && !game.IsServiceOpen && !game.IsPaused)
             {
@@ -92,6 +93,74 @@ namespace RuinRunner
                 GUI.enabled = true;
             }
         }
+        GUIStyle controlKeyStyle, controlLabelStyle;
+        static readonly (string label, GameAction[] keys)[] TownControlRows =
+        {
+            ("이동", new[] { GameAction.MoveUp, GameAction.MoveLeft, GameAction.MoveDown, GameAction.MoveRight }),
+            ("공격", new[] { GameAction.Attack }),
+            ("무기 스킬", new[] { GameAction.Guard }),
+            ("대시", new[] { GameAction.Dash }),
+            ("상호작용", new[] { GameAction.Interact }),
+            ("무기 교체", new[] { GameAction.Weapon1, GameAction.Weapon2, GameAction.Weapon3 }),
+            ("가방", new[] { GameAction.Inventory }),
+            ("지도", new[] { GameAction.Map }),
+            ("일시정지", new[] { GameAction.Pause })
+        };
+
+        // Exhibition visitors start cold in the shelter; the keys sit in a corner, out of the way of the services.
+        void DrawTownControls(float height)
+        {
+            if (controlKeyStyle == null)
+            {
+                controlKeyStyle = new GUIStyle(quickKeyStyle) { fontSize = 13, alignment = TextAnchor.MiddleCenter };
+                controlKeyStyle.normal.textColor = new Color(1f, .93f, .78f);
+                controlLabelStyle = new GUIStyle(quickKeyStyle) { fontSize = 14 };
+                controlLabelStyle.normal.textColor = new Color(.82f, .78f, .72f);
+            }
+            const float rowHeight = 27f, chipHeight = 23f, pad = 12f, inset = 16f, labelWidth = 74f, gap = 4f;
+            float ChipWidth(string text) => Mathf.Max(chipHeight + 2f, controlKeyStyle.CalcSize(new GUIContent(text)).x + 18f);
+            var widest = 0f;
+            foreach (var row in TownControlRows)
+            {
+                var rowWidth = -gap;
+                foreach (var action in row.keys)
+                    rowWidth += ChipWidth(ShortKey(action)) + gap;
+                widest = Mathf.Max(widest, rowWidth);
+            }
+            var panelHeight = pad * 2f + TownControlRows.Length * rowHeight;
+            var panel = new Rect(16f, height - 16f - panelHeight, inset * 2f + labelWidth + widest, panelHeight);
+            DrawPanel(panel);
+            for (int row = 0; row < TownControlRows.Length; row++)
+            {
+                var y = panel.y + pad + row * rowHeight;
+                GUI.Label(new Rect(panel.x + inset, y, labelWidth, rowHeight), TownControlRows[row].label, controlLabelStyle);
+                var x = panel.x + inset + labelWidth;
+                foreach (var action in TownControlRows[row].keys)
+                {
+                    var text = ShortKey(action);
+                    var chip = new Rect(x, y + (rowHeight - chipHeight) * .5f, ChipWidth(text), chipHeight);
+                    GUI.Box(chip, string.Empty, slotStyle);
+                    GUI.Label(chip, text, controlKeyStyle);
+                    x += chip.width + gap;
+                }
+            }
+        }
+
+        string ShortKey(GameAction action)
+        {
+            var binding = game.Settings.GetBinding(action);
+            var key = binding.primary != KeyCode.None ? binding.primary : binding.alternate;
+            switch (key)
+            {
+                case KeyCode.Mouse0: return "좌클릭";
+                case KeyCode.Mouse1: return "우클릭";
+                case KeyCode.Mouse2: return "휠클릭";
+                case KeyCode.Escape: return "Esc";
+                case KeyCode.LeftShift: return "Shift";
+                default: return GameSettingsService.GetKeyName(key);
+            }
+        }
+
         void DrawService(float width, float height)
         {
             var panel = new Rect(width / 2 - 500, height / 2 - 310, 1000, 620);

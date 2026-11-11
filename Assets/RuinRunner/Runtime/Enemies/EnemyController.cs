@@ -350,7 +350,9 @@ namespace RuinRunner
             if (balance == null)
                 return;
             var healthRatio = MaxHealth <= 0f ? 1f : Health / MaxHealth;
-            MaxHealth = Mathf.Max(1f, balance.maxHealth);
+            var config = GameBalance.Current;
+            var healthScale = EnemyRoles.IsBoss(Type) ? config.bossHealthMultiplier : config.enemyHealthMultiplier;
+            MaxHealth = Mathf.Max(1f, balance.maxHealth * Mathf.Max(.1f, healthScale));
             Health = Mathf.Clamp(MaxHealth * healthRatio, 0f, MaxHealth);
             contactDamage = Mathf.Max(0f, balance.attackPower);
             Armor = Mathf.Max(0f, balance.armor);

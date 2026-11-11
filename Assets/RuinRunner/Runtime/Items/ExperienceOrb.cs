@@ -153,7 +153,8 @@ namespace RuinRunner
                 TransientSpriteEffect.Create(spark, point, Vector3.one * .55f, new Color(.85f, 1f, .65f, .85f), .23f, 16,
                     new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 1.2f);
             }
-            target.AddExperience(amount);
+            // Field pickups are the only play source of experience; the global gain knob lives here.
+            target.AddExperience(amount <= 0 ? 0 : Mathf.Max(1, Mathf.RoundToInt(amount * GameBalance.Current.experienceGainMultiplier)));
             Destroy(gameObject);
         }
     }
