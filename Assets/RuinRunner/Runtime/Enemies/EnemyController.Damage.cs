@@ -33,7 +33,9 @@ namespace RuinRunner
             if (player != null)
                 amount *= player.TalentDamageAgainst(this);
             amount = StageMobDamage(amount);
-            var appliedDamage = Mathf.Max(1f, amount * 100f / (100f + Armor));
+            if (IsBoss && !originalImpact)
+                amount *= GameBalance.Current.bossItemDamageMultiplier;
+            var appliedDamage = Mathf.Max(1f, BossBurstGuard(amount * 100f / (100f + Armor)));
             DiagnosticsHooks.EnemyDamaged?.Invoke(this, appliedDamage, originalImpact, critical);
             Health -= appliedDamage;
             DamageNumber.Show(transform.position, appliedDamage, critical, originalImpact);
@@ -72,6 +74,25 @@ namespace RuinRunner
                     Die();
                 }
             }
+        }
+
+        float bossRecentDamage, bossRecentAt;
+
+        // A decaying pool of what the boss took lately. Past the threshold each hit scales by threshold/pool,
+        // so ordinary pressure lands in full while stacked bursts flatten out.
+        float BossBurstGuard(float damage)
+        {
+            if (!IsBoss || damage <= 0f)
+                return damage;
+            var config = GameBalance.Current;
+            var now = Time.time;
+            bossRecentDamage *= Mathf.Exp(-(now - bossRecentAt) / Mathf.Max(.1f, config.bossBurstSeconds));
+            bossRecentAt = now;
+            var threshold = MaxHealth * config.bossBurstThreshold;
+            if (threshold > 0f && bossRecentDamage > threshold)
+                damage *= threshold / bossRecentDamage;
+            bossRecentDamage += damage;
+            return damage;
         }
 
         private void UpdateHealthBar()

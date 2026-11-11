@@ -88,6 +88,9 @@ namespace RuinRunner.EditorTools
                 config.enemyHealthMultiplier = EditorGUILayout.Slider("일반 몬스터 체력 배율", config.enemyHealthMultiplier, .5f, 3f);
                 config.bossHealthMultiplier = EditorGUILayout.Slider("보스 체력 배율", config.bossHealthMultiplier, .5f, 3f);
                 config.experienceGainMultiplier = EditorGUILayout.Slider("경험치 획득 배율", config.experienceGainMultiplier, .1f, 2f);
+                config.bossBurstThreshold = EditorGUILayout.Slider("보스 폭딜 기준 (최대 체력 비율)", config.bossBurstThreshold, .01f, .2f);
+                config.bossBurstSeconds = EditorGUILayout.Slider("보스 폭딜 집계 시간 (초)", config.bossBurstSeconds, .5f, 6f);
+                config.bossItemDamageMultiplier = EditorGUILayout.Slider("보스 대상 장신구 피해 배율", config.bossItemDamageMultiplier, 0f, 1f);
                 foreach (var enemy in config.enemies)
                 {
                     if (enemy == null) continue;

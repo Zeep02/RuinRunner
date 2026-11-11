@@ -68,17 +68,22 @@ namespace RuinRunner
         [Range(.5f, 3f)] public float enemyHealthMultiplier = 1.35f;
         [Range(.5f, 3f)] public float bossHealthMultiplier = 1.4f;
         [Range(.1f, 2f)] public float experienceGainMultiplier = .7f;
+        // Bosses soften burst: damage beyond this share of max health within the recent window shrinks
+        // in proportion, so sustained damage grows with the square root of raw DPS instead of linearly.
+        [Range(.01f, .2f)] public float bossBurstThreshold = .045f;
+        [Range(.5f, 6f)] public float bossBurstSeconds = 2f;
+        [Range(0f, 1f)] public float bossItemDamageMultiplier = .6f;
         public EnemyBalanceData[] enemies =
         {
             new EnemyBalanceData(EnemyType.Grunt, 77f, 6f, 0f, 3.4f, 9),
             new EnemyBalanceData(EnemyType.Shooter, 61f, 5f, 0f, 2.5f, 11),
             new EnemyBalanceData(EnemyType.Charger, 115f, 9f, 5f, 3f, 14),
             new EnemyBalanceData(EnemyType.Leaper, 90f, 8f, 2f, 2.7f, 12),
-            new EnemyBalanceData(EnemyType.Boss, 1200f, 11f, 12f, 2.8f, 45),
+            new EnemyBalanceData(EnemyType.Boss, 1200f, 11f, 25f, 2.8f, 45),
             // Grown primary combos must leave room for both authored patterns.
             // Health changes do not scale player damage or add invulnerability.
-            new EnemyBalanceData(EnemyType.Tidekeeper, 1800f, 10f, 0f, 2f, 65),
-            new EnemyBalanceData(EnemyType.SealHeart, 2800f, 12f, 0f, 3.2f, 90),
+            new EnemyBalanceData(EnemyType.Tidekeeper, 1800f, 10f, 25f, 2f, 65),
+            new EnemyBalanceData(EnemyType.SealHeart, 2800f, 12f, 30f, 3.2f, 90),
             new EnemyBalanceData(EnemyType.Tidecaller, 104f, 7f, 0f, 2.5f, 14),
             new EnemyBalanceData(EnemyType.Sentinel, 144f, 9f, 0f, 3.3f, 16),
             new EnemyBalanceData(EnemyType.Sporeling, 45f, 8f, 0f, 4.3f, 7),
@@ -120,10 +125,10 @@ namespace RuinRunner
                 switch (type)
                 {
                     case EnemyType.Tidekeeper:
-                        missing = new EnemyBalanceData(type, 1800, 10, 0, 2, 65);
+                        missing = new EnemyBalanceData(type, 1800, 10, 25, 2, 65);
                         break;
                     case EnemyType.SealHeart:
-                        missing = new EnemyBalanceData(type, 2800, 12, 0, 3.2f, 90);
+                        missing = new EnemyBalanceData(type, 2800, 12, 30, 3.2f, 90);
                         break;
                     case EnemyType.Tidecaller:
                         missing = new EnemyBalanceData(type, 104, 7, 0, 2.5f, 14);
