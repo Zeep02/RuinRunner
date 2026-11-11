@@ -65,10 +65,14 @@ if(Test-Path -LiteralPath $pidFile){
     if($process -and $process.CommandLine.Contains($dll)){Remove-Item Env:RR_DB -ErrorAction SilentlyContinue;throw 'API is already running. Stop-Backend.ps1 -ApiOnly before rebuilding or restarting.'}
 }
 $env:ASPNETCORE_URLS='http://127.0.0.1:5186';$env:ASPNETCORE_ENVIRONMENT='Production'
+# The admin page (http://127.0.0.1:5186/admin) needs this token. Generated once under the private folder.
+$adminTokenPath=Join-Path $private 'admin-token.txt'
+if(!(Test-Path -LiteralPath $adminTokenPath)){$bytes=New-Object byte[] 32;[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes);[IO.File]::WriteAllText($adminTokenPath,[BitConverter]::ToString($bytes).Replace('-',''),[Text.UTF8Encoding]::new($false))}
+$env:RR_ADMIN_TOKEN=([IO.File]::ReadAllText($adminTokenPath)).Trim()
 try{
     $api=Start-Process -FilePath $dotnet -ArgumentList ('"'+$dll+'"') -WorkingDirectory (Split-Path $project) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logs 'api.log') -RedirectStandardError (Join-Path $logs 'api-error.log')
     @{pid=$api.Id;executable=$dotnet;dll=$dll;startedUtc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding UTF8
-}finally{Remove-Item Env:RR_DB -ErrorAction SilentlyContinue}
+}finally{Remove-Item Env:RR_DB,Env:RR_ADMIN_TOKEN -ErrorAction SilentlyContinue}
 $ready=$false
 for($i=0;$i -lt 30;$i++){
     try{$health=Invoke-RestMethod -Uri 'http://127.0.0.1:5186/health/ready' -TimeoutSec 2;if($health.status -eq 'ready'){$ready=$true;break}}catch{}

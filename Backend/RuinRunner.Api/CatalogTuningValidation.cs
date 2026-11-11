@@ -56,7 +56,7 @@ public static class CatalogTuningValidation
         void Read(string key, JsonElement field)
         {
             Wire.Require(rules.TryGetValue(key, out var rule) && field.ValueKind == JsonValueKind.Number, "catalog_invalid", "알 수 없거나 숫자가 아닌 수치가 있습니다.");
-            Wire.Require(field.TryGetDouble(out var value) && double.IsFinite(value) && value >= rule.Minimum && value <= rule.Maximum && (!rule.Integer || value == Math.Truncate(value)), "catalog_invalid", "장신구 수치 범위를 확인하세요.");
+            Wire.Require(field.TryGetDouble(out var value) && double.IsFinite(value) && value >= rule.Minimum && value <= rule.Maximum && (!rule.Integer || value == Math.Truncate(value)), "catalog_invalid", "장신구 수치 범위를 확인하세요: " + id + "." + key + " (" + rule.Minimum + " ~ " + rule.Maximum + ")");
             Wire.Require(values.TryAdd(key, value), "catalog_invalid", "중복 수치가 있습니다.");
         }
     }

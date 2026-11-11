@@ -138,7 +138,7 @@ namespace RuinRunner
                     continue;
                 }
 
-                var icon = InventoryIconFactory.Get(slot.Weapon.Id, slot.Weapon.Color, InventoryIconKind.Weapon);
+                var icon = InventoryIconFactory.Get(slot.Weapon.ArtId, slot.Weapon.Color, InventoryIconKind.Weapon);
                 ItemIconLibrary.DrawGUI(new Rect(rect.center.x - 26f, rect.y + 20f, 52f, 54f), icon);
                 if (slot.Weapon.AttackType == WeaponAttackType.Ranged)
                 {

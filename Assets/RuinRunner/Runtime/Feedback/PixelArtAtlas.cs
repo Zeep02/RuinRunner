@@ -47,9 +47,9 @@ namespace RuinRunner
         {
             if (weapon == null)
                 return null;
-            if (NativeWeaponArt.Supports(weapon.Id))
-                return Resources.Load<Sprite>(NativeWeaponArt.Path(weapon.Id));
-            return IndividualArt.Sprite("HeldWeapons/" + weapon.Id);
+            if (NativeWeaponArt.Supports(weapon.ArtId))
+                return Resources.Load<Sprite>(NativeWeaponArt.Path(weapon.ArtId));
+            return IndividualArt.Sprite("HeldWeapons/" + weapon.ArtId);
         }
 
         public static Sprite GetTerrainSprite(int index)

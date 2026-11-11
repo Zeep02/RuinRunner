@@ -19,7 +19,7 @@ namespace RuinRunner
         const float PressRecovery = .15f;
         public static WeaponActionSpec Get(WeaponDefinition weapon)
         {
-            if (weapon == null || !SignatureWeaponCatalog.TryGet(weapon.Id, out var signature))
+            if (weapon == null || !SignatureWeaponCatalog.TryGet(weapon.ArtId, out var signature))
                 return default;
             float mana = weapon.CatalogSpecialMana >= 0 ? weapon.CatalogSpecialMana : signature.Mana;
             return new WeaponActionSpec(mana, PressRecovery, signature.Description + "\n마나 " + mana.ToString("0.#"));

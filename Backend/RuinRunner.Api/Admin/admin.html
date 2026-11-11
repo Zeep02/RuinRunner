@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruin Runner 관리자</title>
+<style>
+:root{--bg:#15121b;--panel:#1f1a28;--panel2:#282133;--line:#3a3048;--text:#ece6f2;--dim:#a197ae;--accent:#e8a84a;--good:#6cc58a;--bad:#e2656a;--edit:#3c2f1c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 "Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0 8px 0 0;color:var(--accent)}
+.pill{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--dim);font-size:12px}
+.pill b{color:var(--text);font-weight:600}
+nav{display:flex;gap:4px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{background:none;border:1px solid transparent;color:var(--dim);padding:7px 14px;border-radius:6px;cursor:pointer;font:inherit}
+nav button.on{background:var(--panel2);border-color:var(--line);color:var(--text)}
+main{padding:16px;max-width:1500px;margin:0 auto}
+.bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.grow{flex:1}
+button.act{background:var(--accent);color:#1a1205;border:0;border-radius:6px;padding:8px 16px;font:inherit;font-weight:700;cursor:pointer}
+button.act:disabled{opacity:.4;cursor:default}
+button.sub{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 12px;font:inherit;cursor:pointer}
+button.sub:hover{border-color:var(--accent)}
+button.mini{background:none;border:1px solid var(--line);color:var(--dim);border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer}
+button.mini:hover{color:var(--text);border-color:var(--accent)}
+input,select,textarea{background:#120f17;color:var(--text);border:1px solid var(--line);border-radius:5px;padding:4px 6px;font:inherit}
+input[type=number]{width:84px;text-align:right}
+input.name{width:150px}
+input.changed,select.changed,textarea.changed{background:var(--edit);border-color:var(--accent)}
+input.invalid{border-color:var(--bad);background:#3a1a1e}
+.scroll{overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel);max-height:calc(100vh - 230px)}
+table{border-collapse:collapse;width:100%}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap;vertical-align:top}
+th{position:sticky;top:0;background:var(--panel2);color:var(--dim);font-weight:600;font-size:12px;z-index:1}
+tr.boss td{background:#2a1f1c}
+tr.variant td:first-child{border-left:3px solid var(--accent)}
+td.dim,span.dim{color:var(--dim);font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.card label{display:block;color:var(--dim);font-size:12px;margin-bottom:4px}
+.card input{width:100%;text-align:left}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:4px 12px;padding:2px 0;min-width:560px}
+.stats label{font-size:12px;color:var(--dim);display:flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap}
+.stats input{width:76px}
+td.statcell{white-space:normal;min-width:580px}
+#login{max-width:420px;margin:12vh auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:24px}
+#login h2{margin:0 0 12px;color:var(--accent)}
+#login input{width:100%;margin:8px 0 14px}
+#toast{position:fixed;right:16px;bottom:16px;max-width:520px;padding:12px 16px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);display:none;white-space:pre-wrap;z-index:20}
+#toast.bad{border-color:var(--bad)}#toast.good{border-color:var(--good)}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:10px;max-width:720px;width:92vw}
+dialog::backdrop{background:#0009}
+.diff{max-height:50vh;overflow:auto;font-size:13px;background:#120f17;border-radius:6px;padding:8px 10px;margin:10px 0}
+.diff div{padding:2px 0;border-bottom:1px dashed #2c2436}
+.from{color:var(--bad)}.to{color:var(--good)}
+.cur{color:var(--good);font-weight:700}
+</style>
+</head>
+<body>
+<div id="login" hidden>
+ <h2>관리자 로그인</h2>
+ <div class="dim">서버를 켤 때 만든 관리자 토큰을 넣으세요. <span class="dim">(Open Admin Tool이 클립보드에 복사해 둡니다)</span></div>
+ <input id="tokenInput" type="password" autocomplete="off" placeholder="관리자 토큰">
+ <button class="act" id="loginBtn">들어가기</button>
+</div>
+<div id="app" hidden>
+<header>
+ <h1>Ruin Runner 관리자</h1>
+ <span class="pill">적용 중 <b id="curVer">-</b></span>
+ <span class="pill">패키지 기본 <b id="cfgVer">-</b></span>
+ <span class="pill">편집 기준 <b id="baseVer">-</b></span>
+ <span class="grow"></span>
+ <span class="pill">변경 <b id="changeCount">0</b>건</span>
+ <button class="sub" id="discardBtn">되돌리기</button>
+ <button class="act" id="publishBtn" disabled>서버에 적용</button>
+</header>
+<nav id="tabs"></nav>
+<main id="view"></main>
+</div>
+<dialog id="publishDlg">
+ <h3 style="margin-top:0">서버에 적용</h3>
+ <div class="dim">새 버전을 만들고 바로 적용합니다. 이후 시작하는 원정부터 반영되고, 진행 중인 원정은 시작할 때의 값을 유지합니다.</div>
+ <div class="diff" id="diffList"></div>
+ <label class="dim">메모 (선택)</label>
+ <input id="noteInput" style="width:100%" maxlength="200" placeholder="예: 보스 체력 소폭 하향">
+ <div class="bar" style="margin-top:14px;justify-content:flex-end">
+  <button class="sub" id="cancelPublish">취소</button>
+  <button class="act" id="confirmPublish">적용</button>
+ </div>
+</dialog>
+<div id="toast"></div>
+<script>
+"use strict";
+const RARITY=["일반","고급","희귀","영웅","전설"];
+const STAGES=["1지역","2지역","3지역"];
+const WEAPON_STATS=[["attackPower","공격력",.1,1000],["attackDelayMultiplier","공격 간격 배율",.1,5],["heavyDamageMultiplier","강공격 배율",1,4],["guardDamageReduction","막기 감소율",0,.8],["specialManaCost","스킬 마나",0,100],["specialCooldown","스킬 재사용",.25,15],["magazineSize","탄창",0,100,true],["reloadSeconds","재장전(초)",0,10],["projectileSpeed","탄속",1,80],["projectilePierce","관통",1,16,true]];
+const KNOBS=[["enemyHealthMultiplier","일반 몬스터 체력 배율",.1,10],["bossHealthMultiplier","보스 체력 배율",.1,10],["experienceGainMultiplier","경험치 획득 배율",0,10],["bossBurstThreshold","보스 폭딜 기준 (최대 체력 비율)",.005,1],["bossBurstSeconds","보스 폭딜 집계 시간 (초)",.1,30],["bossItemDamageMultiplier","보스 대상 장신구 피해 배율",0,2]];
+const ECONOMY=[["startingGold","시작 골드"],["enemyGold","몬스터 골드"],["combatGold","전투 보상 골드"],["chestGold","상자 골드"],["bossGold","보스 골드"],["healPrice","회복 물약 가격"],["healAmount","회복량"],["shopOffers","상점 진열 수"],["maxOwnedItems","최대 보유 장비"],["maxAccessories","최대 장신구"]];
+const SETTLEMENT=[["minimumReward","최소 유산 보상"],["killsPerShard","유산 1개당 처치 수"],["rewardPerRoom","방당 유산"],["victoryBonus","엔딩 보너스"]];
+let token=sessionStorage.getItem("rrAdminToken")||"";
+let state=null, base=null, work=null, defaults=null, rules={}, tab="monsters", filter="";
+const $=id=>document.getElementById(id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+function toast(msg,kind){const t=$("toast");t.textContent=msg;t.className=kind||"";t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",kind==="bad"?9000:4000)}
+async function api(path,opts={}){
+ const r=await fetch("/admin/api"+path,{...opts,headers:{"X-Admin-Token":token,"Content-Type":"application/json",...(opts.headers||{})}});
+ const text=await r.text();let body=null;try{body=text?JSON.parse(text):null}catch{}
+ if(r.status===401){sessionStorage.removeItem("rrAdminToken");showLogin();throw new Error("토큰이 맞지 않습니다.")}
+ if(!r.ok)throw new Error((body&&body.message)||("요청 실패 ("+r.status+")"));
+ return body;
+}
+function showLogin(){$("app").hidden=true;$("login").hidden=false;$("tokenInput").focus()}
+$("loginBtn").onclick=async()=>{token=$("tokenInput").value.trim();sessionStorage.setItem("rrAdminToken",token);await boot()};
+$("tokenInput").onkeydown=e=>{if(e.key==="Enter")$("loginBtn").click()};
+
+async function boot(){
+ try{
+  state=await api("/state");
+  defaults=defaults||await api("/enemy-defaults");
+  await load(state.current);
+  $("login").hidden=true;$("app").hidden=false;
+ }catch(e){showLogin();if(token)toast(e.message,"bad")}
+}
+async function load(version){
+ base=await api("/catalogs/"+encodeURIComponent(version));
+ rules=await api("/accessory-rules/"+encodeURIComponent(version));
+ if(!base.enemyBalance)base.enemyBalance=seedBalance();
+ work=clone(base);
+ $("curVer").textContent=state.current;$("cfgVer").textContent=state.configured;$("baseVer").textContent=version;
+ render();
+}
+function seedBalance(){
+ const b={};KNOBS.forEach(([k])=>b[k]=defaults[k]);
+ b.enemies=defaults.enemies.map(e=>({type:e.type,maxHealth:e.maxHealth,attackPower:e.attackPower,armor:e.armor,moveSpeed:e.moveSpeed,experienceReward:e.experienceReward}));
+ return b;
+}
+function at(obj,path){return path.reduce((o,k)=>o==null?undefined:o[k],obj)}
+function setAt(obj,path,v){const last=path[path.length-1];at(obj,path.slice(0,-1))[last]=v}
+function changes(){
+ const out=[];
+ (function walk(a,b,path,label){
+  if(b!==null&&typeof b==="object"){
+   if(Array.isArray(b)&&Array.isArray(a)&&a.length!==b.length&&path.join(".")==="items"){
+    const ids=new Set(a.map(x=>x.id));b.filter(x=>!ids.has(x.id)).forEach(x=>out.push({label:"새 무기 "+x.name+" ("+x.id+")",from:"",to:"추가"}));
+    const nids=new Set(b.map(x=>x.id));a.filter(x=>!nids.has(x.id)).forEach(x=>out.push({label:x.name+" ("+x.id+")",from:"",to:"삭제"}));
+    const map=new Map(a.map(x=>[x.id,x]));b.forEach(x=>{if(map.has(x.id))walk(map.get(x.id),x,path.concat(x.id),label+" "+x.name)});return;
+   }
+   for(const k of Object.keys(b))walk(a==null?undefined:a[k],b[k],path.concat(k),labelOf(path.concat(k),b,k,label));
+   return;
+  }
+  if(a!==b)out.push({label,from:a===undefined?"":a,to:b});
+ })(base,work,[],"");
+ return out;
+}
+function labelOf(path,parent,k,prev){
+ if(Array.isArray(parent)){const x=parent[k];return prev+" "+(x&&(x.name||labelForType(x.type)||x.id)||k)}
+ return prev+" › "+k;
+}
+function labelForType(t){const d=defaults&&defaults.enemies.find(e=>e.type===t);return d?d.label:t}
+function refreshCount(){const n=changes().length;$("changeCount").textContent=n;$("publishBtn").disabled=n===0}
+
+function num(path,opts={}){
+ const i=document.createElement("input");i.type="number";i.step=opts.step||"any";
+ const v=at(work,path);i.value=v;
+ const check=()=>{const x=parseFloat(i.value);const bad=!isFinite(x)||(opts.min!=null&&x<opts.min)||(opts.max!=null&&x>opts.max)||(!!opts.integer&&x!==Math.trunc(x));i.classList.toggle("invalid",bad);i.classList.toggle("changed",!bad&&at(base,path)!==x);return bad?null:x};
+ i.oninput=()=>{const x=check();if(x!==null){setAt(work,path,x);refreshCount();opts.after&&opts.after()}};
+ if(opts.min!=null)i.title="범위 "+opts.min+" ~ "+opts.max;
+ check();return i;
+}
+function text(path,cls){const i=document.createElement("input");i.className=cls||"";i.value=at(work,path)??"";const mark=()=>i.classList.toggle("changed",at(base,path)!==i.value);i.oninput=()=>{setAt(work,path,i.value);mark();refreshCount()};mark();return i}
+function select(path,labels){const s=document.createElement("select");labels.forEach((l,ix)=>{const o=document.createElement("option");o.value=ix;o.textContent=l;s.appendChild(o)});s.value=at(work,path);const mark=()=>s.classList.toggle("changed",at(base,path)!==+s.value);s.onchange=()=>{setAt(work,path,+s.value);mark();refreshCount()};mark();return s}
+function el(tag,attrs,...kids){const e=document.createElement(tag);Object.assign(e,attrs||{});kids.flat().forEach(k=>e.append(k instanceof Node?k:document.createTextNode(k??"")));return e}
+function cell(...kids){return el("td",null,...kids)}
+
+const TABS=[["monsters","몬스터"],["weapons","무기"],["accessories","장신구"],["economy","경제·재능"],["versions","버전 기록"]];
+function render(){
+ const nav=$("tabs");nav.innerHTML="";
+ TABS.forEach(([k,l])=>{const b=el("button",{textContent:l,className:tab===k?"on":""});b.onclick=()=>{tab=k;render()};nav.append(b)});
+ const v=$("view");v.innerHTML="";
+ ({monsters:renderMonsters,weapons:renderWeapons,accessories:renderAccessories,economy:renderEconomy,versions:renderVersions})[tab](v);
+ refreshCount();
+}
+
+function renderMonsters(v){
+ const b=work.enemyBalance;
+ const cards=el("div",{className:"cards"});
+ KNOBS.forEach(([k,l,mn,mx])=>cards.append(el("div",{className:"card"},el("label",{textContent:l}),num(["enemyBalance",k],{min:mn,max:mx,after:updateEffective}))));
+ v.append(cards);
+ const tbl=el("table");
+ tbl.append(el("thead",null,el("tr",null,["이름","지역","체력","실제 체력","공격력","방어력","피해 감소","이동 속도","경험치"].map(h=>el("th",{textContent:h})))));
+ const body=el("tbody");
+ const rows=b.enemies.map((e,ix)=>({e,ix,d:defaults.enemies.find(x=>x.type===e.type)||{label:e.type,stage:0,boss:false}})).sort((a,c)=>(a.d.stage-c.d.stage)||(a.d.boss-c.d.boss));
+ rows.forEach(({e,ix,d})=>{
+  const p=["enemyBalance","enemies",ix];
+  const eff=el("td",{className:"dim"});eff.dataset.ix=ix;
+  const red=el("td",{className:"dim"});red.dataset.red=ix;
+  body.append(el("tr",{className:d.boss?"boss":""},cell(el("b",{textContent:d.label}),el("div",{className:"dim",textContent:e.type})),cell(d.stage?STAGES[d.stage-1]:"-"),
+   cell(num(p.concat("maxHealth"),{min:1,max:1e6,after:updateEffective})),eff,cell(num(p.concat("attackPower"),{min:0,max:1e4})),
+   cell(num(p.concat("armor"),{min:0,max:1e4,after:updateEffective})),red,cell(num(p.concat("moveSpeed"),{min:.05,max:50})),cell(num(p.concat("experienceReward"),{min:0,max:1e5,integer:true,step:1}))));
+ });
+ tbl.append(body);v.append(el("div",{className:"scroll"},tbl));
+ updateEffective();
+}
+function updateEffective(){
+ const b=work.enemyBalance;
+ document.querySelectorAll("td[data-ix]").forEach(td=>{const e=b.enemies[+td.dataset.ix];const d=defaults.enemies.find(x=>x.type===e.type);const m=d&&d.boss?b.bossHealthMultiplier:b.enemyHealthMultiplier;td.textContent=Math.round(e.maxHealth*m).toLocaleString()});
+ document.querySelectorAll("td[data-red]").forEach(td=>{const e=b.enemies[+td.dataset.red];td.textContent=Math.round(100-10000/(100+e.armor))+"%"});
+}
+
+function weaponRow(item,ix,body){
+ const p=["items",ix];const variant=!!item.baseId;
+ const baseName=variant?(work.items.find(x=>x.id===item.baseId)||{}).name:"";
+ const actions=el("td");
+ const dup=el("button",{className:"mini",textContent:"새 무기로 복제"});dup.onclick=()=>addVariant(item);actions.append(dup);
+ if(variant){const del=el("button",{className:"mini",textContent:"삭제"});del.style.marginLeft="4px";del.onclick=()=>{work.items.splice(work.items.indexOf(item),1);render()};actions.append(del)}
+ body.append(el("tr",{className:variant?"variant":""},
+  cell(text(p.concat("name"),"name"),el("div",{className:"dim",textContent:item.id+(variant?" · 기반 "+baseName:"")})),
+  cell(select(p.concat("rarity"),RARITY)),cell(num(p.concat("price"),{min:0,max:1e6,integer:true,step:1})),cell(num(p.concat("sellPrice"),{min:0,max:1e6,integer:true,step:1})),
+  cell(num(p.concat("dropWeight"),{min:0,max:1e6,integer:true,step:1})),cell(select(p.concat("minStage"),STAGES),select(p.concat("maxStage"),STAGES)),
+  el("td",{className:"statcell"},el("div",{className:"stats"},WEAPON_STATS.filter(([k])=>k in item.stats).map(([k,l,mn,mx,int])=>el("label",null,l,num(p.concat(["stats",k]),{min:mn,max:mx,integer:!!int,step:int?1:"any"}))))),actions));
+}
+function addVariant(src){
+ const baseId=src.baseId||src.id;
+ let n=1;while(work.items.some(x=>x.id===baseId+"_v"+n))n++;
+ const v=clone(src);v.id=baseId+"_v"+n;v.baseId=baseId;v.name=src.name+" 개량형";
+ work.items.splice(work.items.indexOf(src)+1,0,v);render();toast("새 무기를 추가했습니다. 이름과 수치를 바꾼 뒤 서버에 적용하세요.","good");
+}
+function renderWeapons(v){
+ const f=el("input",{placeholder:"이름·ID 검색",value:filter});f.oninput=()=>{filter=f.value;renderBody()};
+ v.append(el("div",{className:"bar"},f,el("span",{className:"dim",textContent:"새 무기는 기반 무기의 그림·스킬을 쓰고 이름·수치·가격·드롭은 따로 가집니다."})));
+ const tbl=el("table");tbl.append(el("thead",null,el("tr",null,["이름","등급","가격","판매가","드롭 가중치","등장 지역","수치",""].map(h=>el("th",{textContent:h})))));
+ const body=el("tbody");tbl.append(body);v.append(el("div",{className:"scroll"},tbl));
+ function renderBody(){body.innerHTML="";const q=filter.trim().toLowerCase();work.items.forEach((it,ix)=>{if(it.kind==="weapon"&&(!q||it.name.toLowerCase().includes(q)||it.id.includes(q)))weaponRow(it,ix,body)})}
+ renderBody();
+}
+function renderAccessories(v){
+ const f=el("input",{placeholder:"이름·ID 검색",value:filter});f.oninput=()=>{filter=f.value;renderBody()};
+ v.append(el("div",{className:"bar"},f));
+ const tbl=el("table");tbl.append(el("thead",null,el("tr",null,["이름","등급","가격","판매가","드롭 가중치","등장 지역","효과 수치"].map(h=>el("th",{textContent:h})))));
+ const body=el("tbody");tbl.append(body);v.append(el("div",{className:"scroll"},tbl));
+ function statInputs(item,ix){
+  const r=rules[item.id]||{};const box=el("div",{className:"stats"});
+  Object.keys(r).forEach(key=>{
+   const path=key.startsWith("effect.")?["items",ix,"stats","effect",key.slice(7)]:["items",ix,"stats",key];
+   if(at(work,path)===undefined)return;
+   const rule=r[key];
+   if(rule.min===rule.max&&rule.min===0&&at(work,path)===0)return; // fixed at zero for this item
+   box.append(el("label",null,key.replace("effect.",""),num(path,{min:rule.min,max:rule.max,integer:rule.integer,step:rule.integer?1:"any"})));
+  });
+  return box;
+ }
+ function renderBody(){body.innerHTML="";const q=filter.trim().toLowerCase();work.items.forEach((it,ix)=>{if(it.kind!=="accessory"||q&&!(it.name.toLowerCase().includes(q)||it.id.includes(q)))return;const p=["items",ix];
+  body.append(el("tr",null,cell(text(p.concat("name"),"name"),el("div",{className:"dim",textContent:it.id})),cell(select(p.concat("rarity"),RARITY)),cell(num(p.concat("price"),{min:0,max:1e6,integer:true,step:1})),
+   cell(num(p.concat("sellPrice"),{min:0,max:1e6,integer:true,step:1})),cell(num(p.concat("dropWeight"),{min:0,max:1e6,integer:true,step:1})),cell(select(p.concat("minStage"),STAGES),select(p.concat("maxStage"),STAGES)),
+   el("td",{className:"statcell"},statInputs(it,ix))))})}
+ renderBody();
+}
+function renderEconomy(v){
+ const cards=el("div",{className:"cards"});
+ cards.append(el("div",{className:"card"},el("label",{textContent:"처음 주는 유산"}),num(["startingLegacy"],{min:0,max:1e5,integer:true,step:1})));
+ ECONOMY.forEach(([k,l])=>cards.append(el("div",{className:"card"},el("label",{textContent:l}),num(["economy",k],{min:0,max:1e6,integer:true,step:1}))));
+ SETTLEMENT.forEach(([k,l])=>cards.append(el("div",{className:"card"},el("label",{textContent:l}),num(["settlement",k],{min:k==="killsPerShard"?1:0,max:1e6,integer:true,step:1}))));
+ v.append(el("h3",{textContent:"경제·정산"}),cards);
+ const st=el("table");st.append(el("thead",null,el("tr",null,["시작 무기","해금 유산"].map(h=>el("th",{textContent:h})))));
+ const sb=el("tbody");work.starterWeapons.forEach((s,ix)=>sb.append(el("tr",null,cell(s.name||s.id),cell(num(["starterWeapons",ix,"unlockCost"],{min:0,max:1e5,integer:true,step:1})))));st.append(sb);
+ v.append(el("h3",{textContent:"시작 무기 해금"}),el("div",{className:"scroll",style:"max-height:none;margin-bottom:14px"},st));
+ const tt=el("table");tt.append(el("thead",null,el("tr",null,["재능","설명","해금 유산","필요 원정 수"].map(h=>el("th",{textContent:h})))));
+ const tb=el("tbody");work.talents.forEach((t,ix)=>tb.append(el("tr",null,cell(el("b",{textContent:t.name||t.id})),el("td",{className:"dim",style:"white-space:normal;max-width:520px",textContent:t.description||""}),
+  cell(num(["talents",ix,"unlockCost"],{min:0,max:1e5,integer:true,step:1})),cell(num(["talents",ix,"requiredRuns"],{min:0,max:1e4,integer:true,step:1})))));tt.append(tb);
+ v.append(el("h3",{textContent:"재능 해금"}),el("div",{className:"scroll"},tt));
+}
+function renderVersions(v){
+ const tbl=el("table");tbl.append(el("thead",null,el("tr",null,["버전","만든 시각","기반","메모",""].map(h=>el("th",{textContent:h})))));
+ const body=el("tbody");
+ state.versions.forEach(x=>{
+  const cur=x.version===state.current;const btns=el("td");
+  const open=el("button",{className:"mini",textContent:"이 버전으로 편집"});open.onclick=async()=>{if(changes().length&&!confirm("저장하지 않은 변경을 버릴까요?"))return;await load(x.version);toast("편집 기준을 "+x.version+"(으)로 바꿨습니다.","good")};btns.append(open);
+  if(!cur){const act=el("button",{className:"mini",textContent:"이 버전 적용"});act.style.marginLeft="4px";act.onclick=()=>activate(x.version);btns.append(act)}
+  body.append(el("tr",null,cell(el("span",{className:cur?"cur":"",textContent:x.version+(cur?"  (적용 중)":"")})),cell(new Date(x.publishedUtc).toLocaleString()),cell(x.baseVersion||"패키지 기본"),el("td",{style:"white-space:normal",textContent:x.note||""}),btns));
+ });
+ tbl.append(body);
+ v.append(el("div",{className:"bar"},el("span",{className:"dim",textContent:"버전은 지워지지 않습니다. 예전 버전을 적용하면 바로 되돌아갑니다."})),el("div",{className:"scroll"},tbl));
+}
+async function activate(version){
+ if(!confirm(version+" 버전을 적용할까요? 이후 시작하는 원정부터 반영됩니다."))return;
+ try{await api("/activate",{method:"POST",body:JSON.stringify({version})});state=await api("/state");await load(state.current);toast("적용했습니다: "+version,"good")}catch(e){toast(e.message,"bad")}
+}
+$("discardBtn").onclick=()=>{if(!changes().length||confirm("편집한 내용을 모두 되돌릴까요?")){work=clone(base);render()}};
+$("publishBtn").onclick=()=>{
+ if(document.querySelector("input.invalid")){toast("범위를 벗어난 칸(빨간 칸)을 먼저 고치세요.","bad");return}
+ const list=$("diffList");list.innerHTML="";const ch=changes();
+ ch.slice(0,300).forEach(c=>list.append(el("div",null,c.label.trim()+"  ",el("span",{className:"from",textContent:String(c.from)}),c.from!==""?" → ":"",el("span",{className:"to",textContent:String(c.to)}))));
+ if(ch.length>300)list.append(el("div",{className:"dim",textContent:"외 "+(ch.length-300)+"건"}));
+ $("publishDlg").showModal();
+};
+$("cancelPublish").onclick=()=>$("publishDlg").close();
+$("confirmPublish").onclick=async()=>{
+ const btn=$("confirmPublish");btn.disabled=true;
+ try{
+  const res=await api("/catalogs",{method:"POST",body:JSON.stringify({baseVersion:base.version,note:$("noteInput").value,catalog:work})});
+  $("publishDlg").close();$("noteInput").value="";
+  state=await api("/state");await load(state.current);
+  toast("서버에 적용했습니다: "+res.version+"\n다음 원정부터 반영됩니다.","good");
+ }catch(e){toast(e.message,"bad")}finally{btn.disabled=false}
+};
+window.addEventListener("beforeunload",e=>{if(work&&changes().length){e.preventDefault();e.returnValue=""}});
+if(token)boot();else showLogin();
+</script>
+</body>
+</html>

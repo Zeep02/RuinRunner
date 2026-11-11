@@ -68,6 +68,11 @@ all database data are created under %LOCALAPPDATA%\RuinRunner\LocalBackend, outs
 shortcut; if a port is occupied, stop the older owned backend or choose free ports in the public config.
 Logs: %LOCALAPPDATA%\RuinRunner\LocalBackend\logs. Never delete its database to fix a connection error.
 
+Admin tool: while the backend runs, open "Open Admin Tool.cmd" on the server PC. It opens http://127.0.0.1:<apiPort>/admin
+and puts the admin token on the clipboard. Edits to monsters, weapons, accessories, economy and talents are saved as a new
+catalog version and used by every expedition started afterwards; running expeditions keep their pinned version.
+The page answers only on the server PC itself. Every version stays in the database, so an older one can be re-applied.
+
 Playing across PCs: see SERVER-README.txt. Run "Start Server.cmd" on the server PC and "Join Server.cmd" on each game PC.
 Public server: powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Start-Game.ps1 -ApiUrl https://YOUR-API/
 Plain HTTP is accepted only for private network addresses. No public service or paid hosting is provisioned by this package.

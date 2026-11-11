@@ -76,10 +76,13 @@ $env:RR_MIGRATION_DB="Host=127.0.0.1;Port=$DatabasePort;Database=ruinrunner_isol
 $env:RR_CONTENT_VERSION=$ContentVersion
 try{& $dotnet $dll '--migrate'; if($LASTEXITCODE -ne 0){throw 'Isolated migration failed'}}finally{Remove-Item Env:RR_MIGRATION_DB -ErrorAction SilentlyContinue}
 $env:ASPNETCORE_URLS="http://127.0.0.1:$ApiPort"; $env:ASPNETCORE_ENVIRONMENT='Production'
+$adminTokenPath=Join-Path $private 'admin-token.txt'
+if(!(Test-Path -LiteralPath $adminTokenPath)){$bytes=New-Object byte[] 32;[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes);[IO.File]::WriteAllText($adminTokenPath,[BitConverter]::ToString($bytes).Replace('-',''),[Text.UTF8Encoding]::new($false))}
+$env:RR_ADMIN_TOKEN=([IO.File]::ReadAllText($adminTokenPath)).Trim()
 try{
     $api=Start-Process -FilePath $dotnet -ArgumentList ('"'+$dll+'"') -WorkingDirectory $output -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logs 'api.log') -RedirectStandardError (Join-Path $logs 'api-error.log')
     @{pid=$api.Id;dll=$dll;apiPort=$ApiPort;databasePort=$DatabasePort;contentVersion=$ContentVersion;startedUtc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding UTF8
-}finally{Remove-Item Env:RR_DB,Env:RR_CONTENT_VERSION -ErrorAction SilentlyContinue}
+}finally{Remove-Item Env:RR_DB,Env:RR_CONTENT_VERSION,Env:RR_ADMIN_TOKEN -ErrorAction SilentlyContinue}
 $ready=$false
 for($i=0;$i -lt 30;$i++){
     try{if((Invoke-RestMethod -Uri "http://127.0.0.1:$ApiPort/health/ready" -TimeoutSec 2).status -eq 'ready'){$ready=$true;break}}catch{}

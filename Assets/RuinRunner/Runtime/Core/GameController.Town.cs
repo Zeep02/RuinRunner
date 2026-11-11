@@ -99,6 +99,7 @@ namespace RuinRunner
                 BindExchangeCatalog();
                 WeaponLootTable.BindPinnedCatalog(BackendCatalog);
                 AccessoryLootTable.BindPinnedCatalog(BackendCatalog);
+                GameBalance.BindCatalog(BackendCatalog);
             }
             BossEntrancePresentation.Cancel(this);
             stageEpoch++;
@@ -186,6 +187,7 @@ namespace RuinRunner
                 BindExchangeCatalog();
                 WeaponLootTable.BindPinnedCatalog(BackendCatalog);
                 AccessoryLootTable.BindPinnedCatalog(BackendCatalog);
+                GameBalance.BindCatalog(BackendCatalog);
                 ActiveTalents = new TalentLoadout(BackendRun.loadout.activeTalentIds);
                 CloseService();
                 // Still the town until the ink has covered it, so nothing starts drawing the run's HUD over it.

@@ -194,7 +194,7 @@ namespace RuinRunner
             ghost.blade.sprite = PixelArtAtlas.GetHeldWeaponSprite(weapon);
             ghost.blade.sortingOrder = 2000;
             ghost.blade.flipY = aim.x < 0;
-            ghost.forward = (NativeWeaponArt.TryGet(weapon.Id, out var pose) ? pose.ForwardAngle : 45f) * (aim.x < 0 ? -1 : 1);
+            ghost.forward = (NativeWeaponArt.TryGet(weapon.ArtId, out var pose) ? pose.ForwardAngle : 45f) * (aim.x < 0 ? -1 : 1);
             ghost.Pose();
         }
         void Update()

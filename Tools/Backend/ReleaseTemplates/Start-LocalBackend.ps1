@@ -82,13 +82,17 @@ try{
 $env:RR_DB="Host=127.0.0.1;Port=$databasePort;Database=ruinrunner;Username=rr_app;Password=$($secrets.app);Timeout=5;Command Timeout=10;Maximum Pool Size=16"
 $env:RR_MIGRATION_DB="Host=127.0.0.1;Port=$databasePort;Database=ruinrunner;Username=postgres;Password=$($secrets.admin)"
 $env:RR_CONTENT_VERSION=[string]$config.contentVersion
+# The admin page (/admin) needs this token; "Open Admin Tool.cmd" copies it. Generated once, never shipped.
+$adminTokenPath=Join-Path $private 'admin-token.txt'
+if(!(Test-Path -LiteralPath $adminTokenPath)){[IO.File]::WriteAllText($adminTokenPath,(New-RandomSecret),[Text.UTF8Encoding]::new($false))}
 try{
     try{& $dotnet $dll '--migrate';if($LASTEXITCODE -ne 0){throw 'Local schema/catalog migration failed'}}finally{Remove-Item Env:RR_MIGRATION_DB -ErrorAction SilentlyContinue}
     # Only the API opens to the network with -Network. PostgreSQL always stays on 127.0.0.1.
+    $env:RR_ADMIN_TOKEN=([IO.File]::ReadAllText($adminTokenPath)).Trim()
     $env:ASPNETCORE_URLS=if($Network){"http://0.0.0.0:$apiPort"}else{"http://127.0.0.1:$apiPort"};$env:ASPNETCORE_ENVIRONMENT='Production'
     $api=Start-Process -FilePath $dotnet -ArgumentList ('"'+$dll+'"') -WorkingDirectory (Split-Path $dll) -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $logs 'api.log') -RedirectStandardError (Join-Path $logs 'api-error.log')
     @{pid=$api.Id;dll=$dll;apiPort=$apiPort;databasePort=$databasePort;network=[bool]$Network;startedUtc=[DateTime]::UtcNow.ToString('O')} | ConvertTo-Json | Set-Content -LiteralPath $marker -Encoding UTF8
-}finally{Remove-Item Env:RR_DB,Env:RR_MIGRATION_DB,Env:RR_CONTENT_VERSION -ErrorAction SilentlyContinue}
+}finally{Remove-Item Env:RR_DB,Env:RR_MIGRATION_DB,Env:RR_CONTENT_VERSION,Env:RR_ADMIN_TOKEN -ErrorAction SilentlyContinue}
 $ready=$false
 for($i=0;$i -lt 30;$i++){
     $api.Refresh()

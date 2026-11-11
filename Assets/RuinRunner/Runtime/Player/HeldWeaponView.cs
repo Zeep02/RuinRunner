@@ -27,7 +27,7 @@ namespace RuinRunner
         {
             if (weaponPivot == null || player.EquippedWeapon == null)
                 return transform.position;
-            var forward = NativeWeaponArt.TryGet(player.EquippedWeapon.Id, out var pose) ? pose.ForwardAngle : 45f;
+            var forward = NativeWeaponArt.TryGet(player.EquippedWeapon.ArtId, out var pose) ? pose.ForwardAngle : 45f;
             var axis = new Vector2(Mathf.Cos(forward * Mathf.Deg2Rad), Mathf.Sin(forward * Mathf.Deg2Rad));
             if (weaponRenderer.flipY)
                 axis.y = -axis.y;
@@ -94,7 +94,7 @@ namespace RuinRunner
             var flipped = aim.x < 0f;
             weaponRenderer.flipY = flipped;
 
-            var sourceForwardAngle = NativeWeaponArt.TryGet(weapon.Id, out var nativePose) ? nativePose.ForwardAngle : RangedWeaponArt.TryGet(weapon.Id, out var landmarks)
+            var sourceForwardAngle = NativeWeaponArt.TryGet(weapon.ArtId, out var nativePose) ? nativePose.ForwardAngle : RangedWeaponArt.TryGet(weapon.ArtId, out var landmarks)
                 ? landmarks.ForwardAngle : IsBladeFamily(weapon.Family) ? 45f : 0f;
             if (flipped)
                 sourceForwardAngle = -sourceForwardAngle;
@@ -229,7 +229,7 @@ namespace RuinRunner
         {
             // Reviewed greatswords already have a longer, wider native silhouette.
             // Keep their texel density equal to guns and the hero instead of stretching them.
-            if (NativeWeaponArt.Supports(weapon.Id))
+            if (NativeWeaponArt.Supports(weapon.ArtId))
                 return weapon.Family == WeaponFamily.Bow ? .9f : 1f;
             switch (weapon.Family)
             {
@@ -261,7 +261,7 @@ namespace RuinRunner
         public static Vector2 ShotMuzzlePosition(WeaponDefinition weapon, Transform owner, Vector2 aim)
         {
             var sprite = PixelArtAtlas.GetHeldWeaponSprite(weapon);
-            if (sprite == null || !RangedWeaponArt.TryGet(weapon.Id, out var landmarks))
+            if (sprite == null || !RangedWeaponArt.TryGet(weapon.ArtId, out var landmarks))
                 return (Vector2)owner.position + aim * .75f;
             var muzzle = (new Vector2(landmarks.Muzzle.x, sprite.rect.height - landmarks.Muzzle.y) - sprite.pivot) / sprite.pixelsPerUnit;
             var flipped = aim.x < 0;

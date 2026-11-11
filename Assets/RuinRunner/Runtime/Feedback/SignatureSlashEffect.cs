@@ -18,10 +18,10 @@ namespace RuinRunner
         static readonly System.Collections.Generic.Dictionary<string, SignatureMeleeFx> kits = new System.Collections.Generic.Dictionary<string, SignatureMeleeFx>();
         public static SignatureMeleeFx For(WeaponDefinition weapon)
         {
-            if (weapon == null || !SignatureWeaponCatalog.Has(weapon.Id))
+            if (weapon == null || !SignatureWeaponCatalog.Has(weapon.ArtId))
                 return null;
-            if (!kits.TryGetValue(weapon.Id, out var kit))
-                kits[weapon.Id] = kit = new SignatureMeleeFx(weapon.Id);
+            if (!kits.TryGetValue(weapon.ArtId, out var kit))
+                kits[weapon.ArtId] = kit = new SignatureMeleeFx(weapon.ArtId);
             return kit;
         }
         /// <summary>The trail of a swing: the weapon's own clip, or its family's.</summary>
@@ -58,7 +58,7 @@ namespace RuinRunner
         /// <summary>Scale that fits a family's slash to this weapon. Weapons in a family differ in length.</summary>
         public static float TrailScale(WeaponDefinition weapon, MeleeAttackMotion motion)
         {
-            if (For(weapon) != null || motion == MeleeAttackMotion.Thrust || !NativeWeaponArt.TryGet(weapon.Id, out var pose))
+            if (For(weapon) != null || motion == MeleeAttackMotion.Thrust || !NativeWeaponArt.TryGet(weapon.ArtId, out var pose))
                 return 1;
             return Mathf.Clamp(Vector2.Distance(pose.Grip, pose.Muzzle) / DrawnBladeLength(weapon.Family), MinTrailScale, MaxTrailScale);
         }
@@ -69,7 +69,7 @@ namespace RuinRunner
                 return;
             MeleeComboFrames.Preload(weapon.Family);
             foreach (var role in new[] { "Slash", "Heavy", "Thrust", "Cleave", "Cross" })
-                NativeCombatEffect.PreloadIfKnown(For(weapon) != null ? Clip(weapon.Id, role) : "FxTrail" + weapon.Family + role);
+                NativeCombatEffect.PreloadIfKnown(For(weapon) != null ? Clip(weapon.ArtId, role) : "FxTrail" + weapon.Family + role);
         }
         public static string Clip(string id, string role)
         {

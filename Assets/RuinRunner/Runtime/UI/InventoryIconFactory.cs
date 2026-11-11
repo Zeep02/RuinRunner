@@ -10,6 +10,8 @@ namespace RuinRunner
         private static readonly Dictionary<string, Sprite> WorldSprites = new Dictionary<string, Sprite>();
         public static Texture2D Get(string id, Color rarityColor, InventoryIconKind kind)
         {
+            if (kind == InventoryIconKind.Weapon)
+                id = WeaponLootTable.ArtIdOf(id); // an admin-made variant draws its base weapon's icon
             var accessory = kind == InventoryIconKind.Accessory ? AccessoryLootTable.Find(id) : null;
             return ItemIconLibrary.Get(accessory == null ? id : accessory.IconId, accessory == null ? kind : accessory.IconKind);
         }
@@ -18,6 +20,8 @@ namespace RuinRunner
             var key = kind + ":" + id;
             if (WorldSprites.TryGetValue(key, out var sprite))
                 return sprite;
+            if (kind == InventoryIconKind.Weapon)
+                id = WeaponLootTable.ArtIdOf(id); // an admin-made variant lies on the floor as its base weapon
             var texture = Get(id, rarityColor, kind);
             if (texture == null)
                 return null;

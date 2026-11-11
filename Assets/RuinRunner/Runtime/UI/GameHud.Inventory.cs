@@ -28,7 +28,7 @@ namespace RuinRunner
                     GUI.Label(new Rect(slotRect.x + 40, slotRect.y + 12, 140, 38), "비어 있음", quickNameStyle);
                     continue;
                 }
-                var icon = InventoryIconFactory.Get(slot.Weapon.Id, slot.Weapon.Color, InventoryIconKind.Weapon);
+                var icon = InventoryIconFactory.Get(slot.Weapon.ArtId, slot.Weapon.Color, InventoryIconKind.Weapon);
                 ItemIconLibrary.DrawGUI(new Rect(slotRect.x + 8, slotRect.y + 6, 68, 68), icon);
                 GUI.Label(new Rect(slotRect.x + 80, slotRect.y + 10, 100, 54), slot.Weapon.Name, talentText);
                 DrawUpgradeBadge(slotRect, slot.Item);
@@ -66,7 +66,7 @@ namespace RuinRunner
                 if (entry != null && entry.Kind == InventoryEntryKind.Weapon)
                 {
                     var weapon = weapons[itemIndex];
-                    icon = InventoryIconFactory.Get(weapon.Id, weapon.Color, InventoryIconKind.Weapon);
+                    icon = InventoryIconFactory.Get(weapon.ArtId, weapon.Color, InventoryIconKind.Weapon);
                 }
                 else if (entry != null && entry.Kind == InventoryEntryKind.Accessory)
                 {
@@ -308,7 +308,7 @@ namespace RuinRunner
                 description = (ContentDescription(weapon.Id, "weapon") + "\n" + EquipmentUpgradeRules.WeaponUpgradeText(owned)).TrimEnd();
                 setType = weapon.SetType;
                 rarityColor = weapon.Color;
-                icon = InventoryIconFactory.Get(weapon.Id, weapon.Color, InventoryIconKind.Weapon);
+                icon = InventoryIconFactory.Get(weapon.ArtId, weapon.Color, InventoryIconKind.Weapon);
             }
             else if ((parts[0] == "A" && index >= 0 && index < game.Inventory.Accessories.Count) ||
                      (parts[0] == "C" && index >= 0 && index < game.CurrentAccessoryChoices.Length))

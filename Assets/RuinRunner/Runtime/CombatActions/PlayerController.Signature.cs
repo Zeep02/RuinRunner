@@ -69,7 +69,7 @@ namespace RuinRunner
                     var muzzle = HeldWeaponView.ShotMuzzlePosition(EquippedWeapon, transform, SigAim) - (Vector2)transform.position;
                     return CombatActionGeometry.Clip(transform.position, muzzle, muzzle.magnitude);
                 }
-                var length = NativeWeaponArt.TryGet(EquippedWeapon.Id, out var pose) ? Vector2.Distance(pose.Grip, pose.Muzzle) / 32f : 1f;
+                var length = NativeWeaponArt.TryGet(EquippedWeapon.ArtId, out var pose) ? Vector2.Distance(pose.Grip, pose.Muzzle) / 32f : 1f;
                 return Ahead(Mathf.Clamp(.35f + length * .8f, .8f, 2.2f));
             }
         }
@@ -107,7 +107,7 @@ namespace RuinRunner
                 Destroy(orbTwo.gameObject);
                 orbTwo = null;
             }
-            sig = weapon != null && SignatureWeaponCatalog.Has(weapon.Id) ? new SigState { Id = weapon.Id } : null;
+            sig = weapon != null && SignatureWeaponCatalog.Has(weapon.ArtId) ? new SigState { Id = weapon.ArtId } : null;
             if (sig == null)
                 return;
             if (weapon.Family == WeaponFamily.Orb)

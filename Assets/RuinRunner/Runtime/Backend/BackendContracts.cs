@@ -227,6 +227,28 @@ namespace RuinRunner.Backend
         public ExchangeRecipe[] exchangeRecipes;
         public int accessoryTuningVersion;
         public CatalogItemSet[] itemSets;
+        public EnemyBalanceRules enemyBalance; // admin-published catalogs only
+    }
+    [Serializable]
+    public sealed class EnemyBalanceRules
+    {
+        public float enemyHealthMultiplier;
+        public float bossHealthMultiplier;
+        public float experienceGainMultiplier;
+        public float bossBurstThreshold;
+        public float bossBurstSeconds;
+        public float bossItemDamageMultiplier;
+        public EnemyStatRow[] enemies;
+    }
+    [Serializable]
+    public sealed class EnemyStatRow
+    {
+        public string type;
+        public float maxHealth;
+        public float attackPower;
+        public float armor;
+        public float moveSpeed;
+        public int experienceReward;
     }
     [Serializable]
     public sealed class CatalogItem
@@ -242,6 +264,7 @@ namespace RuinRunner.Backend
         public int minStage;
         public int maxStage;
         public Newtonsoft.Json.Linq.JObject stats;
+        public string baseId; // admin-made weapon variant: the weapon whose art and skill it reuses
     }
     [Serializable]
     public sealed class CatalogItemSet

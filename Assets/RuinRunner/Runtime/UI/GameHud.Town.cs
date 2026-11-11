@@ -536,7 +536,7 @@ namespace RuinRunner
             var weapon = kind == "weapon" ? WeaponLootTable.Find(id) : null;
             var accessory = kind == "accessory" ? AccessoryLootTable.Find(id) : null;
             if (weapon != null || accessory != null)
-                ItemIconLibrary.DrawGUI(rect, InventoryIconFactory.Get(id, weapon != null ? weapon.Color : accessory.Color, weapon != null ? InventoryIconKind.Weapon : InventoryIconKind.Accessory));
+                ItemIconLibrary.DrawGUI(rect, InventoryIconFactory.Get(weapon != null ? weapon.ArtId : id, weapon != null ? weapon.Color : accessory.Color, weapon != null ? InventoryIconKind.Weapon : InventoryIconKind.Accessory));
         }
     }
 }

@@ -68,17 +68,19 @@ namespace RuinRunner
             {
                 if (item.kind != "weapon")
                     continue;
-                var old = Find(item.id);
+                var variant = !string.IsNullOrEmpty(item.baseId);
+                var old = Find(variant ? item.baseId : item.id);
                 if (weights.ContainsKey(item.id) || item.rarity < 0 || item.rarity > 4 || item.dropWeight < 0)
                     throw new ArgumentException("Invalid weapon catalog entry " + item.id);
                 CatalogDropRules.Validate(item);
                 stages.Add(item.id, new Vector2Int(item.minStage, item.maxStage));
                 var s = item.stats;
-                var d = new WeaponDefinition(old.Id, string.IsNullOrWhiteSpace(item.name) ? old.Name : item.name, (WeaponRarity)item.rarity,
+                var d = new WeaponDefinition(variant ? item.id : old.Id, string.IsNullOrWhiteSpace(item.name) ? old.Name : item.name, (WeaponRarity)item.rarity,
                     Number(s, "attackPower", old.BaseAttackPower, .1f, 1000), Number(s, "attackDelayMultiplier", old.BaseAttackDelayMultiplier, .1f, 5), old.Color, old.AttackType,
                     (int)Number(s, "magazineSize", old.BaseMagazineSize, 0, 100), Number(s, "reloadSeconds", old.BaseReloadSeconds, 0, 10), Number(s, "projectileSpeed", old.BaseProjectileSpeed, 1, 80), old.ProjectileSize,
                     (int)Number(s, "projectilePierce", old.ProjectilePierce, 1, 16), old.SpecialType, old.SpecialManaCost, old.SpecialDescription, old.SetType, old.Family, old.ComboProfileId,
                     Number(s, "heavyDamageMultiplier", old.BaseHeavyDamageMultiplier, 1, 4), Number(s, "guardDamageReduction", old.BaseGuardDamageReduction, 0, .8f));
+                d.ArtId = old.ArtId;
                 d.CatalogSpecialMana = Number(s, "specialManaCost", old.SpecialManaCost, 0, 100);
                 d.CatalogSpecialCooldown = Number(s, "specialCooldown", WeaponActionCatalog.Get(old).Cooldown, .25f, 15);
                 next.Add(d);

@@ -96,6 +96,7 @@ graph LR
 - 인증은 설치마다 발급되는 게스트 자격 정보(`/v1/auth/guest`)이며 로컬에는 Windows DPAPI로 보호해 저장합니다(`BackendPrivateStore`).
 - 프로필·해금·원정·경제 기록은 서버가 확정합니다. 변경 요청은 `operationId`와 기대 revision을 함께 보내므로, 응답을 받지 못해 같은 요청을 다시 보내도 한 번만 반영됩니다. 확정 전 요청은 암호화된 저널에 남겨 재실행 후 이어서 보냅니다.
 - 원정 시작 시 서버가 콘텐츠 카탈로그 버전(`Backend/Content/catalog.*.json`)과 생성 시드를 고정합니다.
+- 관리자 도구의 수정은 기존 버전을 고치지 않고 `<패키지 버전>-admin-<시각>` 새 버전으로 저장한 뒤 `catalog_activation`에 기록합니다. 이후 시작하는 원정만 새 버전을 쓰고, 진행 중인 원정은 고정된 버전을 유지합니다. 관리자 카탈로그의 `enemyBalance`는 게임이 원정을 시작할 때 `GameBalance.BindCatalog`로 적용하고, `baseId`가 있는 무기는 기반 무기의 그림·스킬을 쓰는 새 무기로 묶습니다. 관리자 API는 `RR_ADMIN_TOKEN`이 있을 때만 켜지고 기본적으로 서버 PC에서만 응답합니다.
 - 주요 테이블: `players`, `sessions`, `profiles`, `content_catalogs`, `runs`, `operations`, `currency_ledger`, `run_economy`, `run_items`, `run_shops`, `run_reward_events`, `run_generation`, `profile_resets`. 스키마는 `Backend/RuinRunner.Api/Migrations`의 SQL 파일 순서대로 적용됩니다.
 
 | 메서드 | 경로 | 내용 |
@@ -111,6 +112,8 @@ graph LR
 | POST | `/v1/runs/{id}/trades`, `/rewards` | 거래, 보상 |
 | POST | `/v1/runs/{id}/settle` | 정산 |
 | GET | `/v1/catalogs/current`, `/{version}` | 콘텐츠 카탈로그 |
+| GET | `/admin`, `/admin/api/state`, `/catalogs/{version}` | 관리자 페이지, 버전 목록, 편집용 카탈로그 |
+| POST | `/admin/api/catalogs`, `/activate` | 수정본을 새 버전으로 저장·적용, 이전 버전 적용 |
 
 로컬 설정(음량·화면·키)은 `GameSettingsService`가 원자적 교체와 백업 파일로 저장합니다.
 

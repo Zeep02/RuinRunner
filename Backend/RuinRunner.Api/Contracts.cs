@@ -28,9 +28,17 @@ public sealed record SettlementRules(int MinimumReward, int KillsPerShard, int R
 public sealed record Catalog(string Version, string Status, string[] GeneratorVersions, int StartingLegacy,
     int MaxActiveTalents, StarterWeapon[] StarterWeapons, Talent[] Talents, SettlementRules Settlement,
     string[]? DefaultUnlockedTalentIds = null, CatalogItem[]? Items = null, EconomyRules? Economy = null,
-    ExchangeRecipe[]? ExchangeRecipes = null, int AccessoryTuningVersion = 0, CatalogItemSet[]? ItemSets = null);
+    ExchangeRecipe[]? ExchangeRecipes = null, int AccessoryTuningVersion = 0, CatalogItemSet[]? ItemSets = null,
+    EnemyBalanceRules? EnemyBalance = null);
+// BaseId marks an admin-made weapon variant: its own id, price and numbers on the base weapon's art and skill.
 public sealed record CatalogItem(string Id, string Kind, string Name, string Description, int Rarity,
-    int Price, int SellPrice, int DropWeight, int MinStage, int MaxStage, JsonElement Stats);
+    int Price, int SellPrice, int DropWeight, int MinStage, int MaxStage, JsonElement Stats, string? BaseId = null);
+// Monster numbers the client applies for expeditions pinned to this catalog. Absent in shipped catalogs.
+public sealed record EnemyBalanceRules(double EnemyHealthMultiplier, double BossHealthMultiplier, double ExperienceGainMultiplier,
+    double BossBurstThreshold, double BossBurstSeconds, double BossItemDamageMultiplier, EnemyStatRow[] Enemies);
+public sealed record EnemyStatRow(string Type, double MaxHealth, double AttackPower, double Armor, double MoveSpeed, int ExperienceReward);
+public sealed record AdminPublishRequest(string BaseVersion, string Note, Catalog Catalog);
+public sealed record AdminActivateRequest(string Version);
 public sealed record CatalogItemSet(string Id, int Pieces, string Name, string Description, JsonElement Stats);
 public sealed record EconomyRules(int StartingGold, int EnemyGold, int CombatGold, int ChestGold, int BossGold,
     int HealPrice, int HealAmount, int ShopOffers, int MaxOwnedItems, int MaxAccessories);
@@ -74,6 +82,8 @@ public sealed class ApiFailure(int status, string code, string message) : Except
 public static class Wire
 {
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+    // Admin-published payloads omit absent optional sections, so they read like the shipped catalogs.
+    public static readonly JsonSerializerOptions CatalogJson = new(JsonSerializerDefaults.Web) { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull };
     public static string Encode<T>(T value) => JsonSerializer.Serialize(value, Json);
     public static T Decode<T>(string json) => JsonSerializer.Deserialize<T>(json, Json) ?? throw new ApiFailure(400, "invalid_json", "요청을 읽을 수 없습니다.");
     public static void Require(bool condition, string code, string message, int status = 400)

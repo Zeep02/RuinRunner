@@ -83,6 +83,8 @@ namespace RuinRunner
     public sealed class WeaponDefinition
     {
         public string Id { get; }
+        // The weapon whose art, skill, sound and icon this one uses. Its own id except for admin-made variants.
+        public string ArtId { get; internal set; }
         public string Name { get; }
         public WeaponRarity Rarity { get; }
         public float AttackPower { get; private set; }
@@ -137,6 +139,7 @@ namespace RuinRunner
             float guardDamageReduction = .4f)
         {
             Id = id;
+            ArtId = id;
             Name = name;
             Rarity = rarity;
             AttackPower = Mathf.Max(.1f, attackPower);

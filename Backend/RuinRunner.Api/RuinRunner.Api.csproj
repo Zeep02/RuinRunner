@@ -11,6 +11,8 @@
     <Compile Include="../../Assets/RuinRunner/Runtime/Backend/AccessoryTuningSchema.cs" Link="Shared/AccessoryTuningSchema.cs" />
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <Content Include="Migrations/*.sql" CopyToOutputDirectory="PreserveNewest" />
+    <Content Remove="Admin/**" />
+    <Content Include="Admin/*" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../Content/*.json" Link="Content/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

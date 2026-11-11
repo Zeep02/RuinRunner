@@ -18,6 +18,7 @@ Unity 6로 만든 탑다운 액션 로그라이트 게임과, 영구 진행을 �
 | 적과 보스 | 적 AI 디렉터, 보스 3종의 페이즈별 패턴과 대기술 |
 | 성장 | 레벨업 선택지, 장신구 50종과 세트 효과, 현장 장비 변형(형상 모루·서약석·교환 제단) |
 | 영구 진행 | 게스트 인증, 프로필·해금·원정 정산을 서버 DB에 저장, 응답 유실 시 같은 요청 ID로 재전송 |
+| 관리자 도구 | 서버가 여는 웹 페이지에서 몬스터·무기·장신구·경제 수치를 고치고 기존 무기를 바탕으로 새 무기를 추가한다. 적용하면 새 카탈로그 버전이 되어 다음 원정부터 반영되고, 이전 버전으로 바로 되돌릴 수 있다. |
 | 검증 | 명령줄 플래그로 켜는 자동 플레이·전투 샌드박스·스모크 테스트 (별도 어셈블리) |
 
 ## 구조
@@ -88,6 +89,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File Tools/Backend/Start-Backend.
 Unity에서 `Assets/RuinRunner/Scenes/Demo.unity`를 열고 실행하거나, 에디터 메뉴 `RuinRunner > Build Windows Demo`로 빌드합니다. 명령줄 빌드와 스모크 테스트는 `Tools/Build-Clean.ps1`이 수행합니다. 서버 주소는 환경 변수 `RUINRUNNER_API_URL`로 지정합니다.
 
 서버를 포함한 배포 패키지는 `Tools/Backend/New-LocalRelease.ps1`로 만듭니다. 패키지의 `Start Local Game.cmd`가 내장 PostgreSQL과 API를 띄운 뒤 게임을 엽니다.
+
+관리자 도구는 서버를 켠 PC에서 `http://127.0.0.1:<포트>/admin`으로 엽니다. 시작 스크립트가 만든 `admin-token.txt`의 토큰이 필요하며, 패키지에서는 `Open Admin Tool.cmd`가 페이지를 열고 토큰을 클립보드에 복사합니다. 몬스터 기본 수치표는 `Tools/Backend/Export-EnemyDefaults.py`가 게임 코드에서 다시 만듭니다.
 
 ## 저장소 구성
 

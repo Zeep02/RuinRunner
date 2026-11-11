@@ -21,6 +21,14 @@ namespace RuinRunner
             throw new System.ArgumentException("Unknown weapon id: " + id, nameof(id));
         }
 
+        public static string ArtIdOf(string id)
+        {
+            foreach (var weapon in Weapons)
+                if (weapon.Id == id)
+                    return weapon.ArtId;
+            return id;
+        }
+
         public static void ApplyBalance(GameBalanceConfig config)
         {
             if (!string.IsNullOrEmpty(PinnedCatalogVersion))

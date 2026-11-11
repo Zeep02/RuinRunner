@@ -265,19 +265,28 @@ namespace RuinRunner.Backend
         public Task<bool> UnlockAsync(string kind, string id) => Work("해금 저장 중", async () =>
         {
             NeedProfile();
-            Profile = await client.UnlockAsync(Profile.profileId, new UnlockRequest
+            try
             {
-                expectedRevision = Profile.revision,
-                kind = kind,
-                contentId = id,
-                contentVersion = Catalog.version
-            });
+                Profile = await client.UnlockAsync(Profile.profileId, new UnlockRequest
+                {
+                    expectedRevision = Profile.revision,
+                    kind = kind,
+                    contentId = id,
+                    contentVersion = Catalog.version
+                });
+            }
+            catch (BackendClientException e) when (e.Code == "catalog_stale")
+            {
+                // Prices may have changed; show the new ones instead of buying at a price the player never saw.
+                Catalog = await client.GetCurrentCatalogAsync();
+                throw;
+            }
             slots.ApplyServerProfile(Profile);
         });
         public Task<bool> StartAsync(int? seed, string generatorVersion, string buildId) => Work("원정 준비 중", async () =>
         {
             NeedProfile();
-            Run = await client.StartRunAsync(new StartRunRequest
+            StartRunRequest Request() => new StartRunRequest
             {
                 profileId = Profile.profileId,
                 expectedProfileRevision = Profile.revision,
@@ -285,7 +294,17 @@ namespace RuinRunner.Backend
                 contentVersion = Catalog.version,
                 generatorVersion = generatorVersion,
                 buildId = buildId
-            });
+            };
+            try
+            {
+                Run = await client.StartRunAsync(Request());
+            }
+            catch (BackendClientException e) when (e.Code == "catalog_stale")
+            {
+                // An admin switched the live catalog while this player stood in town: depart on the new one.
+                Catalog = await client.GetCurrentCatalogAsync();
+                Run = await client.StartRunAsync(Request());
+            }
             Catalog = JsonConvert.DeserializeObject<ContentCatalog>((await client.GetPinnedCatalogAsync(Run)).json);
             if (Catalog.economy != null)
                 Economy = await client.GetEconomyAsync(Run.runId);
