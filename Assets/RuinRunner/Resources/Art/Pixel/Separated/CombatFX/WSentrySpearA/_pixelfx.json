@@ -1,9 +1,9 @@
 {
   "clip": "WSentrySpearA",
   "ppu": 32,
-  "pivotX": 0.276,
+  "pivotX": 0.31651,
   "pivotY": 0.19853,
-  "width": 125,
+  "width": 109,
   "height": 68,
   "premultiplied": true,
   "canvas": null,
@@ -15,12 +15,12 @@
   "effect": "impacts/hit-spark",
   "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
   "license": "MIT (patch-gg/pixelfx)",
-  "seed": 58,
+  "seed": 67,
   "fps": 30,
   "loop": false,
   "frames": 16,
   "durationSeconds": 0.533,
-  "visibleDiameter": 57,
+  "visibleDiameter": 52,
   "origin": [
     34,
     54

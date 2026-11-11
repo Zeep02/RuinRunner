@@ -1,10 +1,10 @@
 {
   "clip": "WSentrySpearC",
   "ppu": 32,
-  "pivotX": 0.1128,
-  "pivotY": 0.39773,
-  "width": 164,
-  "height": 44,
+  "pivotX": 0.14691,
+  "pivotY": 0.49324,
+  "width": 194,
+  "height": 74,
   "premultiplied": true,
   "canvas": null,
   "center": false,
@@ -15,15 +15,15 @@
   "effect": "holy/light-spear",
   "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
   "license": "MIT (patch-gg/pixelfx)",
-  "seed": 80,
+  "seed": 89,
   "fps": 30,
   "loop": false,
   "frames": 20,
   "durationSeconds": 0.667,
-  "visibleDiameter": 148,
+  "visibleDiameter": 168,
   "origin": [
-    18,
-    26
+    28,
+    37
   ],
-  "optionsJson": "{\"palette\":[\"#141820\",\"#2a3240\",\"#4a5468\",\"#7a8698\",\"#b4bfcf\",\"#e4eaf2\",\"#ffffff\"],\"L\":128,\"W\":6}"
+  "optionsJson": "{\"palette\":[\"#141820\",\"#2a3240\",\"#4a5468\",\"#7a8698\",\"#b4bfcf\",\"#e4eaf2\",\"#ffffff\"],\"L\":128,\"W\":13,\"stars\":8}"
 }

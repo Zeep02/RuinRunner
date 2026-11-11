@@ -15,12 +15,12 @@
   "effect": "lightning/zap-hit",
   "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
   "license": "MIT (patch-gg/pixelfx)",
-  "seed": 34,
+  "seed": 1,
   "fps": 30,
   "loop": false,
   "frames": 28,
   "durationSeconds": 0.933,
-  "visibleDiameter": 97,
+  "visibleDiameter": 98,
   "origin": [
     75,
     52

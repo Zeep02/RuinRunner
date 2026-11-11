@@ -327,8 +327,14 @@ namespace RuinRunner
                     }
                     break;
                 case "world_pendulum":
-                    if (sig.Stage == 1 && combatClock >= sig.Until && sig.Count == 0)
+                    // The weights let go by themselves when the ring closes.
+                    if (sig.Stage == 1 && combatClock >= sig.Until)
                     {
+                        if (sig.Count > 0)
+                        {
+                            SigRecast();
+                            break;
+                        }
                         sig.Stage = 0;
                         if (sig.View != null)
                         {
@@ -391,8 +397,22 @@ namespace RuinRunner
                         if (shotObstructed)
                             break;
                         bool full = sig.A >= .75f;
-                        var bolt = SigBolt.Shoot(this, full ? C("B") : C("Shot"), committedShotOrigin, aim, full ? 15 : 12, D(.8f + Mathf.Min(1, sig.A) * 1.3f), full ? .32f : .22f, full ? 2 : 1, 12);
+                        var bolt = SigBolt.Shoot(this, full ? C("Orb") : C("Shot"), committedShotOrigin, aim, full ? 15 : 12, D(.8f + Mathf.Min(1, sig.A) * 1.3f), full ? .32f : .22f, full ? 2 : 1, 12);
                         bolt.Impact = hit;
+                        if (full)
+                        {
+                            // A full charge bursts once where it first lands; the picture is drawn at the burst's own radius.
+                            bool burst = false;
+                            var area = D(.6f);
+                            bolt.OnHit = (enemy, point) =>
+                            {
+                                if (burst)
+                                    return;
+                                burst = true;
+                                SigFx.Play(C("Burst"), point, 0, -1, false, false, NoviceBurstRadius * 2 * 32 / 173f);
+                                SigArea(point, NoviceBurstRadius, area, null, 3, .08f);
+                            };
+                        }
                         break;
                     }
                 case "scout_carbine":

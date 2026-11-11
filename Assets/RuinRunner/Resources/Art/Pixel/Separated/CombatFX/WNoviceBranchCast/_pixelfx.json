@@ -3,8 +3,8 @@
   "ppu": 32,
   "pivotX": 0.5,
   "pivotY": 0.5,
-  "width": 111,
-  "height": 81,
+  "width": 110,
+  "height": 83,
   "premultiplied": true,
   "canvas": null,
   "center": true,
@@ -15,15 +15,15 @@
   "effect": "arcane/spell-charge",
   "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
   "license": "MIT (patch-gg/pixelfx)",
-  "seed": 23,
+  "seed": 34,
   "fps": 30,
   "loop": true,
   "frames": 48,
   "durationSeconds": 1.6,
-  "visibleDiameter": 99,
+  "visibleDiameter": 102,
   "origin": [
     43,
-    76
+    78
   ],
   "optionsJson": "{\"palette\":[\"#0a0f2e\",\"#172a78\",\"#2550d0\",\"#3f8cff\",\"#7cc8ff\",\"#c8f0ff\",\"#ffffff\"]}"
 }

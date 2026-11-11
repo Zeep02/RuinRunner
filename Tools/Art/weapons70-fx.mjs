@@ -141,7 +141,7 @@ export const TABLE = {
   frost_satellite: { ...orbs("ice") },
   ember_heart: { ...orbs("lava"), A1: mark("lava", "coal", 1, { fill: 0.2 }), A2: mark("lava", "coal", 1, { fill: 0.4 }), A3: mark("lava", "coal", 1, { fill: 0.6 }), A4: mark("lava", "coal", 1, { fill: 0.8 }), A5: mark("lava", "coal", 1, { fill: 1 }) },
   storm_marble: { ...orbs("storm"), D: mark("arcblue", "cross", 1.6) },
-  twin_star: { ...orbs("mono"), Shot: mark("white", "orbitdot", 1.6), A: mark("mono", "half", 1, { side: -1 }), B: mark("mono", "half", 1, { side: 1 }), D: tether("white", "beam", 4) },
+  twin_star: { ...orbs("mono"), Shot: mark("white", "orbitdot", 1.6), A: mark("mono", "half", 1, { side: -1 }), B: mark("mono", "half", 1, { side: 1 }), D: tether("white", "beam", 7) },
   mirror_eye: { ...orbs("moon"), A: mark("moon", "mirror", 1.3), D: bolt("moon", "shard", 1, { tail: 12 }), F: flash("moon", { len: 12, wide: 6 }) },
   small_eclipse: { ...orbs("gold") },
   world_pendulum: { ...orbs("teal"), A: mark("teal", "orbitdot", 1.8), B: bolt("teal", "magic", 1.5, { tail: 24 }) },

@@ -411,14 +411,16 @@ namespace RuinRunner
                 return;
             SigFx.Play(C("A"), SkillOrigin, SigAngle, .42f);
         }
+        const int PendulumWeights = 3;
+        const float PendulumScale = .4f;
         bool SigCatchProjectile(Vector2 point)
         {
-            if (sig == null || sig.Id != "world_pendulum" || sig.Stage != 1 || combatClock >= sig.Until || sig.Count >= 5)
+            if (sig == null || sig.Id != "world_pendulum" || sig.Stage != 1 || combatClock >= sig.Until || sig.Count >= PendulumWeights + 5)
                 return false;
             if (Vector2.Distance(point, transform.position) > 2.3f)
                 return false;
             sig.Count++;
-            sig.Views.Add(SigFx.Loop(C("A"), point, 0, false));
+            sig.Views.Add(SigFx.Loop(C("A"), point, 0, false, 15, null, PendulumScale));
             SigFx.Play(C("D"), point, 0, .3f);
             return true;
         }

@@ -15,12 +15,12 @@
   "effect": "explosions/firework-burst",
   "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
   "license": "MIT (patch-gg/pixelfx)",
-  "seed": 7,
+  "seed": 34,
   "fps": 30,
   "loop": false,
   "frames": 38,
   "durationSeconds": 1.267,
-  "visibleDiameter": 154,
+  "visibleDiameter": 157,
   "origin": [
     100,
     96

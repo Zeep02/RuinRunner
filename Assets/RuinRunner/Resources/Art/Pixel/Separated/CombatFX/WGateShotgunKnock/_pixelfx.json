@@ -1,0 +1,29 @@
+{
+  "clip": "WGateShotgunKnock",
+  "ppu": 32,
+  "pivotX": 0.5,
+  "pivotY": 0.5,
+  "width": 91,
+  "height": 81,
+  "premultiplied": true,
+  "canvas": null,
+  "center": true,
+  "anchor": null,
+  "from": null,
+  "until": "1.25",
+  "source": "pixelfx",
+  "effect": "impacts/blunt-hit",
+  "pixelfxCommit": "a84159688af3ca37a4be05a0d422b94451b2e24e",
+  "license": "MIT (patch-gg/pixelfx)",
+  "seed": 91,
+  "fps": 30,
+  "loop": false,
+  "frames": 28,
+  "durationSeconds": 0.933,
+  "visibleDiameter": 77,
+  "origin": [
+    44,
+    66
+  ],
+  "optionsJson": "{\"palette\":[\"#2a0a10\",\"#5c1212\",\"#a4231a\",\"#e2481c\",\"#ff8a2a\",\"#ffd166\",\"#fff3c4\"]}"
+}

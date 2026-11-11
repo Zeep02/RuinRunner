@@ -358,7 +358,6 @@ namespace RuinRunner
                     {
                         SigSwing(MeleeAttackMotion.Cleave, 1.05f);
                         sig.Point = Ahead(1.6f);
-                        SigCastAt(sig.Point);
                         sig.Target = null;
                         sig.Stage = 1;
                         sig.Until = combatClock + .45f;
@@ -372,6 +371,7 @@ namespace RuinRunner
                             SigAfter(.7f, () =>
                             {
                                 var p = target != null ? (Vector2)target.transform.position : fixedPoint;
+                                SigFx.Play(C("Strike"), p, 0, -1, true);
                                 SigFx.Play(B, p, 0, .42f);
                                 SigFx.Play(CC, p, 0, .45f, true);
                                 SigArea(p, 1.5f, D(1.4f), hit, 3, .12f);
@@ -582,7 +582,8 @@ namespace RuinRunner
                         {
                             var end = CombatActionGeometry.Clip(tip, dir, 4);
                             SigFx.Reach(CC, tip, end, 4);
-                            foreach (var enemy in SigSeg(tip, end, .7f, D(.7f), null, hit, 6))
+                            SigFx.Play(C("Tip"), end - dir * .3f, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg, -1, false, false, .4f);
+                            foreach (var enemy in SigSeg(tip, end, .8f, D(.7f), null, hit, 6))
                                 enemy.Stagger(.7f);
                             ActionShake(.08f);
                         });
@@ -1074,6 +1075,12 @@ namespace RuinRunner
                     sig.Count = 0;
                     sig.ClearViews();
                     sig.View = SigFx.Loop(CC, Feet, 0, true, 12, transform, 1, 4);
+                    for (int i = 0; i < PendulumWeights; i++)
+                    {
+                        sig.Count++;
+                        sig.Views.Add(SigFx.Loop(C("A"), (Vector2)transform.position + Vector2.right * 1.3f, 0, false, 15, null, PendulumScale));
+                    }
+                    SigFx.Play(C("D"), Ahead(.6f), 0, .3f);
                     break;
                 // ---- guns
                 case "scrap_revolver":
@@ -1111,6 +1118,8 @@ namespace RuinRunner
                         SigFx.Play(A, committedShotOrigin, angle);
                         if (shotObstructed)
                             break;
+                        var knocked = new HashSet<EnemyController>();
+                        var knock = C("Knock");
                         for (int i = 0; i < 10; i++)
                         {
                             var dir = (Vector2)(Quaternion.Euler(0, 0, -30 + i * 60f / 9) * aim);
@@ -1119,7 +1128,11 @@ namespace RuinRunner
                             pellet.OnHit = (enemy, point) =>
                             {
                                 SigPull(enemy, (Vector2)enemy.transform.position + dir * 3, 11);
-                                SigFx.Play(B, (Vector2)enemy.transform.position + Vector2.down * .25f, 0, .5f, true);
+                                if (knocked.Add(enemy))
+                                {
+                                    SigFx.Play(knock, point, Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg, -1, false, false, .75f);
+                                    SigFx.Play(B, (Vector2)enemy.transform.position + Vector2.down * .25f, 0, .5f, true);
+                                }
                             };
                         }
                         SigDash(-aim, .55f, .1f, null, null, false);
@@ -1144,7 +1157,7 @@ namespace RuinRunner
                             int index = i;
                             SigAfter(i * .08f, () =>
                             {
-                                if (EquippedWeapon == null || EquippedWeapon.Id != "furnace_sprayer")
+                                if (EquippedWeapon == null || EquippedWeapon.ArtId != "furnace_sprayer")
                                     return;
                                 PrepareRangedShot(SigAim, .09f);
                                 var dir = (Vector2)(Quaternion.Euler(0, 0, UnityEngine.Random.Range(-17f, 17f)) * SigAim);
@@ -1270,6 +1283,6 @@ namespace RuinRunner
             }
         }
         const float SutureReach = 2.3f, SutureRadius = 1.7f, PhantomReach = 2.25f, InstantKingWindow = 1.8f, BannerReach = 4.6f, BannerRadius = 2.6f, BannerSeconds = 7, StarFoldReach = 7, StarFoldSeconds = 6, StarFoldRadius = 1.8f,
-            MirrorSeconds = 6, MeteorFall = .62f, ScoutRange = 9, LightSpearUnits = 8, EclipseRingUnits = 2.6f;
+            MirrorSeconds = 6, MeteorFall = .62f, ScoutRange = 9, LightSpearUnits = 8, EclipseRingUnits = 2.6f, NoviceBurstRadius = 1.2f;
     }
 }

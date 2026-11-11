@@ -65,12 +65,30 @@ namespace RuinRunner
             Application.runInBackground = true;
             Time.captureFramerate = 24;
             var home = (Vector2)game.Player.transform.position;
+            var stations = new Dictionary<EnemyController, Vector2>();
             void Foe(float x, float y)
             {
                 EnemyController foe = null;
                 foe = EnemyController.Create(EnemyType.Grunt, (Vector2)game.Player.transform.position + new Vector2(x, y), game.Player, () => foe == null || !foe.IsDead, _ => { }, game.CameraFollow);
                 foe.MakeTrainingDummy();
                 spawned.Add(foe);
+                stations[foe] = new Vector2(x, y);
+            }
+            // Knockback from the basic attacks carries the dummies out of most skills' reach; put the same dummies back (marks stay on them).
+            void Restation()
+            {
+                foreach (var pair in stations)
+                    if (pair.Key != null && !pair.Key.IsDead)
+                    {
+                        var body = pair.Key.GetComponent<Rigidbody2D>();
+                        var at = home + pair.Value;
+                        if (body != null)
+                        {
+                            body.position = at;
+                            body.linearVelocity = Vector2.zero;
+                        }
+                        pair.Key.transform.position = at;
+                    }
             }
             void Foes()
             {
@@ -92,6 +110,18 @@ namespace RuinRunner
                 if (game.Player != null)
                     Debug.Log("[Sandbox Fx] " + clip + " " + (ground ? "floor " : "air ") + Vector2.Distance(point, game.Player.transform.position).ToString("0.00"));
             };
+            // Hits on the dummies per phase: a weapon whose attack or skill lands nothing in front of it has a hitbox problem.
+            int hits = 0;
+            float dealt = 0;
+            var previousHook = DiagnosticsHooks.EnemyDamaged;
+            DiagnosticsHooks.EnemyDamaged = (enemy, amount, original, critical) =>
+            {
+                hits++;
+                dealt += amount;
+                previousHook?.Invoke(enemy, amount, original, critical);
+            };
+            // The run opens with the hero rising out of ink; the first weapon waits for that to finish.
+            yield return new WaitForSeconds(2f);
             var end = Mathf.Min(SignatureWeaponCatalog.All.Length, first + count);
             for (var w = first; w < end; w++)
             {
@@ -105,14 +135,22 @@ namespace RuinRunner
                 Debug.Log("[Sandbox Tour] " + w + " " + weapon.Id + " equipped=" + game.Player.EquippedWeapon.Id);
                 var name = w.ToString("D2") + "_" + weapon.Id;
                 yield return new WaitForSeconds(.15f);
+                hits = 0;
+                dealt = 0;
                 var capture = StartCoroutine(CaptureFrames(System.IO.Path.Combine(folder, name, "L")));
                 StageValidationInput.SetHeld(GameAction.Attack, true);
                 yield return new WaitForSeconds(1.2f);
                 StageValidationInput.SetHeld(GameAction.Attack, false);
                 yield return new WaitForSeconds(.2f);
                 StopCoroutine(capture);
+                int leftHits = hits;
+                float leftDealt = dealt;
+                hits = 0;
+                dealt = 0;
                 // Some skills spend what the attacks above built up, so the same targets stay if they survived.
                 Foes();
+                game.Player.Teleport(home);
+                Restation();
                 game.Player.SandboxRefresh();
                 yield return new WaitForSeconds(.1f);
                 capture = StartCoroutine(CaptureFrames(System.IO.Path.Combine(folder, name, "R")));
@@ -122,7 +160,9 @@ namespace RuinRunner
                 yield return Tap();
                 yield return new WaitForSeconds(1.1f);
                 StopCoroutine(capture);
+                Debug.Log("[Sandbox Hits] " + weapon.Id + " L=" + leftHits + " (" + leftDealt.ToString("0") + ") R=" + hits + " (" + dealt.ToString("0") + ")");
             }
+            DiagnosticsHooks.EnemyDamaged = previousHook;
             Debug.Log("[Sandbox Tour] Finished");
             Application.Quit(0);
         }
