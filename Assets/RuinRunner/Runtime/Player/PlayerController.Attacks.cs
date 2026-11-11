@@ -124,8 +124,9 @@ namespace RuinRunner
             meleeAngleOffset = step.AngleOffset;
             pendingMeleeStep = step;
             pendingMeleeStroke = 0;
-            pendingMeleeCritical = Stats.RollCritical();
-            pendingMeleeDamage = Damage * step.DamageMultiplier * damageMultiplier * SigMeleeMult() * (pendingMeleeCritical ? Stats.CriticalDamage : 1f);
+            var counter = CounterStrike();
+            pendingMeleeCritical = counter || Stats.RollCritical();
+            pendingMeleeDamage = Damage * step.DamageMultiplier * damageMultiplier * SigMeleeMult() * (pendingMeleeCritical ? Stats.CriticalDamage : 1f) * (counter ? CounterBonus : 1f);
             // Odd combo steps swing clockwise on screen, the way the trail is drawn; the rest turn the other way.
             SignatureSlashEffect.Create(this, SignatureMeleeFx.Trail(EquippedWeapon, step.Motion, isHeavy), Mathf.Atan2(committedMeleeAim.y, committedMeleeAim.x) * Mathf.Rad2Deg + step.AngleOffset,
                 step.Motion == MeleeAttackMotion.Sweep && (bodyCombo ? MeleeComboFrames.TrailMirrored(EquippedWeapon.Family, activeComboAnimationStep, committedMeleeAim.x < 0) : isHeavy || (activeComboAnimationStep & 1) == 0),
@@ -181,7 +182,7 @@ namespace RuinRunner
             var isHeavy = heavyAttackPose;
             var critical = pendingMeleeCritical;
             MeleeContactsResolved++;
-            CombatAudio.PlayWeapon(EquippedWeapon.Family, isHeavy, EquippedWeapon.Id);
+            CombatAudio.PlayWeapon(EquippedWeapon.Family, isHeavy, EquippedWeapon.ArtId);
             var baseDirection = committedMeleeAim;
             var baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
             var angle = baseAngle + step.AngleOffset + (step.Motion == MeleeAttackMotion.CrossCut ? MeleeMotionTiming.CrossStrikeOffset(stroke) : 0);
@@ -263,13 +264,14 @@ namespace RuinRunner
             attackAnimationSequence++;
             var direction = AimDirection.sqrMagnitude > .01f ? AimDirection.normalized : Vector2.right * facing;
             PrepareRangedShot(direction);
-            var critical = Stats.RollCritical();
-            var damage = Damage * (critical ? Stats.CriticalDamage : 1f);
+            var counter = CounterStrike();
+            var critical = counter || Stats.RollCritical();
+            var damage = Damage * (critical ? Stats.CriticalDamage : 1f) * (counter ? CounterBonus : 1f);
             if (sig == null)
                 return;
             SigBasicShot(direction, damage, critical);
             SigShotFired(direction);
-            CombatAudio.PlayWeapon(EquippedWeapon.Family, false, EquippedWeapon.Id);
+            CombatAudio.PlayWeapon(EquippedWeapon.Family, false, EquippedWeapon.ArtId);
         }
 
         private void PrepareRangedShot(Vector2 aim, float presentationDuration = -1f)

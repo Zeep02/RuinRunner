@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace RuinRunner
 {
-    /// <summary>The twelve talents. Each one changes how a run is played and asks for something back.</summary>
+    /// <summary>The talents. Each one changes how a run is played and asks for something back.</summary>
     public sealed partial class PlayerController
     {
         const float GlassDamage = 1.6f, GlassHealth = .5f, LastStandDamage = 1.2f, LastStandHeal = .5f, MiserPerGold = .002f, RevenantHealth = .6f;
@@ -16,10 +16,15 @@ namespace RuinRunner
         readonly HashSet<EnemyController> dashCut = new HashSet<EnemyController>();
         internal Func<int> GoldQuery;
         float fullCupUntil, bloodUntil, duelFactor = 1;
+        // Prey mark (id corpse_burst) and counter step (id ghost_mine): ids kept so saved unlocks stay valid.
+        const float PreyRange = 7, PreySeconds = 5, PreyBonus = 1.5f, UnmarkedPenalty = .85f, CounterWindow = 1.2f, CounterBonus = 1.4f, CounterRecharge = 1.25f;
+        EnemyController prey;
+        SigFx preyMark, counterGlint;
+        float preyUntil, counterUntil;
         int bloodStacks, duelFrame = -1;
         PlayerProgression progressionCache;
         int MaxDashes => MaxStoredDashes + (HasTalent(TalentId.DoubleStep) ? 1 : 0);
-        float DashRecharge => DashRechargeSeconds * (HasTalent(TalentId.PhantomStep) ? 1.3f : 1);
+        float DashRecharge => DashRechargeSeconds * (HasTalent(TalentId.PhantomStep) ? 1.3f : 1) * (HasTalent(TalentId.GhostMine) ? CounterRecharge : 1);
 
         // Everything the permanent tree grants, read from what this profile has bought.
         public void ConfigureMastery(string[] unlocked)
@@ -46,6 +51,9 @@ namespace RuinRunner
                 result *= 1.6f;
             if (HasTalent(TalentId.FirstBlood) && enemy.Health >= enemy.MaxHealth)
                 result *= 2;
+            // Bosses fight alone, so the mark neither helps nor costs against them.
+            if (HasTalent(TalentId.CorpseBurst) && !enemy.IsBoss)
+                result *= enemy == prey && combatClock < preyUntil ? PreyBonus : UnmarkedPenalty;
             return result;
         }
         public bool ManaOverdriven => combatClock < overdriveUntil;
@@ -160,15 +168,44 @@ namespace RuinRunner
                 bloodStacks = combatClock < bloodUntil ? Mathf.Min(5, bloodStacks + 1) : 1;
                 bloodUntil = combatClock + 5;
             }
-            if (!HasTalent(TalentId.CorpseBurst) || enemy == null || enemy.IsBoss)
-                return;
-            Vector2 point = enemy.transform.position;
-            float damage = Damage * .9f;
-            SigAfter(.05f, () =>
+            if (HasTalent(TalentId.CorpseBurst) && enemy != null)
+                MarkNextPrey(enemy);
+        }
+        // A kill hands the mark to the closest survivor: the hunt goes one enemy at a time instead of clearing a crowd.
+        void MarkNextPrey(EnemyController fallen)
+        {
+            EnemyController next = null;
+            float best = float.MaxValue;
+            foreach (var candidate in CombatActionGeometry.Circle(fallen.transform.position, PreyRange, 16))
             {
-                SigFx.Play("TalentCorpse", point);
-                SigArea(point, 1.6f, damage, null, 4, .05f);
-            });
+                if (candidate == null || candidate == fallen || candidate.IsDead || candidate.IsBoss)
+                    continue;
+                float distance = ((Vector2)candidate.transform.position - (Vector2)fallen.transform.position).sqrMagnitude;
+                if (distance < best)
+                {
+                    best = distance;
+                    next = candidate;
+                }
+            }
+            if (preyMark != null)
+                preyMark.Stop();
+            preyMark = null;
+            prey = next;
+            if (next == null)
+                return;
+            preyUntil = combatClock + PreySeconds;
+            preyMark = SigFx.Loop("TalentMark", (Vector2)next.transform.position + Vector2.up * .2f, 0, false, 12, next.transform, 1, PreySeconds);
+        }
+        // The first basic attack after a dash lands as a sure critical; consumed by that swing or shot.
+        bool CounterStrike()
+        {
+            if (!HasTalent(TalentId.GhostMine) || combatClock >= counterUntil)
+                return false;
+            counterUntil = 0;
+            if (counterGlint != null)
+                counterGlint.Stop();
+            counterGlint = null;
+            return true;
         }
         void TalentOnDashStart(Vector2 start)
         {
@@ -176,12 +213,10 @@ namespace RuinRunner
             dashCut.Clear();
             if (!HasTalent(TalentId.GhostMine))
                 return;
-            float damage = Damage * 1.2f;
-            SigAfter(.45f, () =>
-            {
-                SigFx.Play("TalentMine", start);
-                SigArea(start, 1.6f, damage, null, 5, .08f);
-            });
+            counterUntil = combatClock + DashDuration + CounterWindow;
+            if (counterGlint != null)
+                counterGlint.Stop();
+            counterGlint = SigFx.Loop("TalentReady", SkillOrigin, 0, false, 12, transform, 1, DashDuration + CounterWindow);
         }
         void TalentOnDashStep(Vector2 point)
         {

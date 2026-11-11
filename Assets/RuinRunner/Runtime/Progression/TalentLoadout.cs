@@ -63,7 +63,7 @@ namespace RuinRunner
         public static readonly TalentDefinition[] All ={
             new TalentDefinition(TalentId.GlassBlade,"glass_blade","유리 칼날",TalentFamily.Blade,"주는 피해 +60%.\n최대 체력이 절반이 됩니다."),
             new TalentDefinition(TalentId.LastStand,"last_stand","벼랑 끝",TalentFamily.Blade,"잃은 체력만큼 피해가 늘어 빈사일 때 +120%.\n회복량은 절반이 됩니다."),
-            new TalentDefinition(TalentId.CorpseBurst,"corpse_burst","시체 폭죽",TalentFamily.Blade,"처치한 적이 터져 주변을 휩쓸고, 그 폭발에 죽은 적도 터집니다."),
+            new TalentDefinition(TalentId.CorpseBurst,"corpse_burst","사냥 표식",TalentFamily.Blade,"처치하면 가장 가까운 적에게 5초간 표식을 남기고, 표식 대상에게 주는 피해 +50%.\n표식 없는 적에게는 -15%."),
             new TalentDefinition(TalentId.ExecutionerEdge,"executioner_edge","처형인의 날",TalentFamily.Blade,"체력 30% 이하인 적에게 주는 피해 +60%."),
             new TalentDefinition(TalentId.FirstBlood,"first_blood","첫 칼",TalentFamily.Blade,"체력이 가득한 적에게 주는 피해 +100%."),
             new TalentDefinition(TalentId.Bloodthirst,"bloodthirst","피의 갈증",TalentFamily.Blade,"처치할 때마다 5초간 피해 +8%, 5번까지.\n맞으면 전부 사라집니다."),
@@ -73,7 +73,7 @@ namespace RuinRunner
             new TalentDefinition(TalentId.FullCup,"full_cup","넘치는 잔",TalentFamily.Mana,"마나가 가득할 때 쓴 스킬의 피해 +80%."),
             new TalentDefinition(TalentId.ManaHeart,"mana_heart","마나 심장",TalentFamily.Mana,"최대 마나 +75%.\n마나 재생이 절반이 됩니다."),
             new TalentDefinition(TalentId.HunterBreath,"hunter_breath","사냥꾼의 호흡",TalentFamily.Mana,"처치할 때마다 마나 10을 얻습니다.\n전투 중에는 마나가 저절로 차지 않습니다."),
-            new TalentDefinition(TalentId.GhostMine,"ghost_mine","터지는 잔상",TalentFamily.Step,"대시를 시작한 자리에 잔상이 남았다가 터집니다."),
+            new TalentDefinition(TalentId.GhostMine,"ghost_mine","역습 걸음",TalentFamily.Step,"대시 직후 첫 공격은 반드시 치명타가 되고 피해 +40%.\n대시 충전은 25% 느려집니다."),
             new TalentDefinition(TalentId.RazorWind,"razor_wind","칼바람",TalentFamily.Step,"대시로 스친 적을 모두 베고, 벤 적 하나당 마나 4를 얻습니다."),
             new TalentDefinition(TalentId.CloseCall,"close_call","종이 한 장",TalentFamily.Step,"대시로 공격을 피하면 시간이 잠깐 느려지고 마나 15를 얻으며, 3초간 피해 +50%."),
             new TalentDefinition(TalentId.DoubleStep,"double_step","세 번째 걸음",TalentFamily.Step,"대시를 한 번 더 모아 둘 수 있습니다."),
