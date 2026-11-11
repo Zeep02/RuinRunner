@@ -68,3 +68,7 @@ __pycache__/
 /.mcp.json
 .pptx-build/
 rendered_slides/
+
+# Retired art and review captures (local only, not used by the game)
+/Assets/RuinRunner/ArtReview/
+/Assets/RuinRunner/ArtReview.meta
